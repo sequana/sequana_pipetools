@@ -6,9 +6,12 @@
 Installation
 ~~~~~~~~~~~~
 
-Not yet on pypi but will be soon::
+from pypi website::
 
     pip install sequana_pipetools
+
+No dependencies for this package except Python itself. Although, when using it,
+you will need to install the relevant Sequana pipelines that you wish to use. 
 
 Changelog
 ~~~~~~~~~
