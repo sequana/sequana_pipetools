@@ -52,6 +52,7 @@ setup(
     # package installation
     packages = ["sequana_pipetools"],
     install_requires = "sequana",
+    tests_require= ["pytest", "coverage", "sequana_rnaseq"],
 
     # This is recursive include of data files
     exclude_package_data = {"": ["__pycache__"]},
