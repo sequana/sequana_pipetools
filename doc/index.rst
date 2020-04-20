@@ -32,24 +32,14 @@ Sequana_pipetools documentation
     Cokelaer et al, (2017), 'Sequana': a Set of Snakemake NGS pipelines, Journal of
     Open Source Software, 2(16), 352, `JOSS DOI doi:10.21105/joss.00352 <http://www.doi2bib.org/bib/10.21105%2Fjoss.00352>`_
 
-Installation
-============
-
-::
-
-    pip install sequana_pipetools
-
-Usage
-======
-
-There is currently only one tool to be used as follows::
-
-    sequana_completion --pipeline fastqc
-
-
-
 What is sequana_pipetools ?
 ============================
+
+**sequana_pipetools** is a set of tools to help us in managing the **Sequana** pipelines.
+
+This has the advantage of being pure Python library without the needs to update
+**Sequana** itself.
+
 
 **Sequana** is a versatile tool that provides 
 
@@ -61,14 +51,33 @@ What is sequana_pipetools ?
 
 See the home page for details.
 
-**sequana_pipetools** is a set of tools to help us in managing the sequana pipelines.
-
-This has the advantage of being pure Python library without the needs to update
-Sequana itself.
 
 To join the project, please let us know on `github <https://github.com/sequana/sequana/issues/306>`_.
 
+Installation
+============
 
-    
+from pypi website::
 
+    pip install sequana_pipetools
 
+No dependencies for this package except Python itself. Although, when using it,
+you will need to install the relevant Sequana pipelines that you wish to use. 
+
+This package is for `Sequana <https://sequana.readthedocs.io>`_ developers. 
+
+Usage
+======
+
+There is currently only one tool to be used as follows::
+
+    sequana_completion --pipeline fastqc
+
+Changelog
+=========
+
+========= ====================================================================
+Version   Description
+========= ====================================================================
+0.1.0     creation of the package
+========= ====================================================================

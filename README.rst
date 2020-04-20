@@ -29,12 +29,12 @@ This has the advantage of being pure Python library without the needs to update
 **Sequana** is a versatile tool that provides 
 
 #. A Python library dedicated to NGS analysis (e.g., tools to visualise standard NGS formats).
-#. A set of :ref:`pipelines <Pipelines>` dedicated to NGS in the form of Snakefiles
+#. A set of Pipelines dedicated to NGS in the form of Snakefiles
    (Makefile-like with Python syntax based on snakemake framework) with more
-   than 80 re-usable rules (see :ref:`rules`).
+   than 80 re-usable rules.
 #. Standalone applications.
 
-See the home page for details.
+See the `sequana home page <https://sequana.readthedocs.io>`_ for details.
 
 
 To join the project, please let us know on `github <https://github.com/sequana/sequana/issues/306>`_.
