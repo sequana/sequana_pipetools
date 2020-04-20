@@ -2,9 +2,45 @@
 :Status: Production
 :Citation: Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI doi:10.21105/joss.00352
 
+.. image:: https://badge.fury.io/py/sequana_pipetools.svg
+    :target: https://pypi.python.org/pypi/sequana_pipetools
+
+.. image:: https://travis-ci.org/sequana/sequana_pipetools.svg?branch=master
+    :target: https://travis-ci.org/sequana/sequana_pipetools
+
+.. image:: https://coveralls.io/repos/github/sequana/sequana_pipetools/badge.svg?branch=master
+    :target: https://coveralls.io/github/sequana/sequana_pipetools?branch=master 
+
+.. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
+   :target: http://joss.theoj.org/papers/10.21105/joss.00352
+   :alt: JOSS (journal of open source software) DOI
+
+
+
+What is sequana_pipetools ?
+============================
+
+**sequana_pipetools** is a set of tools to help us in managing the **Sequana** pipelines.
+
+This has the advantage of being pure Python library without the needs to update
+**Sequana** itself.
+
+
+**Sequana** is a versatile tool that provides 
+
+#. A Python library dedicated to NGS analysis (e.g., tools to visualise standard NGS formats).
+#. A set of :ref:`pipelines <Pipelines>` dedicated to NGS in the form of Snakefiles
+   (Makefile-like with Python syntax based on snakemake framework) with more
+   than 80 re-usable rules (see :ref:`rules`).
+#. Standalone applications.
+
+See the home page for details.
+
+
+To join the project, please let us know on `github <https://github.com/sequana/sequana/issues/306>`_.
 
 Installation
-~~~~~~~~~~~~
+============
 
 from pypi website::
 
@@ -19,8 +55,15 @@ directory and build the local sphinx directory using::
     make html
     browse build/html/index.html
 
+Usage
+======
+
+There is currently only one tool to be used as follows::
+
+    sequana_completion --pipeline fastqc
+
 Changelog
-~~~~~~~~~
+=========
 
 ========= ====================================================================
 Version   Description
