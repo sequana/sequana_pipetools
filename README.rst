@@ -13,7 +13,7 @@ from pypi website::
 No dependencies for this package except Python itself. Although, when using it,
 you will need to install the relevant Sequana pipelines that you wish to use. 
 
-This package is for Sequana developers. To get more help, go to the doc
+This package is for `Sequana <https://sequana.readthedocs.io>`_ developers. To get more help, go to the doc
 directory and build the local sphinx directory using::
 
     make html
