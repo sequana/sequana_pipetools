@@ -42,5 +42,6 @@ install:
 script: 
   - pytest -v --cov-config=.coveragerc_travis --durations=10  test/ --cov=sequana_pipetools --cov-report term-missing --timeout 300 
 
+
 after_success:
   coveralls
