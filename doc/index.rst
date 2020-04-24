@@ -1,5 +1,5 @@
 Sequana_pipetools documentation
-##########################################
+###############################
 
 |version|, |today|
 
@@ -25,8 +25,8 @@ Sequana_pipetools documentation
 
 
 :Python version: Python 3.6, 3.7.3; most modules are Python2.7 compatible.
-:Source: See  `source <https://github.com/sequana/sequana/>`_.
-:Issues: Please fill a report on `github <https://github.com/sequana/sequana/issues>`_
+:Source: See  `source <https://github.com/sequana/sequana/>`__.
+:Issues: Please fill a report on `github <https://github.com/sequana/sequana/issues>`__
 :How to cite: For Sequana in general including the pipelines, please use
 
     Cokelaer et al, (2017), 'Sequana': a Set of Snakemake NGS pipelines, Journal of
@@ -44,9 +44,9 @@ This has the advantage of being pure Python library without the needs to update
 **Sequana** is a versatile tool that provides 
 
 #. A Python library dedicated to NGS analysis (e.g., tools to visualise standard NGS formats).
-#. A set of :ref:`pipelines <Pipelines>` dedicated to NGS in the form of Snakefiles
+#. A set of pipelines dedicated to NGS in the form of Snakefiles
    (Makefile-like with Python syntax based on snakemake framework) with more
-   than 80 re-usable rules (see :ref:`rules`).
+   than 80 re-usable rules.
 #. Standalone applications.
 
 See the home page for details.
@@ -81,3 +81,4 @@ Version   Description
 ========= ====================================================================
 0.1.0     creation of the package
 ========= ====================================================================
+

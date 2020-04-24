@@ -14,7 +14,7 @@ class Options(argparse.ArgumentParser):
     sequana_completion --name rnaseq
     sequana_completion --name all
     """
-        
+
         super(Options, self).__init__(usage=usage, prog=prog, 
             description="""This tool creates completion script for sequana
 pipelines. Each pipeline has its own in .config/sequana/pipelines that you can
@@ -31,7 +31,9 @@ scripts, use --name all """)
 
 class Complete():
 
-    setup = """
+    # KEEP '#version:' on first line as it it since it is used in
+    # sequana/pipeline_common.py right now
+    setup = """#version: {version}
 function _mycomplete_()
 {{
     local cur prev opts
@@ -56,8 +58,16 @@ complete  -F _mycomplete_ sequana_{pipeline_name}
     """
 
     def __init__(self, pipeline_name):
-        self.pipeline_name = pipeline_name
+        self._set_pipeline_name(pipeline_name)
+
+    def _get_pipeline_name(self):
+        return self._pipeline_name
+
+    def _set_pipeline_name(self, name):
+        self._pipeline_name = name
         self._init_config_file()
+        self._init_version()
+    pipeline_name = property(_get_pipeline_name, _set_pipeline_name)
 
     def save_completion_script(self):
         config_path = self.config_path
@@ -68,7 +78,8 @@ complete  -F _mycomplete_ sequana_{pipeline_name}
         arguments = self.get_arguments()
 
         with open(output_filename, "w") as fout:
-            fout.write(self.setup.format(options=" ".join(arguments)))
+            fout.write(self.setup.format(version=self.pipeline_version, 
+                                         options=" ".join(arguments)))
             for action in self._actions:
                 option_name = action.option_strings[0]
                 if action.choices:
@@ -91,12 +102,22 @@ complete  -F _mycomplete_ sequana_{pipeline_name}
         self.config_path = path
         return path
 
+    def _init_version(self):
+        import importlib
+        pname = self.pipeline_name
+        mod = importlib.import_module('sequana_pipelines.{}'.format(pname))
+        mod = importlib.import_module('sequana_pipelines.{}.main'.format(pname))
+        module = sys.modules['sequana_pipelines.{}'.format(self.pipeline_name)]
+        version = module.version
+        self.pipeline_version = version
+
     def get_arguments(self):
         import importlib
         pname = self.pipeline_name
         mod = importlib.import_module('sequana_pipelines.{}'.format(pname))
         mod = importlib.import_module('sequana_pipelines.{}.main'.format(pname))
         module = sys.modules['sequana_pipelines.{}'.format(self.pipeline_name)]
+
         main = module.__getattribute__('main')
         opt = main.Options()
         to_exclude = ["-h", "--help"]
