@@ -68,6 +68,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
-0.1.1     add version of the pipeline in the output completion file 
+0.1.2     add version of the pipeline in the output completion file 
+0.1.1     release bug fix
 0.1.0     creation of the package
 ========= ====================================================================
