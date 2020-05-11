@@ -2,14 +2,8 @@
 :Status: Production
 :Citation: Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI doi:10.21105/joss.00352
 
-.. image:: https://badge.fury.io/py/sequana_pipetools.svg
+.. image:: https://badge.fury.io/py/sequana-pipetools.svg
     :target: https://pypi.python.org/pypi/sequana_pipetools
-
-.. image:: https://badge.fury.io/gh/sequana%2Fsequana_pipetools.svg
-    :target: https://badge.fury.io/gh/sequana%2Fsequana_pipetools
-
-.. image:: https://badge.fury.io/gh/sequana%2Fsequana_pipetools.svg
-       :target: https://badge.fury.io/gh/sequana%2Fsequana_pipetools
 
 .. image:: https://travis-ci.org/sequana/sequana_pipetools.svg?branch=master
     :target: https://travis-ci.org/sequana/sequana_pipetools
