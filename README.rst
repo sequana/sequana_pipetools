@@ -62,6 +62,11 @@ There is currently only one tool to be used as follows::
 
     sequana_completion --pipeline fastqc
 
+The library is intended to help Sequana developers to design their pipelines. 
+See the `Sequana orgnization repository for examples <https://github.com/sequana>`_.
+
+
+
 Changelog
 =========
 
