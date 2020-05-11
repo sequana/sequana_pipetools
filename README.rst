@@ -5,6 +5,12 @@
 .. image:: https://badge.fury.io/py/sequana_pipetools.svg
     :target: https://pypi.python.org/pypi/sequana_pipetools
 
+.. image:: https://badge.fury.io/gh/sequana%2Fsequana_pipetools.svg
+    :target: https://badge.fury.io/gh/sequana%2Fsequana_pipetools
+
+.. image:: https://badge.fury.io/gh/sequana%2Fsequana_pipetools.svg
+       :target: https://badge.fury.io/gh/sequana%2Fsequana_pipetools
+
 .. image:: https://travis-ci.org/sequana/sequana_pipetools.svg?branch=master
     :target: https://travis-ci.org/sequana/sequana_pipetools
 
@@ -68,6 +74,9 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.2.0     add content from sequana.pipeline_common to handle all kind of 
+          options in the argparse of all pipelines. This is independent of 
+          sequana to speed up the --version and --help calls
 0.1.2     add version of the pipeline in the output completion file 
 0.1.1     release bug fix
 0.1.0     creation of the package

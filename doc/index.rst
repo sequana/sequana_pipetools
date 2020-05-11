@@ -11,6 +11,9 @@ Sequana_pipetools documentation
     <a href="https://pypi.python.org/pypi/sequana_pipetools">
     <img src="https://badge.fury.io/py/sequana_pipetools.svg"></a>
 
+    <a href="https://badge.fury.io/gh/sequana%2Fsequana_pipetools">
+    <img src="https://badge.fury.io/gh/sequana%2Fsequana_pipetools.svg" alt="GitHub version" height="18"></a>
+
     <a href="https://travis-ci.org/sequana/sequana_pipetools">
     <img src="https://travis-ci.org/sequana/sequana_pipetools.svg?branch=master"></a>
 
