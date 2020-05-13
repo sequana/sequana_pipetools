@@ -73,6 +73,8 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.2.1     * add --from-project option to import existing config file
+          * remove --paired-data option
 0.2.0     add content from sequana.pipeline_common to handle all kind of 
           options in the argparse of all pipelines. This is independent of 
           sequana to speed up the --version and --help calls

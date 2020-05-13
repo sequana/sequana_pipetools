@@ -15,16 +15,16 @@ class Options(argparse.ArgumentParser):
     sequana_completion --name all
     """
 
-        super(Options, self).__init__(usage=usage, prog=prog, 
+        super(Options, self).__init__(usage=usage, prog=prog,
             description="""This tool creates completion script for sequana
 pipelines. Each pipeline has its own in .config/sequana/pipelines that you can
 source at your convenience""",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-        self.add_argument("--force", action="store_true", 
+        self.add_argument("--force", action="store_true",
             help="""overwrite files in sequana config pipeline directory""")
         self.add_argument("--name",  type=str,
-            help="""Name of a pipelines for which you wish to 
+            help="""Name of a pipelines for which you wish to
             create the completion file. Set to a valid name ror to create all
 scripts, use --name all """)
 
@@ -78,7 +78,7 @@ complete  -F _mycomplete_ sequana_{pipeline_name}
         arguments = self.get_arguments()
 
         with open(output_filename, "w") as fout:
-            fout.write(self.setup.format(version=self.pipeline_version, 
+            fout.write(self.setup.format(version=self.pipeline_version,
                                          options=" ".join(arguments)))
             for action in self._actions:
                 option_name = action.option_strings[0]
@@ -86,6 +86,8 @@ complete  -F _mycomplete_ sequana_{pipeline_name}
                     option_choices = " ".join(action.choices )
                     fout.write(self.set_option_with_choice(option_name, option_choices))
                 elif option_name.endswith("directory"):
+                    fout.write(self.set_option_directory(option_name))
+                elif option_name in ["--databases"]:
                     fout.write(self.set_option_directory(option_name))
             fout.write(self.teardown.format(pipeline_name=self.pipeline_name))
 
@@ -143,6 +145,7 @@ to_exclude]
                 return 0
                 ;;"""
         return data
+
 
 
 def main(args=None):

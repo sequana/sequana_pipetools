@@ -68,6 +68,13 @@ class GeneralOptions():
         parser.add_argument("--level", dest="level", default="INFO",
             choices=['INFO', 'DEBUG', 'WARNING', 'ERROR', 'CRITICAL'],
             help="logging level in INFO, DEBUG, WARNING, ERROR, CRITICAL")
+        parser.add_argument("--from-project", dest="from_project", default=None,
+            help="""You can initiate a new analysis run from an existing project.
+                In theory, sequana project have a hidden .sequana directory, 
+                which can be used as input. The name of the run directory itself 
+                should suffice (if .sequana is found inside). From there, 
+                the config file and the pipeline files are copied in your new 
+                working directory""")
 
 
 def guess_scheduler():
@@ -125,8 +132,7 @@ class SnakemakeOptions():
 
 class InputOptions():
     def __init__(self, group_name="data", input_directory=".",
-                 input_pattern="*fastq.gz", add_input_readtag=True,
-                 add_is_paired=True):
+                 input_pattern="*fastq.gz", add_input_readtag=True):
         """
 
         By default, single-end data sets. If paired, set is_paired to True
@@ -135,7 +141,6 @@ class InputOptions():
         self.group_name = group_name
         self.input_directory = input_directory
         self.input_pattern = input_pattern
-        self.add_is_paired = add_is_paired
         self.add_input_readtag = add_input_readtag
 
     def add_options(self, parser):
@@ -164,14 +169,6 @@ class InputOptions():
                 files are tagged with  _1 and _2, you must change this readtag
                 accordingly to '_[12]'. This option is used only if
                 --paired-data is used""",
-            )
-
-        if self.add_is_paired:
-            self.group.add_argument(
-                "--paired-data",
-                dest="paired_data",
-                action="store_true",
-                help="""NOT IMPLEMENTED YET"""
             )
 
 
