@@ -85,8 +85,10 @@ complete  -F _mycomplete_ sequana_{pipeline_name}
                 if action.choices:
                     option_choices = " ".join(action.choices )
                     fout.write(self.set_option_with_choice(option_name, option_choices))
-                elif option_name.endswith("directory"):
+                elif option_name.endswith("-directory"):
                     fout.write(self.set_option_directory(option_name))
+                elif option_name.endswith("-file"):
+                    fout.write(self.set_option_file(option_name))
                 elif option_name in ["--databases"]:
                     fout.write(self.set_option_directory(option_name))
             fout.write(self.teardown.format(pipeline_name=self.pipeline_name))
@@ -145,6 +147,18 @@ to_exclude]
                 return 0
                 ;;"""
         return data
+
+    def set_option_file(self, option_name):
+        data = f"""
+            {option_name})
+                #xpat=".[!.]*"
+                #COMPREPLY=( $(compgen -X "${{xpat}}" -d ${{cur}}) )
+                COMPREPLY=( $(compgen  -f ${{cur}}) )
+                return 0
+                ;;"""
+        return data
+
+
 
 
 
