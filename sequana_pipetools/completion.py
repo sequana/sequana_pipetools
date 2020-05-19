@@ -89,7 +89,7 @@ complete  -F _mycomplete_ sequana_{pipeline_name}
                     fout.write(self.set_option_directory(option_name))
                 elif option_name.endswith("-file"):
                     fout.write(self.set_option_file(option_name))
-                elif option_name in ["--databases"]:
+                elif option_name in ["--databases", "--from-project"]:
                     fout.write(self.set_option_directory(option_name))
             fout.write(self.teardown.format(pipeline_name=self.pipeline_name))
 
