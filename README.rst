@@ -73,6 +73,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.2.3     * fix completion to avoir 2 scripts to overwrite each other
 0.2.2     * add a deprecated warning + before_pipeline function
 0.2.1     * add --from-project option to import existing config file
           * remove --paired-data option

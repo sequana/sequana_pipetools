@@ -34,7 +34,7 @@ class Complete():
     # KEEP '#version:' on first line as it it since it is used in
     # sequana/pipeline_common.py right now
     setup = """#version: {version}
-function _mycomplete_()
+function _mycomplete_{pipeline_name}()
 {{
     local cur prev opts
     COMPREPLY=()
@@ -54,7 +54,7 @@ function _mycomplete_()
 
 }}
 #complete -d -X '.[^./]*' -F _mycomplete_ sequana_{pipeline_name}
-complete  -F _mycomplete_ sequana_{pipeline_name}
+complete  -F _mycomplete_{pipeline_name} sequana_{pipeline_name}
     """
 
     def __init__(self, pipeline_name):
@@ -79,6 +79,7 @@ complete  -F _mycomplete_ sequana_{pipeline_name}
 
         with open(output_filename, "w") as fout:
             fout.write(self.setup.format(version=self.pipeline_version,
+                                        pipeline_name=pipeline_name,
                                          options=" ".join(arguments)))
             for action in self._actions:
                 option_name = action.option_strings[0]
