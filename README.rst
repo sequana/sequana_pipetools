@@ -31,7 +31,7 @@ Python library. Why moving it from Sequana ? Well, this is more modular. If we
 change Sequana, the pipelines are less likely to break. Similarly, if we update
 a tool used by all the pipelines, there is less chances to break Sequana itself. 
 Currently, this package provide completion for all the
-pipelines, metadata (:mod:`info` module), common options to include in the user
+pipelines, metadata, common options to include in the user
 interface, and helper functions.
 
 What is Sequana ?
@@ -77,7 +77,7 @@ There is currently only one standalone tool to be used as follows::
 The library is intended to help Sequana developers to design their pipelines. 
 See the `Sequana orgnization repository for examples <https://github.com/sequana>`_.
 
-Then, for developers, one should look at e.g. :mod:`sequana_pipetools.options`
+Then, for developers, one should look at e.g. module sequana_pipetools.options
 for the API reference and one of the official sequana pipeline (e.g.,
 https://github.com/sequana/sequana_variant_calling)
 
