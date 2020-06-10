@@ -36,8 +36,8 @@ import matplotlib.sphinxext
 release = version
 author = "Thomas Cokelaer"
 title = "sequana_pipetools"
-copyright = author + ", 2016-2017"
-project = 'Sequana'
+copyright = author + ", 2020"
+project = 'Sequana pipetools'
 
 import easydev
 from easydev import get_path_sphinx_themes

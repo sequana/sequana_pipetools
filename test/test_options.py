@@ -3,6 +3,22 @@ from easydev import AttrDict
 import argparse
 
 
+def test_misc():
+
+    import sys
+    sys.argv.append("--version")
+    from sequana_pipetools.options import init_pipeline
+    try:
+        init_pipeline("rnaseq")
+    except:
+        pass
+    sys.argv.remove("--version")
+    sys.argv.append("--deps")
+    try:
+        init_pipeline("rnaseq")
+    except:
+        pass
+
 
 
 

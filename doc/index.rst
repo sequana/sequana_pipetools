@@ -1,37 +1,9 @@
-Sequana_pipetools documentation
-###############################
-
-|version|, |today|
+Sequana_pipetools documentation 
+########################################
 
 
-.. raw:: html
 
-    <div style="width:80%"><p>
-
-    <a href="https://badge.fury.io/py/sequana-pipetools"><img
-    src="https://badge.fury.io/py/sequana-pipetools.svg" alt="PyPI version"
-    height="18"></a>
-
-    <a href="https://travis-ci.org/sequana/sequana_pipetools">
-    <img src="https://travis-ci.org/sequana/sequana_pipetools.svg?branch=master"></a>
-
-    <a href="https://coveralls.io/github/sequana/sequana_pipetools?branch=master">
-    <img src="https://coveralls.io/repos/github/sequana/sequana_pipetools/badge.svg?branch=master"></a>
-
-    <a href="http://joss.theoj.org/papers/10.21105/joss.00352">
-    <img src="http://joss.theoj.org/papers/10.21105/joss.00352/status.svg"></a>
-
-    </p>
-    </div>
-
-
-:Python version: Python 3.6, 3.7.3; most modules are Python2.7 compatible.
-:Source: See  `source <https://github.com/sequana/sequana/>`__.
-:Issues: Please fill a report on `github <https://github.com/sequana/sequana/issues>`__
-:How to cite: For Sequana in general including the pipelines, please use
-
-    Cokelaer et al, (2017), 'Sequana': a Set of Snakemake NGS pipelines, Journal of
-    Open Source Software, 2(16), 352, `JOSS DOI doi:10.21105/joss.00352 <http://www.doi2bib.org/bib/10.21105%2Fjoss.00352>`_
+.. include:: ../README.rst
 
 What is sequana_pipetools ?
 ============================

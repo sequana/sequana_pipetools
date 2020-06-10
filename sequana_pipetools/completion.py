@@ -31,6 +31,13 @@ scripts, use --name all """)
 
 class Complete():
 
+    # For the -o default, this was an issue with compgen removing the slashes on
+    # directrories . Solution was found here: 
+    # https://stackoverflow.com/questions/12933362/getting-compgen-to-include-slashes-on-directories-when-looking-for-files
+    # Before using this option, a second directory could not be completed e.g.
+    # in --databases, only the first argument could be completed, which was
+    # really annoying. 
+
     # KEEP '#version:' on first line as it it since it is used in
     # sequana/pipeline_common.py right now
     setup = """#version: {version}
@@ -54,7 +61,7 @@ function _mycomplete_{pipeline_name}()
 
 }}
 #complete -d -X '.[^./]*' -F _mycomplete_ sequana_{pipeline_name}
-complete  -F _mycomplete_{pipeline_name} sequana_{pipeline_name}
+complete -o  default -F _mycomplete_{pipeline_name} sequana_{pipeline_name}
     """
 
     def __init__(self, pipeline_name):
