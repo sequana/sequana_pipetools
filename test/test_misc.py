@@ -23,8 +23,6 @@ def test_error():
     except:
         assert True
 
-
-
 def test_print_version():
     from sequana_pipetools.misc import print_version
     try:print_version("quality_control")
@@ -33,3 +31,8 @@ def test_print_version():
     except:pass
 
 
+def test_new_version():
+    
+    from sequana_pipetools.misc import print_newest_version
+    print_newest_version()
+    print_newest_version("sequana-pipetools")

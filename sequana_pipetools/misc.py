@@ -103,4 +103,33 @@ def print_version(name):
     print(Colors().purple("- Star us https://github.com/sequana/sequana/stargazers"))
 
 
+def print_newest_version(name=None):
+    color = Colors()
+    import subprocess
+    ret = subprocess.run(["pip", "list", "--outdated"], stdout=subprocess.PIPE)
 
+    if name:
+        if isinstance(name, str):
+            names = [name]
+        elif isinstance(name, list):
+            names = name
+    else:
+        names = None
+
+    for line in ret.stdout.strip().decode().split("\n"):
+
+        if names:
+            if line.split()[0].strip() in names:
+                pkg = line.split()[0]
+                local_version = line.split()[1]
+                new_version = line.split()[2]
+                print(color.warning(
+                    "A newest version ({}) is available for {}. You have {}".format(
+                    new_version, pkg, local_version)))
+        elif line.split()[0].startswith("sequana"):
+            pkg = line.split()[0]
+            local_version = line.split()[1]
+            new_version = line.split()[2]
+            print(color.warning(
+                "A newest version ({}) is available for {}. You have {}".format(
+                new_version, pkg, local_version)))

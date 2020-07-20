@@ -15,7 +15,7 @@
 #
 ##############################################################################
 import sys
-from sequana_pipetools.misc import Colors, print_version
+from sequana_pipetools.misc import Colors, print_version, print_newest_version
 
 
 __all__ = ["GeneralOptions", "SlurmOptions", "SnakemakeOptions",
@@ -33,6 +33,7 @@ def before_pipeline(NAME):
 
     if "--version" in sys.argv:
         print_version(NAME)
+        print_newest_version(["sequana", "sequana-pipetools", "sequana-" + NAME])
         sys.exit(0)
 
     if "--deps" in sys.argv:
@@ -42,6 +43,8 @@ def before_pipeline(NAME):
             data = fin.read()
         print("Those software will be required for the pipeline to work correctly:\n{}".format(data))
         sys.exit(0)
+
+    print_newest_version(["sequana", "sequana-pipetools", "sequana-" + NAME])
 
 
 class GeneralOptions():

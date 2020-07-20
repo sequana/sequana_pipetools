@@ -46,6 +46,12 @@ There is currently only one tool to be used as follows::
 
     sequana_completion --pipeline fastqc
 
+
+.. toctree::
+
+    references
+
+
 Changelog
 =========
 

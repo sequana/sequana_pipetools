@@ -88,6 +88,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.2.5     * include newest_version feature
 0.2.4     * completion can now handle multiple directories/files properly 
           * better doc and more tests
 0.2.3     * fix completion to avoir 2 scripts to overwrite each other
