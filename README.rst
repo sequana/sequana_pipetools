@@ -88,6 +88,8 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.2.6     * previous new feature led to overhead of a few seconds with --help
+            in this version, we include it only when using --version
 0.2.5     * include newest_version feature
 0.2.4     * completion can now handle multiple directories/files properly 
           * better doc and more tests

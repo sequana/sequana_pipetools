@@ -44,7 +44,8 @@ def before_pipeline(NAME):
         print("Those software will be required for the pipeline to work correctly:\n{}".format(data))
         sys.exit(0)
 
-    print_newest_version(["sequana", "sequana-pipetools", "sequana-" + NAME])
+    # This slow down all --help, so only when using --version
+    #print_newest_version(["sequana", "sequana-pipetools", "sequana-" + NAME])
 
 
 class GeneralOptions():
