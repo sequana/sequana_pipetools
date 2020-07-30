@@ -88,6 +88,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.3.0     * stable release
 0.2.6     * previous new feature led to overhead of a few seconds with --help
             in this version, we include it only when using --version
 0.2.5     * include newest_version feature

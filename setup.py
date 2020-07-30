@@ -4,8 +4,8 @@ __revision__ = "$Id: $" # for the SVN Id
 from setuptools import setup, find_namespace_packages
 
 _MAJOR               = 0
-_MINOR               = 2
-_MICRO               = 6
+_MINOR               = 3
+_MICRO               = 0
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
@@ -52,7 +52,7 @@ setup(
 
     # package installation
     packages = ["sequana_pipetools"],
-    install_requires = ["easydev"], #"sequana",
+    nstall_requires = ["easydev"], #"sequana",
     tests_require= ["pytest", "coverage", "pytest-cov", "sequana_rnaseq",
         "sequana_quality_control"],
 

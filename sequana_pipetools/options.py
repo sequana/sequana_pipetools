@@ -37,6 +37,8 @@ def before_pipeline(NAME):
         sys.exit(0)
 
     if "--deps" in sys.argv:
+        # Means than sequana must be installed, which we assume if someone uses
+        # a pipeline. so must be here and not global import
         from sequana.snaketools import Module
         module = Module(NAME)
         with open(module.requirements, "r") as fin:
@@ -303,6 +305,7 @@ class CutadaptOptions():
                     " provide the type of adapters using --cutadapt-adapter-choice"
                     " (set to one of %s )" % self.adapters_choice)
                 sys.exit(1)
+
             from sequana import FindAdaptersFromDesign
             fa = FindAdaptersFromDesign(design, options.cutadapt_adapter_choice)
             try:
