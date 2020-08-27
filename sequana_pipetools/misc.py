@@ -104,6 +104,7 @@ def print_version(name):
 
 
 def print_newest_version(name=None):
+    # This is slow
     color = Colors()
     import subprocess
     ret = subprocess.run(["pip", "list", "--outdated"], stdout=subprocess.PIPE)

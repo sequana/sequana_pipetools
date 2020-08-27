@@ -33,7 +33,8 @@ def before_pipeline(NAME):
 
     if "--version" in sys.argv:
         print_version(NAME)
-        print_newest_version(["sequana", "sequana-pipetools", "sequana-" + NAME])
+        if "--any-update" in sys.argv:
+            print_newest_version(["sequana", "sequana-pipetools", "sequana-" + NAME])
         sys.exit(0)
 
     if "--deps" in sys.argv:
