@@ -78,7 +78,7 @@ def print_version(name):
         import pkg_resources
         version = pkg_resources.require("sequana")[0].version
         print("Sequana version used: {}".format(version))
-    except Exception as err:
+    except Exception as err: #pragma: no cover
         print(err)
         print("Sequana version used: ?".format(name))
 
@@ -86,7 +86,7 @@ def print_version(name):
         import pkg_resources
         version = pkg_resources.require("sequana_pipetools")[0].version
         print("Sequana_pipetools version used: {}".format(version))
-    except Exception as err:
+    except Exception as err: #pragma: no cover
         print(err)
         print("Sequana_pipetools version used: ?".format(name))
 

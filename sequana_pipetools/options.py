@@ -295,7 +295,7 @@ class CutadaptOptions():
                     "When using --cutadapt-design-file, one must not"
                     " set the forward/reverse adapters with --cutadapt-fwd"
                     " and/or --cutadapt-rev\n\n" + self.description)
-                sys.exit(1)
+                sys.exit(1) #pragma: no cover
 
             # otherwise, we just check the format but we need the adapter choice
             if options.cutadapt_adapter_choice in [None, 'none']:
@@ -303,16 +303,16 @@ class CutadaptOptions():
                     "When using --cutadapt-design-file, you must also"
                     " provide the type of adapters using --cutadapt-adapter-choice"
                     " (set to one of %s )" % self.adapters_choice)
-                sys.exit(1)
+                sys.exit(1) #pragma: no cover
 
             from sequana import FindAdaptersFromDesign
             fa = FindAdaptersFromDesign(design, options.cutadapt_adapter_choice)
-            try:
+            try: 
                 fa.check()
             except:
                 logger.critical("Your design file contains indexes not found "
                     "in the list of adapters from {}".format(options.cutadapt_adapter_choice))
-                sys.exit(1)
+                sys.exit(1)  #pragma: no cover
 
         # No design provided here below
         # do we need to remove adapters at all ?
