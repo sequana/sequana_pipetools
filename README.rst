@@ -80,6 +80,7 @@ See the `Sequana organization repository for examples <https://github.com/sequan
 Currently, this library provides a set of Options classes that should be used to
 design the API of your pipelines. For example, the
 sequana_pipetools.options.SlurmOptions can be used as follows inside a standard
+::
 
     import argparse
     from sequana_pipetools.options import *
