@@ -31,8 +31,10 @@ def test_print_version():
     except:pass
 
 
+
 def test_new_version():
     
     from sequana_pipetools.misc import print_newest_version
     print_newest_version()
     print_newest_version("sequana-pipetools")
+    print_newest_version(["sequana-pipetools"])
