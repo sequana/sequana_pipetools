@@ -23,7 +23,7 @@
 What is sequana_pipetools ?
 ============================
 
-**sequana_pipetools** is a set of tools to help us managing the different **Sequana** pipelines.
+**sequana_pipetools** is a set of tools to help us managing the different `**Sequana** <https://sequana.readthedocs.io>`_ pipelines.
 
 The goal of this package is to make the deployment of `Sequana pipelines <https://sequana.readthedocs.io>`_ easier
 by moving some of the common tools used by the different pipelines in a pure
@@ -75,7 +75,32 @@ There is currently only one standalone tool to be used as follows::
     sequana_completion --pipeline fastqc
 
 The library is intended to help Sequana developers to design their pipelines. 
-See the `Sequana orgnization repository for examples <https://github.com/sequana>`_.
+See the `Sequana organization repository for examples <https://github.com/sequana>`_.
+
+Currently, this library provides a set of Options classes that should be used to
+design the API of your pipelines. For example, the
+sequana_pipetools.options.SlurmOptions can be used as follows inside a standard
+
+    import argparse
+    from sequana_pipetools.options import *
+    from sequana_pipetools.misc import Colors
+    from sequana_pipetools.info import sequana_epilog, sequana_prolog
+
+    col = Colors()
+    NAME = "fastqc"
+
+    class Options(argparse.ArgumentParser):
+        def __init__(self, prog=NAME, epilog=None):
+            usage = col.purple(sequana_prolog.format(**{"name": NAME}))
+            super(Options, self).__init__(usage=usage, prog=prog, description="",
+                epilog=epilog,
+                formatter_class=argparse.ArgumentDefaultsHelpFormatter
+            )
+            # add a new group of options to the parser
+            so = SlurmOptions()
+            so.add_options(self)
+
+
 
 Then, for developers, one should look at e.g. module sequana_pipetools.options
 for the API reference and one of the official sequana pipeline (e.g.,
