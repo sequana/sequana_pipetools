@@ -23,7 +23,7 @@ __all__ = ["GeneralOptions", "SlurmOptions", "SnakemakeOptions",
 
 
 def init_pipeline(NAME):
-    print('deprecated, please use before_pipeline instead')
+    print('init_pipeline is deprecated, please use before_pipeline instead')
     before_pipeline(NAME)
 
 def before_pipeline(NAME):
@@ -135,8 +135,6 @@ class SnakemakeOptions():
             default=False,
             help="""If the working directory exists, proceed anyway."""
         )
-
-
 
 
 class InputOptions():
