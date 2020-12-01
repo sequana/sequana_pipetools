@@ -101,11 +101,13 @@ sequana_pipetools.options.SlurmOptions can be used as follows inside a standard
             so = SlurmOptions()
             so.add_options(self)
 
-
-
 Then, for developers, one should look at e.g. module sequana_pipetools.options
 for the API reference and one of the official sequana pipeline (e.g.,
 https://github.com/sequana/sequana_variant_calling)
+
+The code above, can be create automatically using one of our cookie cutter tool
+available in https://github.com/sequana/sequana_pipeline_template and as a
+standalone in sequana (sequana_init_pipeline)
 
 
 Changelog
