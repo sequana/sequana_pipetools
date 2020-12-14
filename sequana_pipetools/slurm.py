@@ -9,6 +9,9 @@ class DebugJob:
     - Working on slurm
     - Only a single sequana job has been launched in the path specified.
 
+    Usage:
+    DebugJob(path_to_analysis_folder)
+
     :param path: Path to a working directory from a sequana pipeline execution
     (Directory containing slurm_*.out files)
     """
