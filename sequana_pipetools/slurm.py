@@ -20,6 +20,9 @@ class DebugJob:
         self.path = Path(path)
         self.slurm_out = sorted([f for f in self.path.glob("slurm*.out")])
 
+        if not self.slurm_out:
+            raise IOError(f"No slurm*.out files were found in {path}")
+
         with open(self.slurm_out[0], "r") as f:
             self.snakemaster = f.read()
 
