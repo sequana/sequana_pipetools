@@ -1,5 +1,6 @@
 from pathlib import Path
 import parse
+import re
 
 
 class DebugJob:
@@ -14,10 +15,12 @@ class DebugJob:
 
     :param path: Path to a working directory from a sequana pipeline execution
     (Directory containing slurm_*.out files)
+    :param context: The number of lines to print around the error line.
     """
 
-    def __init__(self, path):
+    def __init__(self, path, context=5):
         self.path = Path(path)
+        self.context = context
         self.slurm_out = sorted([f for f in self.path.glob("slurm*.out")])
 
         if not self.slurm_out:
@@ -27,12 +30,8 @@ class DebugJob:
             self.snakemaster = f.read()
 
         self.percent = self._get_percent()
-        (
-            self.rules_with_error,
-            self.error_log_files,
-            self.slurm_jobids,
-        ) = self._get_rules_with_errors()
-        self.n_errors = len(self.rules_with_error)
+        self.errors = self._get_rules_with_errors()
+        self.n_errors = len(self.errors)
 
     def __repr__(self):
 
@@ -43,21 +42,49 @@ class DebugJob:
         message = "#" * 33 + " DEBUG REPORT " + "#" * 33 + "\n\n"
         message += f"The analysis reached {self.percent}%. A total of {self.n_errors} errors has been found.\n\n"
 
-        if self.n_errors:
-            message += f"Rules with errors are: {', '.join(self.rules_with_error)}\n\n"
-            message += "Following are the corresponding logs:\n\n"
+        for e in self.errors:
+            message += f"Rule: {e['rule']}, SlurmID: {e['slurm_id']}\n"
 
-            self.error_log = ""
-            for log in self.error_log_files:
-                with open(log, "r") as l:
-                    self.error_log += f"File: {log}:\n"
-                    self.error_log += "-" * 80 + "\n\n"
-                    self.error_log += l.read()
-                    self.error_log += "=" * 80 + "\n\n"
-
-            message += f"{self.error_log}\n"
+            message += self._get_error_message(self.path / e["log"])
+            message += self._get_error_message(
+                self.path / ("slurm-" + str(e["slurm_id"]) + ".out")
+            )
 
         message += "\n" + "#" * 80
+
+        return message
+
+    def _get_error_message(self, log_file):
+        """Extract error message from a log file."""
+
+        message = ""
+        with open(log_file, "r") as f:
+
+            # Get lines with "error" in:
+            error_lines = [
+                i
+                for i, line in enumerate(f)
+                if re.findall("error", line, re.IGNORECASE)
+            ]
+
+            if not error_lines:
+                return "-" * 80 + f"\nNo error found in {log_file}.\n" + "-" * 80 + "\n"
+
+            # Add a number of lines around (ie the context)
+            lines_to_print = [
+                list(range(i - self.context, i + self.context + 1)) for i in error_lines
+            ]
+            # Flats and uniquify the list of list
+            lines_to_print = set([y for x in lines_to_print for y in x])
+
+        message += "-" * 80 + "\n"
+        message += f"Error messages found in {log_file} (context: {self.context}):\n"
+        with open(log_file, "r") as f:
+            for i, line in enumerate(f):
+                if i in lines_to_print:
+                    message += line
+
+        message += "-" * 80 + "\n"
         return message
 
     def _get_percent(self):
@@ -76,14 +103,6 @@ class DebugJob:
     jobid: {jobid:d}
     output: {output}
     log: {log:S} (check log file(s) for error message)
-    cluster_jobid: Submitted batch job {slurm_jobid:d}"""
+    cluster_jobid: Submitted batch job {slurm_id:d}"""
 
-        rules_with_error = [e["rule"] for e in parse.findall(errors, self.snakemaster)]
-        error_log_files = [
-            self.path / e["log"] for e in parse.findall(errors, self.snakemaster)
-        ]
-        slurm_jobids = [
-            e["slurm_jobid"] for e in parse.findall(errors, self.snakemaster)
-        ]
-
-        return (rules_with_error, error_log_files, slurm_jobids)
+        return list(parse.findall(errors, self.snakemaster))
