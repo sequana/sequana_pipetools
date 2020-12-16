@@ -52,7 +52,7 @@ setup(
 
     # package installation
     packages = ["sequana_pipetools"],
-    install_requires = ["easydev"], #"sequana",
+    install_requires =  open("requirements.txt").read(),
     tests_require= ["pytest", "coverage", "pytest-cov", "sequana_rnaseq",
         "sequana_quality_control"],
 
