@@ -27,7 +27,11 @@ class DebugJob:
             self.snakemaster = f.read()
 
         self.percent = self._get_percent()
-        self.rules_with_error, self.error_log_files = self._get_rules_with_errors()
+        (
+            self.rules_with_error,
+            self.error_log_files,
+            self.slurm_jobids,
+        ) = self._get_rules_with_errors()
         self.n_errors = len(self.rules_with_error)
 
     def __repr__(self):
@@ -70,13 +74,16 @@ class DebugJob:
 
         errors = """Error in rule {rule:S}:
     jobid: {jobid:d}
-    output: {output:S}
+    output: {output}
     log: {log:S} (check log file(s) for error message)
-    """
+    cluster_jobid: Submitted batch job {slurm_jobid:d}"""
 
         rules_with_error = [e["rule"] for e in parse.findall(errors, self.snakemaster)]
         error_log_files = [
             self.path / e["log"] for e in parse.findall(errors, self.snakemaster)
         ]
+        slurm_jobids = [
+            e["slurm_jobid"] for e in parse.findall(errors, self.snakemaster)
+        ]
 
-        return rules_with_error, error_log_files
+        return (rules_with_error, error_log_files, slurm_jobids)
