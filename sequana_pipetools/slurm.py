@@ -15,11 +15,14 @@
 #  documentation: http://sequana.readthedocs.io
 #
 ##############################################################################
+import sys
+import re
 import argparse
 from pathlib import Path
-import parse
-import re
 
+import parse
+
+import re
 
 class DebugJob:
     """Helper for sequana jobs debugging on slurm cluster.
