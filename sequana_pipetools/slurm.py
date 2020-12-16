@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+#
+#  This file is part of Sequana software
+#
+#  Copyright (c) 2016-2020 - Sequana Development Team
+#
+#  File author(s):
+#      Thomas Cokelaer <thomas.cokelaer@pasteur.fr>
+#      Etienne Kornobis <etienne.kornobis@pasteur.fr>
+#
+#  Distributed under the terms of the 3-clause BSD license.
+#  The full license is in the LICENSE file, distributed with this software.
+#
+#  website: https://github.com/sequana/sequana
+#  documentation: http://sequana.readthedocs.io
+#
+##############################################################################
+import argparse
 from pathlib import Path
 import parse
 import re
@@ -106,3 +124,40 @@ class DebugJob:
     cluster_jobid: Submitted batch job {slurm_id:d}"""
 
         return list(parse.findall(errors, self.snakemaster))
+
+
+class Options(argparse.ArgumentParser):
+    def __init__(self, prog="sequana_slurm_status"):
+        usage = """
+    sequana_slurm_status
+    sequana_slurm_status --directory ./rnaseq/
+    """
+
+        super(Options, self).__init__(usage=usage, prog=prog,
+            description="""This tool scan slurm jobs trying o infer useful
+summary of errorse""", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+        self.add_argument("--directory", type=str,
+            help="""Directory where to introspect slurm jobs""")
+ 
+
+
+
+def main(args=None):
+
+    if args is None:
+        args = sys.argv[:]
+
+    user_options = Options()
+
+    # If --help or no options provided, show the help
+    if len(args) == 1:
+        user_options.parse_args(["prog", "--help"])
+    else:
+       options = user_options.parse_args(args[1:])
+
+
+if __name__ == "__main__":
+    main()
+
+

@@ -5,7 +5,7 @@ from setuptools import setup, find_namespace_packages
 
 _MAJOR               = 0
 _MINOR               = 4
-_MICRO               = 0
+_MICRO               = 1
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
@@ -66,7 +66,9 @@ setup(
     zip_safe=False,
 
     entry_points = {'console_scripts':[
-        'sequana_completion=sequana_pipetools.completion:main']
+        'sequana_completion=sequana_pipetools.completion:main',
+        'sequana_slurm_status=sequana_pipetools.slurm:main'
+    ]
     }
 
 )

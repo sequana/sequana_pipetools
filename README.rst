@@ -116,6 +116,8 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.4.1     * add slurm status utility (sequana_slurm_status)
+0.4.0     * stable version
 0.3.1     * comment the prin_newest_version, which is too slow
 0.3.0     * stable release
 0.2.6     * previous new feature led to overhead of a few seconds with --help
