@@ -44,14 +44,23 @@ interface, and helper functions.
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/veryold.png
     :scale: 45%
 
-    Old Sequana framework will all pipelines and Sequana library in the same
+    **Figure 1** Old Sequana framework will all pipelines and Sequana library in the same
     place including pipetools (this library).
 
-.. image:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/old.png
+.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/old.png
+    :scale: 45%
+    
+    **Figure 2** v0.8 of Sequana moved the Snakemake pipelines in indepdendent
+    repositories. A `cookie cutter <https://github.com/sequana/sequana_pipeline_template>`_ 
+    ease the creation of scuh pipelines
+
+.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/new.png
     :width: 45%
 
-.. image:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/new.png
-    :width: 45%
+    **Figure** New Sequana framework. The library itself with the core, the
+    bioinformatics tools is now independent of the pipelines. Besides, the
+    pipetools library provide common tools to all pipelines to help in their
+    creation/management. For instance, common parser for options.
 
 
 
