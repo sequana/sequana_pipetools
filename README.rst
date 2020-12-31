@@ -55,7 +55,7 @@ interface, and helper functions.
     ease the creation of scuh pipelines
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/new.png
-    :width: 45%
+    :width: 25%
 
     **Figure** New Sequana framework. The library itself with the core, the
     bioinformatics tools is now independent of the pipelines. Besides, the
