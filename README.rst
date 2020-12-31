@@ -93,14 +93,24 @@ To get more help, go to the doc directory and build the local sphinx directory u
 Usage
 ======
 
-There is currently only one standalone tool to be used as follows::
+There are currently two standalone tools. The first one is for Linux users under
+bash to obtain completion of a sequana pipeline command line arguments::
 
     sequana_completion --pipeline fastqc
 
-The library is intended to help Sequana developers to design their pipelines. 
+The second is used to introspect slurm files to get a summary of the SLURM log
+files::
+
+    sequana_slurm_status --directory .
+
+Will print a short summary report with common errors (if any).
+
+
+The library is intended to help Sequana developers to design their pipelines.
 See the `Sequana organization repository for examples <https://github.com/sequana>`_.
 
-Currently, this library provides a set of Options classes that should be used to
+In addition to those standalones, sequana_pipetools goal to to provide utilities to help Sequana developers. 
+We currently provide a set of Options classes that should be used to
 design the API of your pipelines. For example, the
 sequana_pipetools.options.SlurmOptions can be used as follows inside a standard
 Python module::
@@ -126,7 +136,7 @@ Python module::
 
 Then, for developers, one should look at e.g. module sequana_pipetools.options
 for the API reference and one of the official sequana pipeline (e.g.,
-https://github.com/sequana/sequana_variant_calling)
+https://github.com/sequana/sequana_variant_calling) to get help from examples. 
 
 The code above, can be create automatically using one of our cookie cutter tool
 available in https://github.com/sequana/sequana_pipeline_template and as a
