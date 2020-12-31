@@ -36,8 +36,13 @@ interface, and helper functions.
 
 
 .. image:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/veryold.png
+    :width: 45%
+
 .. image:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/old.png
+    :width: 45%
+
 .. image:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/new.png
+    :width: 45%
 
 
 
