@@ -1,0 +1,22 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	feature_counts_2
+	1
+
+[Wed Dec 30 17:53:29 2020]
+rule feature_counts_2:
+    input: 8HHHR1_S7/star_mapping/8HHHR1_S7_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 8HHHR1_S7/feature_counts_2/8HHHR1_S7_feature.out
+    log: 8HHHR1_S7/feature_counts_2/8HHHR1_S7.logs
+    jobid: 0
+    wildcards: sample=8HHHR1_S7
+
+featureCounts -T 1 -t gene -g gene_id -M -s 2                  -a /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff -o 8HHHR1_S7/feature_counts_2/8HHHR1_S7_feature.out 8HHHR1_S7/star_mapping/8HHHR1_S7_Aligned.sortedByCoord.out.bam 2> 8HHHR1_S7/feature_counts_2/8HHHR1_S7.logs
+sed -i "s/Status.*/Status	__fc2_8HHHR1_S7/g" 8HHHR1_S7/feature_counts_2/8HHHR1_S7_feature.out.summary
+[Wed Dec 30 17:54:05 2020]
+Finished job 0.
+1 of 1 steps (100%) done

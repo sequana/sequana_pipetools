@@ -58,7 +58,8 @@ here by the *pipetools* box were required by all pipelines. This was mostly for
 providing user interface, sanity check of input data, etc. This was moving fast
 with new pipelines added every month. To make the pipelines and Sequana more
 modular, we decided to create a pure Python library that would make the
-pipelines even more independent as shown in **Fig3**. 
+pipelines even more independent as shown in **Fig3**. We called it
+**sequana_pipetools**.
 
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/new.png
@@ -71,21 +72,6 @@ pipelines even more independent as shown in **Fig3**.
 
 
 
-What is Sequana ?
-=================
-
-**Sequana** is a versatile tool that provides 
-
-#. A Python library dedicated to NGS analysis (e.g., tools to visualise standard NGS formats).
-#. A set of Pipelines dedicated to NGS in the form of Snakefiles
-   (Makefile-like with Python syntax based on snakemake framework) with more
-   than 80 re-usable rules.
-#. Standalone applications.
-
-See the `sequana home page <https://sequana.readthedocs.io>`_ for details.
-
-
-To join the project, please let us know on `github <https://github.com/sequana/sequana/issues/306>`_.
 
 Installation
 ============
@@ -117,7 +103,7 @@ See the `Sequana organization repository for examples <https://github.com/sequan
 Currently, this library provides a set of Options classes that should be used to
 design the API of your pipelines. For example, the
 sequana_pipetools.options.SlurmOptions can be used as follows inside a standard
-::
+Python module::
 
     import argparse
     from sequana_pipetools.options import *
@@ -145,6 +131,22 @@ https://github.com/sequana/sequana_variant_calling)
 The code above, can be create automatically using one of our cookie cutter tool
 available in https://github.com/sequana/sequana_pipeline_template and as a
 standalone in sequana (sequana_init_pipeline)
+
+What is Sequana ?
+=================
+
+**Sequana** is a versatile tool that provides 
+
+#. A Python library dedicated to NGS analysis (e.g., tools to visualise standard NGS formats).
+#. A set of Pipelines dedicated to NGS in the form of Snakefiles
+   (Makefile-like with Python syntax based on snakemake framework) with more
+   than 80 re-usable rules.
+#. Standalone applications.
+
+See the `sequana home page <https://sequana.readthedocs.io>`_ for details.
+
+
+To join the project, please let us know on `github <https://github.com/sequana/sequana/issues/306>`_.
 
 
 Changelog
