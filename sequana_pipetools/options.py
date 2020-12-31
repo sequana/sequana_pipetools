@@ -19,7 +19,7 @@ from sequana_pipetools.misc import Colors, print_version, print_newest_version
 
 
 __all__ = ["GeneralOptions", "SlurmOptions", "SnakemakeOptions",
-    "CutadaptOptions", "KrakenOptions", "InputOptions", ]
+    "CutadaptOptions", "KrakenOptions", "InputOptions", "FeatureCountsOptions"]
 
 
 def init_pipeline(NAME):
@@ -344,6 +344,42 @@ class CutadaptOptions():
             pass
 
 
+class FeatureCountsOptions():
+    def __init__(self, group_name="feature_counts", feature_type="gene",
+                       attribute="ID", options=None, strandness=None):
+
+        self.group_name = group_name
+        self.feature_type = feature_type
+        self.attribute = attribute
+        self.options = options
+        self.strandness = strandness
+
+    def add_options(self, parser):
+        group = parser.add_argument_group(self.group_name)
+        group.add_argument("--feature-counts-strandness",
+             default=self.strandness, 
+             help="""0 for unstranded, 1 for stranded and 2 for reversely
+             stranded. If you do not know, let the pipeline guess for you.""")
+        group.add_argument("--feature-counts-attribute",
+             default=self.attribute,
+             help="""the GFF attribute to use as identifier. If you do not know,
+             look at the GFF file or use 'sequana summary YOURFILE.gff' command to get
+             information about attributes and  features contained in your annotation file.""")
+        group.add_argument("--feature-counts-extra-attributes",
+             default=None,
+             help="""any extra attribute to add in final feature counts files""")
+        group.add_argument("--feature-counts-feature-type",
+             default=self.feature_type,
+             help="""the GFF feature type (e.g., gene, exon, mRNA, etc). If you 
+             do not know, look at the GFF file or use 'sequana summary YOURFILE.gff'.""")
+        group.add_argument("--feature-counts-options",
+             default=self.options,
+             help="""Any extra options for feature counts. Note that the -s
+             option (strandness), the -g option (attribute name) and -t options 
+            (genetic type) have their own options. If you use still use one of 
+            the -s/-g/-t, it will replace the --feature-counts-strandness, 
+            --feature-counts-attribute and -feature-counts-feature options respectively""")
+ 
 
 
 

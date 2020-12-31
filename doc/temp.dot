@@ -1,0 +1,21 @@
+digraph snakemake_dag {
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans,                 fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey];
+	0[label = "sequana", color = "0.46 0.6 0.85", style="rounded"];
+	1[label = "sequana_pipetools", color = "0.38 0.6 0.85", style="rounded"];
+	2[label = "rnaseq", color = "0.17 0.6 0.85", style="rounded"];
+	3[label = "chipseq", color = "0.58 0.6 0.85", style="rounded"];
+	4[label = "variant", color = "0.21 0.6 0.85", style="rounded"];
+	5[label = "denovo", color = "0.62 0.6 0.85", style="rounded"];
+	0 -> 1
+	1 -> 2
+	1 -> 3
+	1 -> 4
+	1 -> 5
+	0 -> 2
+	0 -> 3
+	0 -> 4
+	0 -> 5
+}            
+

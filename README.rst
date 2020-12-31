@@ -23,7 +23,7 @@
 What is sequana_pipetools ?
 ============================
 
-**sequana_pipetools** is a set of tools to help us managing the different `**Sequana** <https://sequana.readthedocs.io>`_ pipelines.
+**sequana_pipetools** is a set of tools to help us managing the `Sequana <https://sequana.readthedocs.io>`_ pipelines (NGS pipelines such as RNA-seq, Variant, ChIP-seq, etc).
 
 The goal of this package is to make the deployment of `Sequana pipelines <https://sequana.readthedocs.io>`_ easier
 by moving some of the common tools used by the different pipelines in a pure
@@ -116,6 +116,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.4.2     * add FeatureCounts options
 0.4.1     * add slurm status utility (sequana_slurm_status)
 0.4.0     * stable version
 0.3.1     * comment the prin_newest_version, which is too slow
