@@ -42,7 +42,7 @@ interface, and helper functions.
 
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/veryold.png
-    scale: 45%
+    :scale: 45%
 
     Old Sequana framework will all pipelines and Sequana library in the same
     place including pipetools (this library).
