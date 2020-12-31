@@ -35,7 +35,7 @@ pipelines, tools to manage pipelines in a single library (Sequana) as described
 in **Fig 1** here below.
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/veryold.png
-    :scale: 45%
+    :scale: 40%
 
     **Figure 1** Old Sequana framework will all pipelines and Sequana library in the same
     place including pipetools (this library).
@@ -55,8 +55,8 @@ pipelines independent as shown in **Fig 2**:
 That way, we could change a pipeline without the need to update Sequana, and
 vice-versa. This was already a great jump ahead. Yet, some tools reprensented
 here by the *pipetools* box were required by all pipelines. This was mostly for
-provided user interface, sanity check of input data, etc. This was moving fast
-ith new pipelines added every month. To make the pipelines and Sequana more
+providing user interface, sanity check of input data, etc. This was moving fast
+with new pipelines added every month. To make the pipelines and Sequana more
 modular, we decided to create a pure Python library that would make the
 pipelines even more independent as shown in **Fig3**. 
 
