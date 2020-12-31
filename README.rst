@@ -41,9 +41,11 @@ pipelines, metadata, common options to include in the user
 interface, and helper functions.
 
 
-.. image:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/veryold.png
-    :width: 45%
-    :caption: TEST
+.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/veryold.png
+    scale: 45%
+
+    Old Sequana framework will all pipelines and Sequana library in the same
+    place including pipetools (this library).
 
 .. image:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/old.png
     :width: 45%
