@@ -34,6 +34,13 @@ Currently, this package provide completion for all the
 pipelines, metadata, common options to include in the user
 interface, and helper functions.
 
+
+.. image:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/veryold.png
+.. image:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/old.png
+.. image:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/new.png
+
+
+
 What is Sequana ?
 =================
 
