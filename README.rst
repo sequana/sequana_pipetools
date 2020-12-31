@@ -46,7 +46,7 @@ dependencies woule be needed, and so on. So, we first decided to make all
 pipelines independent as shown in **Fig 2**:
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/old.png
-    :scale: 45%
+    :scale: 40%
     
     **Figure 2** v0.8 of Sequana moved the Snakemake pipelines in indepdendent
     repositories. A `cookie cutter <https://github.com/sequana/sequana_pipeline_template>`_ 
@@ -62,9 +62,9 @@ pipelines even more independent as shown in **Fig3**.
 
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/new.png
-    :width: 25%
+    :scale: 40%
 
-    **Figure** New Sequana framework. The library itself with the core, the
+    **Figure 3** New Sequana framework. The library itself with the core, the
     bioinformatics tools is now independent of the pipelines. Besides, the
     pipetools library provide common tools to all pipelines to help in their
     creation/management. For instance, common parser for options.
