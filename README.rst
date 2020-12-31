@@ -27,7 +27,13 @@ What is sequana_pipetools ?
 
 The goal of this package is to make the deployment of `Sequana pipelines <https://sequana.readthedocs.io>`_ easier
 by moving some of the common tools used by the different pipelines in a pure
-Python library. Why moving it from Sequana ? Well, this is more modular. If we
+Python library. 
+
+
+The Sequana framework used to have all bioinformatics, snakemake rules,
+pipelines, tools to manage pipelines in a single library (Sequana) as described
+in **Fig 1**. 
+Why moving it from Sequana ? Well, this is more modular. If we
 change Sequana, the pipelines are less likely to break. Similarly, if we update
 a tool used by all the pipelines, there is less chances to break Sequana itself. 
 Currently, this package provide completion for all the
@@ -37,6 +43,7 @@ interface, and helper functions.
 
 .. image:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/veryold.png
     :width: 45%
+    :caption: TEST
 
 .. image:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/old.png
     :width: 45%
