@@ -32,14 +32,7 @@ Python library.
 
 The Sequana framework used to have all bioinformatics, snakemake rules,
 pipelines, tools to manage pipelines in a single library (Sequana) as described
-in **Fig 1**. 
-Why moving it from Sequana ? Well, this is more modular. If we
-change Sequana, the pipelines are less likely to break. Similarly, if we update
-a tool used by all the pipelines, there is less chances to break Sequana itself. 
-Currently, this package provide completion for all the
-pipelines, metadata, common options to include in the user
-interface, and helper functions.
-
+in **Fig 1** here below.
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/veryold.png
     :scale: 45%
@@ -47,12 +40,26 @@ interface, and helper functions.
     **Figure 1** Old Sequana framework will all pipelines and Sequana library in the same
     place including pipetools (this library).
 
+Each time we changed anything, the entire library needed to be checked carefully
+(even though we had 80% test coverage). Each time a pipeline was added, new
+dependencies woule be needed, and so on. So, we first decided to make all
+pipelines independent as shown in **Fig 2**:
+
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/old.png
     :scale: 45%
     
     **Figure 2** v0.8 of Sequana moved the Snakemake pipelines in indepdendent
     repositories. A `cookie cutter <https://github.com/sequana/sequana_pipeline_template>`_ 
     ease the creation of scuh pipelines
+
+That way, we could change a pipeline without the need to update Sequana, and
+vice-versa. This was already a great jump ahead. Yet, some tools reprensented
+here by the *pipetools* box were required by all pipelines. This was mostly for
+provided user interface, sanity check of input data, etc. This was moving fast
+ith new pipelines added every month. To make the pipelines and Sequana more
+modular, we decided to create a pure Python library that would make the
+pipelines even more independent as shown in **Fig3**. 
+
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/new.png
     :width: 25%
