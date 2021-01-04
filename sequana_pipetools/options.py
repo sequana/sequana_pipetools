@@ -371,7 +371,11 @@ class FeatureCountsOptions():
         group.add_argument("--feature-counts-feature-type",
              default=self.feature_type,
              help="""the GFF feature type (e.g., gene, exon, mRNA, etc). If you 
-             do not know, look at the GFF file or use 'sequana summary YOURFILE.gff'.""")
+             do not know, look at the GFF file or use 'sequana summary
+YOURFILE.gff'. Would you need to perform an analysis on several features, you
+can either build your own custom GFF file (see Please see
+https://github.com/sequana/rnaseq/wiki) or provide several entries separated by
+commas""")
         group.add_argument("--feature-counts-options",
              default=self.options,
              help="""Any extra options for feature counts. Note that the -s
