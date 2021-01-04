@@ -165,6 +165,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.4.3     * add MANIFEST to include missing requirements.txt
 0.4.2     * add FeatureCounts options
 0.4.1     * add slurm status utility (sequana_slurm_status)
 0.4.0     * stable version
