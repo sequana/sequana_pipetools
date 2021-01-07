@@ -5,7 +5,7 @@ from setuptools import setup, find_namespace_packages
 
 _MAJOR               = 0
 _MINOR               = 4
-_MICRO               = 0
+_MICRO               = 3
 version              = '%d.%d.%d' % (_MAJOR, _MINOR, _MICRO)
 release              = '%d.%d' % (_MAJOR, _MINOR)
 
@@ -52,7 +52,7 @@ setup(
 
     # package installation
     packages = ["sequana_pipetools"],
-    install_requires = ["easydev"], #"sequana",
+    install_requires =  open("requirements.txt").read(),
     tests_require= ["pytest", "coverage", "pytest-cov", "sequana_rnaseq",
         "sequana_quality_control"],
 
@@ -66,7 +66,9 @@ setup(
     zip_safe=False,
 
     entry_points = {'console_scripts':[
-        'sequana_completion=sequana_pipetools.completion:main']
+        'sequana_completion=sequana_pipetools.completion:main',
+        'sequana_slurm_status=sequana_pipetools.slurm:main'
+    ]
     }
 
 )

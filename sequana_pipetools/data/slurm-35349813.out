@@ -1,0 +1,1664 @@
+Building DAG of jobs...
+Using shell: /bin/bash
+Provided cluster nodes: 40
+Job counts:
+	count	jobs
+	12	add_read_group
+	12	bowtie1_mapping_rna
+	12	fastqc_filtered
+	12	feature_counts_0
+	12	feature_counts_1
+	12	feature_counts_2
+	1	guess_strandness
+	12	mark_duplicates_ref
+	1	multiqc
+	1	rnaseq
+	1	rulegraph
+	12	star_mapping
+	12	unpigz_R1
+	112
+
+[Wed Dec 30 16:40:55 2020]
+Job 113: 
+    -- Creating rulegraph in a dot file and save into rulegraph.svg
+    
+
+[Wed Dec 30 16:40:55 2020]
+rule star_mapping:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/8HHHR1_S7_R1_001.fastq.gz, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/star/SAindex
+    output: 8HHHR1_S7/star_mapping/8HHHR1_S7_Aligned.sortedByCoord.out.bam
+    log: 8HHHR1_S7/star_mapping/8HHHR1_S7.logs
+    jobid: 47
+    wildcards: sample=8HHHR1_S7
+    threads: 4
+
+Submitted job 47 with external jobid 'Submitted batch job 35350342'.
+
+[Wed Dec 30 16:40:55 2020]
+rule fastqc_filtered:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/16HHHR3_S12_R1_001.fastq.gz
+    output: 16HHHR3_S12/fastqc_filtered/16HHHR3_S12.done
+    log: 16HHHR3_S12/fastqc_filtered/fastqc.log
+    jobid: 2
+    wildcards: sample=16HHHR3_S12
+    threads: 4
+
+Submitted job 2 with external jobid 'Submitted batch job 35350343'.
+
+[Wed Dec 30 16:40:55 2020]
+rule star_mapping:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/16HHHR3_S12_R1_001.fastq.gz, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/star/SAindex
+    output: 16HHHR3_S12/star_mapping/16HHHR3_S12_Aligned.sortedByCoord.out.bam
+    log: 16HHHR3_S12/star_mapping/16HHHR3_S12.logs
+    jobid: 40
+    wildcards: sample=16HHHR3_S12
+    threads: 4
+
+Submitted job 40 with external jobid 'Submitted batch job 35350344'.
+
+[Wed Dec 30 16:40:55 2020]
+rule fastqc_filtered:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/16HHHR1_S10_R1_001.fastq.gz
+    output: 16HHHR1_S10/fastqc_filtered/16HHHR1_S10.done
+    log: 16HHHR1_S10/fastqc_filtered/fastqc.log
+    jobid: 10
+    wildcards: sample=16HHHR1_S10
+    threads: 4
+
+Submitted job 10 with external jobid 'Submitted batch job 35350345'.
+
+[Wed Dec 30 16:40:55 2020]
+rule unpigz_R1:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/woHHR3_S3_R1_001.fastq.gz
+    output: woHHR3_S3/cutadapt/woHHR3_S3_R1_.cutadapt.fastq
+    jobid: 25
+    wildcards: sample=woHHR3_S3
+    threads: 4
+
+
+        unpigz -p 4 -fk --stdout /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/woHHR3_S3_R1_001.fastq.gz  > woHHR3_S3/cutadapt/woHHR3_S3_R1_.cutadapt.fastq
+        
+Submitted job 25 with external jobid 'Submitted batch job 35350346'.
+
+[Wed Dec 30 16:40:58 2020]
+rule unpigz_R1:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/16HHHR1_S10_R1_001.fastq.gz
+    output: 16HHHR1_S10/cutadapt/16HHHR1_S10_R1_.cutadapt.fastq
+    jobid: 33
+    wildcards: sample=16HHHR1_S10
+    threads: 4
+
+
+        unpigz -p 4 -fk --stdout /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/16HHHR1_S10_R1_001.fastq.gz  > 16HHHR1_S10/cutadapt/16HHHR1_S10_R1_.cutadapt.fastq
+        
+Submitted job 33 with external jobid 'Submitted batch job 35350347'.
+
+[Wed Dec 30 16:40:58 2020]
+rule star_mapping:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/16HHHR1_S10_R1_001.fastq.gz, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/star/SAindex
+    output: 16HHHR1_S10/star_mapping/16HHHR1_S10_Aligned.sortedByCoord.out.bam
+    log: 16HHHR1_S10/star_mapping/16HHHR1_S10.logs
+    jobid: 48
+    wildcards: sample=16HHHR1_S10
+    threads: 4
+
+Submitted job 48 with external jobid 'Submitted batch job 35350348'.
+
+[Wed Dec 30 16:40:58 2020]
+rule fastqc_filtered:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/16HHHR2_S11_R1_001.fastq.gz
+    output: 16HHHR2_S11/fastqc_filtered/16HHHR2_S11.done
+    log: 16HHHR2_S11/fastqc_filtered/fastqc.log
+    jobid: 3
+    wildcards: sample=16HHHR2_S11
+    threads: 4
+
+Submitted job 3 with external jobid 'Submitted batch job 35350349'.
+
+[Wed Dec 30 16:40:58 2020]
+rule star_mapping:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/16HHHR2_S11_R1_001.fastq.gz, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/star/SAindex
+    output: 16HHHR2_S11/star_mapping/16HHHR2_S11_Aligned.sortedByCoord.out.bam
+    log: 16HHHR2_S11/star_mapping/16HHHR2_S11.logs
+    jobid: 41
+    wildcards: sample=16HHHR2_S11
+    threads: 4
+
+Submitted job 41 with external jobid 'Submitted batch job 35350350'.
+
+[Wed Dec 30 16:40:58 2020]
+rule fastqc_filtered:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/4HHHR3_S6_R1_001.fastq.gz
+    output: 4HHHR3_S6/fastqc_filtered/4HHHR3_S6.done
+    log: 4HHHR3_S6/fastqc_filtered/fastqc.log
+    jobid: 11
+    wildcards: sample=4HHHR3_S6
+    threads: 4
+
+Submitted job 11 with external jobid 'Submitted batch job 35350352'.
+
+[Wed Dec 30 16:41:00 2020]
+rule star_mapping:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/4HHHR3_S6_R1_001.fastq.gz, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/star/SAindex
+    output: 4HHHR3_S6/star_mapping/4HHHR3_S6_Aligned.sortedByCoord.out.bam
+    log: 4HHHR3_S6/star_mapping/4HHHR3_S6.logs
+    jobid: 49
+    wildcards: sample=4HHHR3_S6
+    threads: 4
+
+Submitted job 49 with external jobid 'Submitted batch job 35350353'.
+
+[Wed Dec 30 16:41:00 2020]
+rule unpigz_R1:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/16HHHR2_S11_R1_001.fastq.gz
+    output: 16HHHR2_S11/cutadapt/16HHHR2_S11_R1_.cutadapt.fastq
+    jobid: 19
+    wildcards: sample=16HHHR2_S11
+    threads: 4
+
+
+        unpigz -p 4 -fk --stdout /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/16HHHR2_S11_R1_001.fastq.gz  > 16HHHR2_S11/cutadapt/16HHHR2_S11_R1_.cutadapt.fastq
+        
+Submitted job 19 with external jobid 'Submitted batch job 35350354'.
+
+[Wed Dec 30 16:41:00 2020]
+rule fastqc_filtered:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/woHHR1_S1_R1_001.fastq.gz
+    output: woHHR1_S1/fastqc_filtered/woHHR1_S1.done
+    log: woHHR1_S1/fastqc_filtered/fastqc.log
+    jobid: 4
+    wildcards: sample=woHHR1_S1
+    threads: 4
+
+Submitted job 4 with external jobid 'Submitted batch job 35350355'.
+
+[Wed Dec 30 16:41:00 2020]
+rule star_mapping:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/woHHR1_S1_R1_001.fastq.gz, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/star/SAindex
+    output: woHHR1_S1/star_mapping/woHHR1_S1_Aligned.sortedByCoord.out.bam
+    log: woHHR1_S1/star_mapping/woHHR1_S1.logs
+    jobid: 42
+    wildcards: sample=woHHR1_S1
+    threads: 4
+
+Submitted job 42 with external jobid 'Submitted batch job 35350356'.
+
+[Wed Dec 30 16:41:00 2020]
+rule unpigz_R1:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/4HHHR2_S5_R1_001.fastq.gz
+    output: 4HHHR2_S5/cutadapt/4HHHR2_S5_R1_.cutadapt.fastq
+    jobid: 27
+    wildcards: sample=4HHHR2_S5
+    threads: 4
+
+
+        unpigz -p 4 -fk --stdout /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/4HHHR2_S5_R1_001.fastq.gz  > 4HHHR2_S5/cutadapt/4HHHR2_S5_R1_.cutadapt.fastq
+        
+Submitted job 27 with external jobid 'Submitted batch job 35350357'.
+
+[Wed Dec 30 16:41:00 2020]
+rule fastqc_filtered:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/woHHR2_S2_R1_001.fastq.gz
+    output: woHHR2_S2/fastqc_filtered/woHHR2_S2.done
+    log: woHHR2_S2/fastqc_filtered/fastqc.log
+    jobid: 12
+    wildcards: sample=woHHR2_S2
+    threads: 4
+
+Submitted job 12 with external jobid 'Submitted batch job 35350358'.
+
+[Wed Dec 30 16:41:00 2020]
+rule star_mapping:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/woHHR2_S2_R1_001.fastq.gz, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/star/SAindex
+    output: woHHR2_S2/star_mapping/woHHR2_S2_Aligned.sortedByCoord.out.bam
+    log: woHHR2_S2/star_mapping/woHHR2_S2.logs
+    jobid: 50
+    wildcards: sample=woHHR2_S2
+    threads: 4
+
+Submitted job 50 with external jobid 'Submitted batch job 35350359'.
+
+[Wed Dec 30 16:41:03 2020]
+rule unpigz_R1:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/4HHHR3_S6_R1_001.fastq.gz
+    output: 4HHHR3_S6/cutadapt/4HHHR3_S6_R1_.cutadapt.fastq
+    jobid: 35
+    wildcards: sample=4HHHR3_S6
+    threads: 4
+
+
+        unpigz -p 4 -fk --stdout /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/4HHHR3_S6_R1_001.fastq.gz  > 4HHHR3_S6/cutadapt/4HHHR3_S6_R1_.cutadapt.fastq
+        
+Submitted job 35 with external jobid 'Submitted batch job 35350361'.
+
+[Wed Dec 30 16:41:03 2020]
+rule fastqc_filtered:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/4HHHR1_S4_R1_001.fastq.gz
+    output: 4HHHR1_S4/fastqc_filtered/4HHHR1_S4.done
+    log: 4HHHR1_S4/fastqc_filtered/fastqc.log
+    jobid: 5
+    wildcards: sample=4HHHR1_S4
+    threads: 4
+
+Submitted job 5 with external jobid 'Submitted batch job 35350362'.
+
+[Wed Dec 30 16:41:03 2020]
+rule star_mapping:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/4HHHR1_S4_R1_001.fastq.gz, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/star/SAindex
+    output: 4HHHR1_S4/star_mapping/4HHHR1_S4_Aligned.sortedByCoord.out.bam
+    log: 4HHHR1_S4/star_mapping/4HHHR1_S4.logs
+    jobid: 43
+    wildcards: sample=4HHHR1_S4
+    threads: 4
+
+Submitted job 43 with external jobid 'Submitted batch job 35350363'.
+
+[Wed Dec 30 16:41:03 2020]
+rule fastqc_filtered:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/8HHHR3_S9_R1_001.fastq.gz
+    output: 8HHHR3_S9/fastqc_filtered/8HHHR3_S9.done
+    log: 8HHHR3_S9/fastqc_filtered/fastqc.log
+    jobid: 13
+    wildcards: sample=8HHHR3_S9
+    threads: 4
+
+Submitted job 13 with external jobid 'Submitted batch job 35350364'.
+
+[Wed Dec 30 16:41:03 2020]
+rule fastqc_filtered:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/8HHHR1_S7_R1_001.fastq.gz
+    output: 8HHHR1_S7/fastqc_filtered/8HHHR1_S7.done
+    log: 8HHHR1_S7/fastqc_filtered/fastqc.log
+    jobid: 9
+    wildcards: sample=8HHHR1_S7
+    threads: 4
+
+Submitted job 9 with external jobid 'Submitted batch job 35350366'.
+
+[Wed Dec 30 16:41:05 2020]
+rule star_mapping:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/8HHHR3_S9_R1_001.fastq.gz, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/star/SAindex
+    output: 8HHHR3_S9/star_mapping/8HHHR3_S9_Aligned.sortedByCoord.out.bam
+    log: 8HHHR3_S9/star_mapping/8HHHR3_S9.logs
+    jobid: 51
+    wildcards: sample=8HHHR3_S9
+    threads: 4
+
+Submitted job 51 with external jobid 'Submitted batch job 35350367'.
+
+[Wed Dec 30 16:41:05 2020]
+rule unpigz_R1:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/woHHR1_S1_R1_001.fastq.gz
+    output: woHHR1_S1/cutadapt/woHHR1_S1_R1_.cutadapt.fastq
+    jobid: 21
+    wildcards: sample=woHHR1_S1
+    threads: 4
+
+
+        unpigz -p 4 -fk --stdout /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/woHHR1_S1_R1_001.fastq.gz  > woHHR1_S1/cutadapt/woHHR1_S1_R1_.cutadapt.fastq
+        
+Submitted job 21 with external jobid 'Submitted batch job 35350368'.
+
+[Wed Dec 30 16:41:05 2020]
+rule fastqc_filtered:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/woHHR3_S3_R1_001.fastq.gz
+    output: woHHR3_S3/fastqc_filtered/woHHR3_S3.done
+    log: woHHR3_S3/fastqc_filtered/fastqc.log
+    jobid: 6
+    wildcards: sample=woHHR3_S3
+    threads: 4
+
+[33mJob counts:
+	count	jobs
+	1	rulegraph
+	1[0m
+Submitted job 6 with external jobid 'Submitted batch job 35350369'.
+
+[Wed Dec 30 16:41:05 2020]
+rule star_mapping:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/woHHR3_S3_R1_001.fastq.gz, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/star/SAindex
+    output: woHHR3_S3/star_mapping/woHHR3_S3_Aligned.sortedByCoord.out.bam
+    log: woHHR3_S3/star_mapping/woHHR3_S3.logs
+    jobid: 44
+    wildcards: sample=woHHR3_S3
+    threads: 4
+
+Submitted job 44 with external jobid 'Submitted batch job 35350370'.
+
+[Wed Dec 30 16:41:05 2020]
+rule unpigz_R1:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/8HHHR2_S8_R1_001.fastq.gz
+    output: 8HHHR2_S8/cutadapt/8HHHR2_S8_R1_.cutadapt.fastq
+    jobid: 29
+    wildcards: sample=8HHHR2_S8
+    threads: 4
+
+
+        unpigz -p 4 -fk --stdout /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/8HHHR2_S8_R1_001.fastq.gz  > 8HHHR2_S8/cutadapt/8HHHR2_S8_R1_.cutadapt.fastq
+        
+Submitted job 29 with external jobid 'Submitted batch job 35350371'.
+[33mcd rulegraph; snakemake -s "/pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/star_skip_cutadapt/rnaseq_50pct_moins_M/rnaseq.rules" --rulegraph --nolock  > rg.dot; cd .. [0m
+
+[Wed Dec 30 16:41:05 2020]
+rule unpigz_R1:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/woHHR2_S2_R1_001.fastq.gz
+    output: woHHR2_S2/cutadapt/woHHR2_S2_R1_.cutadapt.fastq
+    jobid: 37
+    wildcards: sample=woHHR2_S2
+    threads: 4
+
+
+        unpigz -p 4 -fk --stdout /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/woHHR2_S2_R1_001.fastq.gz  > woHHR2_S2/cutadapt/woHHR2_S2_R1_.cutadapt.fastq
+        
+Submitted job 37 with external jobid 'Submitted batch job 35350372'.
+
+[Wed Dec 30 16:41:08 2020]
+rule fastqc_filtered:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/4HHHR2_S5_R1_001.fastq.gz
+    output: 4HHHR2_S5/fastqc_filtered/4HHHR2_S5.done
+    log: 4HHHR2_S5/fastqc_filtered/fastqc.log
+    jobid: 7
+    wildcards: sample=4HHHR2_S5
+    threads: 4
+
+Submitted job 7 with external jobid 'Submitted batch job 35350374'.
+
+[Wed Dec 30 16:41:08 2020]
+rule star_mapping:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/4HHHR2_S5_R1_001.fastq.gz, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/star/SAindex
+    output: 4HHHR2_S5/star_mapping/4HHHR2_S5_Aligned.sortedByCoord.out.bam
+    log: 4HHHR2_S5/star_mapping/4HHHR2_S5.logs
+    jobid: 45
+    wildcards: sample=4HHHR2_S5
+    threads: 4
+
+Submitted job 45 with external jobid 'Submitted batch job 35350375'.
+
+[Wed Dec 30 16:41:08 2020]
+rule unpigz_R1:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/16HHHR3_S12_R1_001.fastq.gz
+    output: 16HHHR3_S12/cutadapt/16HHHR3_S12_R1_.cutadapt.fastq
+    jobid: 15
+    wildcards: sample=16HHHR3_S12
+    threads: 4
+
+
+        unpigz -p 4 -fk --stdout /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/16HHHR3_S12_R1_001.fastq.gz  > 16HHHR3_S12/cutadapt/16HHHR3_S12_R1_.cutadapt.fastq
+        
+Submitted job 15 with external jobid 'Submitted batch job 35350376'.
+
+[Wed Dec 30 16:41:08 2020]
+rule unpigz_R1:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/4HHHR1_S4_R1_001.fastq.gz
+    output: 4HHHR1_S4/cutadapt/4HHHR1_S4_R1_.cutadapt.fastq
+    jobid: 23
+    wildcards: sample=4HHHR1_S4
+    threads: 4
+
+
+        unpigz -p 4 -fk --stdout /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/4HHHR1_S4_R1_001.fastq.gz  > 4HHHR1_S4/cutadapt/4HHHR1_S4_R1_.cutadapt.fastq
+        
+Submitted job 23 with external jobid 'Submitted batch job 35350377'.
+
+[Wed Dec 30 16:41:08 2020]
+rule fastqc_filtered:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/8HHHR2_S8_R1_001.fastq.gz
+    output: 8HHHR2_S8/fastqc_filtered/8HHHR2_S8.done
+    log: 8HHHR2_S8/fastqc_filtered/fastqc.log
+    jobid: 8
+    wildcards: sample=8HHHR2_S8
+    threads: 4
+
+Submitted job 8 with external jobid 'Submitted batch job 35350379'.
+
+[Wed Dec 30 16:41:10 2020]
+rule star_mapping:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/8HHHR2_S8_R1_001.fastq.gz, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/star/SAindex
+    output: 8HHHR2_S8/star_mapping/8HHHR2_S8_Aligned.sortedByCoord.out.bam
+    log: 8HHHR2_S8/star_mapping/8HHHR2_S8.logs
+    jobid: 46
+    wildcards: sample=8HHHR2_S8
+    threads: 4
+
+Submitted job 46 with external jobid 'Submitted batch job 35350380'.
+
+[Wed Dec 30 16:41:10 2020]
+rule unpigz_R1:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/8HHHR1_S7_R1_001.fastq.gz
+    output: 8HHHR1_S7/cutadapt/8HHHR1_S7_R1_.cutadapt.fastq
+    jobid: 31
+    wildcards: sample=8HHHR1_S7
+    threads: 4
+
+
+        unpigz -p 4 -fk --stdout /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/8HHHR1_S7_R1_001.fastq.gz  > 8HHHR1_S7/cutadapt/8HHHR1_S7_R1_.cutadapt.fastq
+        
+Submitted job 31 with external jobid 'Submitted batch job 35350381'.
+
+[Wed Dec 30 16:41:10 2020]
+rule unpigz_R1:
+    input: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/8HHHR3_S9_R1_001.fastq.gz
+    output: 8HHHR3_S9/cutadapt/8HHHR3_S9_R1_.cutadapt.fastq
+    jobid: 39
+    wildcards: sample=8HHHR3_S9
+    threads: 4
+
+
+        unpigz -p 4 -fk --stdout /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/downsampling/downsampling_50pct/8HHHR3_S9_R1_001.fastq.gz  > 8HHHR3_S9/cutadapt/8HHHR3_S9_R1_.cutadapt.fastq
+        
+Submitted job 39 with external jobid 'Submitted batch job 35350382'.
+Building DAG of jobs...
+[33mdot -Tsvg rg.ann.dot -o .sequana/rulegraph.svg || true[0m
+Removing temporary output file rulegraph/rg.dot.
+Removing temporary output file rg.ann.dot.
+[Wed Dec 30 16:41:16 2020]
+Finished job 113.
+1 of 112 steps (0.89%) done
+[Wed Dec 30 16:56:50 2020]
+Finished job 27.
+2 of 112 steps (2%) done
+
+[Wed Dec 30 16:56:50 2020]
+rule bowtie1_mapping_rna:
+    input: 4HHHR2_S5/cutadapt/4HHHR2_S5_R1_.cutadapt.fastq, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9_rRNA.1.ebwt
+    output: 4HHHR2_S5/bowtie1_mapping_rna/4HHHR2_S5.bam, 4HHHR2_S5/bowtie1_mapping_rna/4HHHR2_S5.sorted.bam
+    log: 4HHHR2_S5/bowtie1_mapping_rna/4HHHR2_S5_rRNA.out, 4HHHR2_S5/bowtie1_mapping_rna/4HHHR2_S5_rRNA.err
+    jobid: 26
+    wildcards: sample=4HHHR2_S5
+    threads: 4
+
+Submitted job 26 with external jobid 'Submitted batch job 35351044'.
+[Wed Dec 30 16:57:02 2020]
+Finished job 25.
+3 of 112 steps (3%) done
+
+[Wed Dec 30 16:57:02 2020]
+rule bowtie1_mapping_rna:
+    input: woHHR3_S3/cutadapt/woHHR3_S3_R1_.cutadapt.fastq, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9_rRNA.1.ebwt
+    output: woHHR3_S3/bowtie1_mapping_rna/woHHR3_S3.bam, woHHR3_S3/bowtie1_mapping_rna/woHHR3_S3.sorted.bam
+    log: woHHR3_S3/bowtie1_mapping_rna/woHHR3_S3_rRNA.out, woHHR3_S3/bowtie1_mapping_rna/woHHR3_S3_rRNA.err
+    jobid: 24
+    wildcards: sample=woHHR3_S3
+    threads: 4
+
+Submitted job 24 with external jobid 'Submitted batch job 35351047'.
+[Wed Dec 30 16:57:28 2020]
+Finished job 21.
+4 of 112 steps (4%) done
+
+[Wed Dec 30 16:57:28 2020]
+rule bowtie1_mapping_rna:
+    input: woHHR1_S1/cutadapt/woHHR1_S1_R1_.cutadapt.fastq, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9_rRNA.1.ebwt
+    output: woHHR1_S1/bowtie1_mapping_rna/woHHR1_S1.bam, woHHR1_S1/bowtie1_mapping_rna/woHHR1_S1.sorted.bam
+    log: woHHR1_S1/bowtie1_mapping_rna/woHHR1_S1_rRNA.out, woHHR1_S1/bowtie1_mapping_rna/woHHR1_S1_rRNA.err
+    jobid: 20
+    wildcards: sample=woHHR1_S1
+    threads: 4
+
+[Wed Dec 30 16:57:28 2020]
+Finished job 29.
+5 of 112 steps (4%) done
+Submitted job 20 with external jobid 'Submitted batch job 35351056'.
+
+[Wed Dec 30 16:57:29 2020]
+rule bowtie1_mapping_rna:
+    input: 8HHHR2_S8/cutadapt/8HHHR2_S8_R1_.cutadapt.fastq, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9_rRNA.1.ebwt
+    output: 8HHHR2_S8/bowtie1_mapping_rna/8HHHR2_S8.bam, 8HHHR2_S8/bowtie1_mapping_rna/8HHHR2_S8.sorted.bam
+    log: 8HHHR2_S8/bowtie1_mapping_rna/8HHHR2_S8_rRNA.out, 8HHHR2_S8/bowtie1_mapping_rna/8HHHR2_S8_rRNA.err
+    jobid: 28
+    wildcards: sample=8HHHR2_S8
+    threads: 4
+
+Submitted job 28 with external jobid 'Submitted batch job 35351057'.
+[Wed Dec 30 16:57:31 2020]
+Finished job 23.
+6 of 112 steps (5%) done
+
+[Wed Dec 30 16:57:31 2020]
+rule bowtie1_mapping_rna:
+    input: 4HHHR1_S4/cutadapt/4HHHR1_S4_R1_.cutadapt.fastq, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9_rRNA.1.ebwt
+    output: 4HHHR1_S4/bowtie1_mapping_rna/4HHHR1_S4.bam, 4HHHR1_S4/bowtie1_mapping_rna/4HHHR1_S4.sorted.bam
+    log: 4HHHR1_S4/bowtie1_mapping_rna/4HHHR1_S4_rRNA.out, 4HHHR1_S4/bowtie1_mapping_rna/4HHHR1_S4_rRNA.err
+    jobid: 22
+    wildcards: sample=4HHHR1_S4
+    threads: 4
+
+Submitted job 22 with external jobid 'Submitted batch job 35351058'.
+[Wed Dec 30 16:57:43 2020]
+Finished job 35.
+7 of 112 steps (6%) done
+
+[Wed Dec 30 16:57:43 2020]
+rule bowtie1_mapping_rna:
+    input: 4HHHR3_S6/cutadapt/4HHHR3_S6_R1_.cutadapt.fastq, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9_rRNA.1.ebwt
+    output: 4HHHR3_S6/bowtie1_mapping_rna/4HHHR3_S6.bam, 4HHHR3_S6/bowtie1_mapping_rna/4HHHR3_S6.sorted.bam
+    log: 4HHHR3_S6/bowtie1_mapping_rna/4HHHR3_S6_rRNA.out, 4HHHR3_S6/bowtie1_mapping_rna/4HHHR3_S6_rRNA.err
+    jobid: 34
+    wildcards: sample=4HHHR3_S6
+    threads: 4
+
+[Wed Dec 30 16:57:43 2020]
+Finished job 37.
+8 of 112 steps (7%) done
+Submitted job 34 with external jobid 'Submitted batch job 35351062'.
+
+[Wed Dec 30 16:57:44 2020]
+rule bowtie1_mapping_rna:
+    input: woHHR2_S2/cutadapt/woHHR2_S2_R1_.cutadapt.fastq, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9_rRNA.1.ebwt
+    output: woHHR2_S2/bowtie1_mapping_rna/woHHR2_S2.bam, woHHR2_S2/bowtie1_mapping_rna/woHHR2_S2.sorted.bam
+    log: woHHR2_S2/bowtie1_mapping_rna/woHHR2_S2_rRNA.out, woHHR2_S2/bowtie1_mapping_rna/woHHR2_S2_rRNA.err
+    jobid: 36
+    wildcards: sample=woHHR2_S2
+    threads: 4
+
+Submitted job 36 with external jobid 'Submitted batch job 35351063'.
+[Wed Dec 30 16:57:55 2020]
+Finished job 10.
+9 of 112 steps (8%) done
+[Wed Dec 30 16:58:09 2020]
+Finished job 2.
+10 of 112 steps (9%) done
+[Wed Dec 30 16:58:23 2020]
+Finished job 19.
+11 of 112 steps (10%) done
+
+[Wed Dec 30 16:58:23 2020]
+rule bowtie1_mapping_rna:
+    input: 16HHHR2_S11/cutadapt/16HHHR2_S11_R1_.cutadapt.fastq, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9_rRNA.1.ebwt
+    output: 16HHHR2_S11/bowtie1_mapping_rna/16HHHR2_S11.bam, 16HHHR2_S11/bowtie1_mapping_rna/16HHHR2_S11.sorted.bam
+    log: 16HHHR2_S11/bowtie1_mapping_rna/16HHHR2_S11_rRNA.out, 16HHHR2_S11/bowtie1_mapping_rna/16HHHR2_S11_rRNA.err
+    jobid: 18
+    wildcards: sample=16HHHR2_S11
+    threads: 4
+
+[Wed Dec 30 16:58:24 2020]
+Finished job 12.
+12 of 112 steps (11%) done
+Submitted job 18 with external jobid 'Submitted batch job 35351085'.
+[Wed Dec 30 16:58:48 2020]
+Finished job 9.
+13 of 112 steps (12%) done
+[Wed Dec 30 16:58:49 2020]
+Finished job 3.
+14 of 112 steps (12%) done
+[Wed Dec 30 16:58:51 2020]
+Finished job 39.
+15 of 112 steps (13%) done
+
+[Wed Dec 30 16:58:51 2020]
+rule bowtie1_mapping_rna:
+    input: 8HHHR3_S9/cutadapt/8HHHR3_S9_R1_.cutadapt.fastq, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9_rRNA.1.ebwt
+    output: 8HHHR3_S9/bowtie1_mapping_rna/8HHHR3_S9.bam, 8HHHR3_S9/bowtie1_mapping_rna/8HHHR3_S9.sorted.bam
+    log: 8HHHR3_S9/bowtie1_mapping_rna/8HHHR3_S9_rRNA.out, 8HHHR3_S9/bowtie1_mapping_rna/8HHHR3_S9_rRNA.err
+    jobid: 38
+    wildcards: sample=8HHHR3_S9
+    threads: 4
+
+Submitted job 38 with external jobid 'Submitted batch job 35351089'.
+[Wed Dec 30 16:59:16 2020]
+Finished job 5.
+16 of 112 steps (14%) done
+[Wed Dec 30 16:59:16 2020]
+Finished job 15.
+17 of 112 steps (15%) done
+
+[Wed Dec 30 16:59:16 2020]
+rule bowtie1_mapping_rna:
+    input: 16HHHR3_S12/cutadapt/16HHHR3_S12_R1_.cutadapt.fastq, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9_rRNA.1.ebwt
+    output: 16HHHR3_S12/bowtie1_mapping_rna/16HHHR3_S12.bam, 16HHHR3_S12/bowtie1_mapping_rna/16HHHR3_S12.sorted.bam
+    log: 16HHHR3_S12/bowtie1_mapping_rna/16HHHR3_S12_rRNA.out, 16HHHR3_S12/bowtie1_mapping_rna/16HHHR3_S12_rRNA.err
+    jobid: 14
+    wildcards: sample=16HHHR3_S12
+    threads: 4
+
+[Wed Dec 30 16:59:17 2020]
+Finished job 8.
+18 of 112 steps (16%) done
+[Wed Dec 30 16:59:17 2020]
+Finished job 31.
+19 of 112 steps (17%) done
+Submitted job 14 with external jobid 'Submitted batch job 35351097'.
+
+[Wed Dec 30 16:59:17 2020]
+rule bowtie1_mapping_rna:
+    input: 8HHHR1_S7/cutadapt/8HHHR1_S7_R1_.cutadapt.fastq, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9_rRNA.1.ebwt
+    output: 8HHHR1_S7/bowtie1_mapping_rna/8HHHR1_S7.bam, 8HHHR1_S7/bowtie1_mapping_rna/8HHHR1_S7.sorted.bam
+    log: 8HHHR1_S7/bowtie1_mapping_rna/8HHHR1_S7_rRNA.out, 8HHHR1_S7/bowtie1_mapping_rna/8HHHR1_S7_rRNA.err
+    jobid: 30
+    wildcards: sample=8HHHR1_S7
+    threads: 4
+
+Submitted job 30 with external jobid 'Submitted batch job 35351098'.
+[Wed Dec 30 17:00:05 2020]
+Finished job 6.
+20 of 112 steps (18%) done
+[Wed Dec 30 17:00:30 2020]
+Finished job 7.
+21 of 112 steps (19%) done
+[Wed Dec 30 17:00:59 2020]
+Finished job 33.
+22 of 112 steps (20%) done
+
+[Wed Dec 30 17:00:59 2020]
+rule bowtie1_mapping_rna:
+    input: 16HHHR1_S10/cutadapt/16HHHR1_S10_R1_.cutadapt.fastq, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9_rRNA.1.ebwt
+    output: 16HHHR1_S10/bowtie1_mapping_rna/16HHHR1_S10.bam, 16HHHR1_S10/bowtie1_mapping_rna/16HHHR1_S10.sorted.bam
+    log: 16HHHR1_S10/bowtie1_mapping_rna/16HHHR1_S10_rRNA.out, 16HHHR1_S10/bowtie1_mapping_rna/16HHHR1_S10_rRNA.err
+    jobid: 32
+    wildcards: sample=16HHHR1_S10
+    threads: 4
+
+Submitted job 32 with external jobid 'Submitted batch job 35351168'.
+[Wed Dec 30 17:02:03 2020]
+Finished job 13.
+23 of 112 steps (21%) done
+[Wed Dec 30 17:02:14 2020]
+Finished job 4.
+24 of 112 steps (21%) done
+[Wed Dec 30 17:03:31 2020]
+Finished job 11.
+25 of 112 steps (22%) done
+Removing temporary output file woHHR3_S3/cutadapt/woHHR3_S3_R1_.cutadapt.fastq.
+[Wed Dec 30 17:30:17 2020]
+Finished job 24.
+26 of 112 steps (23%) done
+[Wed Dec 30 17:30:30 2020]
+Finished job 48.
+27 of 112 steps (24%) done
+
+[Wed Dec 30 17:30:30 2020]
+rule feature_counts_2:
+    input: 16HHHR1_S10/star_mapping/16HHHR1_S10_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 16HHHR1_S10/feature_counts_2/16HHHR1_S10_feature.out
+    log: 16HHHR1_S10/feature_counts_2/16HHHR1_S10.logs
+    jobid: 85
+    wildcards: sample=16HHHR1_S10
+
+Submitted job 85 with external jobid 'Submitted batch job 35352093'.
+
+[Wed Dec 30 17:30:33 2020]
+rule feature_counts_1:
+    input: 16HHHR1_S10/star_mapping/16HHHR1_S10_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 16HHHR1_S10/feature_counts_1/16HHHR1_S10_feature.out
+    log: 16HHHR1_S10/feature_counts_1/16HHHR1_S10.logs
+    jobid: 73
+    wildcards: sample=16HHHR1_S10
+
+Submitted job 73 with external jobid 'Submitted batch job 35352094'.
+
+[Wed Dec 30 17:30:33 2020]
+rule feature_counts_0:
+    input: 16HHHR1_S10/star_mapping/16HHHR1_S10_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 16HHHR1_S10/feature_counts_0/16HHHR1_S10_feature.out
+    log: 16HHHR1_S10/feature_counts_0/16HHHR1_S10.logs
+    jobid: 61
+    wildcards: sample=16HHHR1_S10
+
+Submitted job 61 with external jobid 'Submitted batch job 35352095'.
+
+[Wed Dec 30 17:30:33 2020]
+rule add_read_group:
+    input: 16HHHR1_S10/star_mapping/16HHHR1_S10_Aligned.sortedByCoord.out.bam
+    output: 16HHHR1_S10/add_read_group/16HHHR1_S10.bam
+    log: 16HHHR1_S10/logs/AddOrReplaceReadGroups/stdout.logs, 16HHHR1_S10/logs/AddOrReplaceReadGroups/stderr.logs
+    jobid: 106
+    wildcards: sample=16HHHR1_S10
+
+
+        picard AddOrReplaceReadGroups VALIDATION_STRINGENCY=SILENT I=16HHHR1_S10/star_mapping/16HHHR1_S10_Aligned.sortedByCoord.out.bam O=16HHHR1_S10/add_read_group/16HHHR1_S10.bam         ID=16HHHR1_S10 LB=16HHHR1_S10 PL=Illumina PU=H35CTBCXY SM=16HHHR1_S10 > 16HHHR1_S10/logs/AddOrReplaceReadGroups/stdout.logs 2> 16HHHR1_S10/logs/AddOrReplaceReadGroups/stderr.logs
+        samtools index 16HHHR1_S10/add_read_group/16HHHR1_S10.bam
+        
+Submitted job 106 with external jobid 'Submitted batch job 35352096'.
+Removing temporary output file 8HHHR2_S8/cutadapt/8HHHR2_S8_R1_.cutadapt.fastq.
+[Wed Dec 30 17:31:44 2020]
+Finished job 28.
+28 of 112 steps (25%) done
+Removing temporary output file 8HHHR3_S9/cutadapt/8HHHR3_S9_R1_.cutadapt.fastq.
+[Wed Dec 30 17:32:46 2020]
+Finished job 38.
+29 of 112 steps (26%) done
+[Wed Dec 30 17:33:10 2020]
+Finished job 42.
+30 of 112 steps (27%) done
+
+[Wed Dec 30 17:33:10 2020]
+rule feature_counts_0:
+    input: woHHR1_S1/star_mapping/woHHR1_S1_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: woHHR1_S1/feature_counts_0/woHHR1_S1_feature.out
+    log: woHHR1_S1/feature_counts_0/woHHR1_S1.logs
+    jobid: 55
+    wildcards: sample=woHHR1_S1
+
+Submitted job 55 with external jobid 'Submitted batch job 35352159'.
+
+[Wed Dec 30 17:33:11 2020]
+rule add_read_group:
+    input: woHHR1_S1/star_mapping/woHHR1_S1_Aligned.sortedByCoord.out.bam
+    output: woHHR1_S1/add_read_group/woHHR1_S1.bam
+    log: woHHR1_S1/logs/AddOrReplaceReadGroups/stdout.logs, woHHR1_S1/logs/AddOrReplaceReadGroups/stderr.logs
+    jobid: 94
+    wildcards: sample=woHHR1_S1
+
+
+        picard AddOrReplaceReadGroups VALIDATION_STRINGENCY=SILENT I=woHHR1_S1/star_mapping/woHHR1_S1_Aligned.sortedByCoord.out.bam O=woHHR1_S1/add_read_group/woHHR1_S1.bam         ID=woHHR1_S1 LB=woHHR1_S1 PL=Illumina PU=H35CTBCXY SM=woHHR1_S1 > woHHR1_S1/logs/AddOrReplaceReadGroups/stdout.logs 2> woHHR1_S1/logs/AddOrReplaceReadGroups/stderr.logs
+        samtools index woHHR1_S1/add_read_group/woHHR1_S1.bam
+        
+Submitted job 94 with external jobid 'Submitted batch job 35352160'.
+
+[Wed Dec 30 17:33:11 2020]
+rule feature_counts_2:
+    input: woHHR1_S1/star_mapping/woHHR1_S1_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: woHHR1_S1/feature_counts_2/woHHR1_S1_feature.out
+    log: woHHR1_S1/feature_counts_2/woHHR1_S1.logs
+    jobid: 79
+    wildcards: sample=woHHR1_S1
+
+Submitted job 79 with external jobid 'Submitted batch job 35352161'.
+
+[Wed Dec 30 17:33:12 2020]
+rule feature_counts_1:
+    input: woHHR1_S1/star_mapping/woHHR1_S1_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: woHHR1_S1/feature_counts_1/woHHR1_S1_feature.out
+    log: woHHR1_S1/feature_counts_1/woHHR1_S1.logs
+    jobid: 67
+    wildcards: sample=woHHR1_S1
+
+Submitted job 67 with external jobid 'Submitted batch job 35352162'.
+[Wed Dec 30 17:33:21 2020]
+Finished job 44.
+31 of 112 steps (28%) done
+
+[Wed Dec 30 17:33:21 2020]
+rule feature_counts_1:
+    input: woHHR3_S3/star_mapping/woHHR3_S3_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: woHHR3_S3/feature_counts_1/woHHR3_S3_feature.out
+    log: woHHR3_S3/feature_counts_1/woHHR3_S3.logs
+    jobid: 69
+    wildcards: sample=woHHR3_S3
+
+Submitted job 69 with external jobid 'Submitted batch job 35352170'.
+
+[Wed Dec 30 17:33:21 2020]
+rule feature_counts_0:
+    input: woHHR3_S3/star_mapping/woHHR3_S3_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: woHHR3_S3/feature_counts_0/woHHR3_S3_feature.out
+    log: woHHR3_S3/feature_counts_0/woHHR3_S3.logs
+    jobid: 57
+    wildcards: sample=woHHR3_S3
+
+Submitted job 57 with external jobid 'Submitted batch job 35352171'.
+
+[Wed Dec 30 17:33:21 2020]
+rule feature_counts_2:
+    input: woHHR3_S3/star_mapping/woHHR3_S3_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: woHHR3_S3/feature_counts_2/woHHR3_S3_feature.out
+    log: woHHR3_S3/feature_counts_2/woHHR3_S3.logs
+    jobid: 81
+    wildcards: sample=woHHR3_S3
+
+Submitted job 81 with external jobid 'Submitted batch job 35352172'.
+
+[Wed Dec 30 17:33:21 2020]
+rule add_read_group:
+    input: woHHR3_S3/star_mapping/woHHR3_S3_Aligned.sortedByCoord.out.bam
+    output: woHHR3_S3/add_read_group/woHHR3_S3.bam
+    log: woHHR3_S3/logs/AddOrReplaceReadGroups/stdout.logs, woHHR3_S3/logs/AddOrReplaceReadGroups/stderr.logs
+    jobid: 98
+    wildcards: sample=woHHR3_S3
+
+
+        picard AddOrReplaceReadGroups VALIDATION_STRINGENCY=SILENT I=woHHR3_S3/star_mapping/woHHR3_S3_Aligned.sortedByCoord.out.bam O=woHHR3_S3/add_read_group/woHHR3_S3.bam         ID=woHHR3_S3 LB=woHHR3_S3 PL=Illumina PU=H35CTBCXY SM=woHHR3_S3 > woHHR3_S3/logs/AddOrReplaceReadGroups/stdout.logs 2> woHHR3_S3/logs/AddOrReplaceReadGroups/stderr.logs
+        samtools index woHHR3_S3/add_read_group/woHHR3_S3.bam
+        
+Submitted job 98 with external jobid 'Submitted batch job 35352174'.
+Removing temporary output file 16HHHR3_S12/cutadapt/16HHHR3_S12_R1_.cutadapt.fastq.
+[Wed Dec 30 17:33:33 2020]
+Finished job 14.
+32 of 112 steps (29%) done
+Removing temporary output file 16HHHR2_S11/cutadapt/16HHHR2_S11_R1_.cutadapt.fastq.
+[Wed Dec 30 17:33:58 2020]
+Finished job 18.
+33 of 112 steps (29%) done
+Removing temporary output file 4HHHR1_S4/cutadapt/4HHHR1_S4_R1_.cutadapt.fastq.
+[Wed Dec 30 17:34:00 2020]
+Finished job 22.
+34 of 112 steps (30%) done
+Removing temporary output file 8HHHR1_S7/cutadapt/8HHHR1_S7_R1_.cutadapt.fastq.
+[Wed Dec 30 17:34:47 2020]
+Finished job 30.
+35 of 112 steps (31%) done
+[Wed Dec 30 17:35:25 2020]
+Finished job 50.
+36 of 112 steps (32%) done
+
+[Wed Dec 30 17:35:25 2020]
+rule feature_counts_2:
+    input: woHHR2_S2/star_mapping/woHHR2_S2_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: woHHR2_S2/feature_counts_2/woHHR2_S2_feature.out
+    log: woHHR2_S2/feature_counts_2/woHHR2_S2.logs
+    jobid: 87
+    wildcards: sample=woHHR2_S2
+
+Submitted job 87 with external jobid 'Submitted batch job 35352240'.
+
+[Wed Dec 30 17:35:26 2020]
+rule feature_counts_1:
+    input: woHHR2_S2/star_mapping/woHHR2_S2_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: woHHR2_S2/feature_counts_1/woHHR2_S2_feature.out
+    log: woHHR2_S2/feature_counts_1/woHHR2_S2.logs
+    jobid: 75
+    wildcards: sample=woHHR2_S2
+
+Submitted job 75 with external jobid 'Submitted batch job 35352242'.
+
+[Wed Dec 30 17:35:27 2020]
+rule feature_counts_0:
+    input: woHHR2_S2/star_mapping/woHHR2_S2_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: woHHR2_S2/feature_counts_0/woHHR2_S2_feature.out
+    log: woHHR2_S2/feature_counts_0/woHHR2_S2.logs
+    jobid: 63
+    wildcards: sample=woHHR2_S2
+
+Submitted job 63 with external jobid 'Submitted batch job 35352243'.
+
+[Wed Dec 30 17:35:27 2020]
+rule add_read_group:
+    input: woHHR2_S2/star_mapping/woHHR2_S2_Aligned.sortedByCoord.out.bam
+    output: woHHR2_S2/add_read_group/woHHR2_S2.bam
+    log: woHHR2_S2/logs/AddOrReplaceReadGroups/stdout.logs, woHHR2_S2/logs/AddOrReplaceReadGroups/stderr.logs
+    jobid: 110
+    wildcards: sample=woHHR2_S2
+
+
+        picard AddOrReplaceReadGroups VALIDATION_STRINGENCY=SILENT I=woHHR2_S2/star_mapping/woHHR2_S2_Aligned.sortedByCoord.out.bam O=woHHR2_S2/add_read_group/woHHR2_S2.bam         ID=woHHR2_S2 LB=woHHR2_S2 PL=Illumina PU=H35CTBCXY SM=woHHR2_S2 > woHHR2_S2/logs/AddOrReplaceReadGroups/stdout.logs 2> woHHR2_S2/logs/AddOrReplaceReadGroups/stderr.logs
+        samtools index woHHR2_S2/add_read_group/woHHR2_S2.bam
+        
+Submitted job 110 with external jobid 'Submitted batch job 35352246'.
+[Wed Dec 30 17:35:37 2020]
+Finished job 43.
+37 of 112 steps (33%) done
+
+[Wed Dec 30 17:35:37 2020]
+rule feature_counts_0:
+    input: 4HHHR1_S4/star_mapping/4HHHR1_S4_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 4HHHR1_S4/feature_counts_0/4HHHR1_S4_feature.out
+    log: 4HHHR1_S4/feature_counts_0/4HHHR1_S4.logs
+    jobid: 56
+    wildcards: sample=4HHHR1_S4
+
+Submitted job 56 with external jobid 'Submitted batch job 35352255'.
+
+[Wed Dec 30 17:35:39 2020]
+rule add_read_group:
+    input: 4HHHR1_S4/star_mapping/4HHHR1_S4_Aligned.sortedByCoord.out.bam
+    output: 4HHHR1_S4/add_read_group/4HHHR1_S4.bam
+    log: 4HHHR1_S4/logs/AddOrReplaceReadGroups/stdout.logs, 4HHHR1_S4/logs/AddOrReplaceReadGroups/stderr.logs
+    jobid: 96
+    wildcards: sample=4HHHR1_S4
+
+
+        picard AddOrReplaceReadGroups VALIDATION_STRINGENCY=SILENT I=4HHHR1_S4/star_mapping/4HHHR1_S4_Aligned.sortedByCoord.out.bam O=4HHHR1_S4/add_read_group/4HHHR1_S4.bam         ID=4HHHR1_S4 LB=4HHHR1_S4 PL=Illumina PU=H35CTBCXY SM=4HHHR1_S4 > 4HHHR1_S4/logs/AddOrReplaceReadGroups/stdout.logs 2> 4HHHR1_S4/logs/AddOrReplaceReadGroups/stderr.logs
+        samtools index 4HHHR1_S4/add_read_group/4HHHR1_S4.bam
+        
+Submitted job 96 with external jobid 'Submitted batch job 35352257'.
+
+[Wed Dec 30 17:35:39 2020]
+rule feature_counts_2:
+    input: 4HHHR1_S4/star_mapping/4HHHR1_S4_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 4HHHR1_S4/feature_counts_2/4HHHR1_S4_feature.out
+    log: 4HHHR1_S4/feature_counts_2/4HHHR1_S4.logs
+    jobid: 80
+    wildcards: sample=4HHHR1_S4
+
+Submitted job 80 with external jobid 'Submitted batch job 35352258'.
+
+[Wed Dec 30 17:35:39 2020]
+rule feature_counts_1:
+    input: 4HHHR1_S4/star_mapping/4HHHR1_S4_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 4HHHR1_S4/feature_counts_1/4HHHR1_S4_feature.out
+    log: 4HHHR1_S4/feature_counts_1/4HHHR1_S4.logs
+    jobid: 68
+    wildcards: sample=4HHHR1_S4
+
+Submitted job 68 with external jobid 'Submitted batch job 35352259'.
+Removing temporary output file 4HHHR3_S6/cutadapt/4HHHR3_S6_R1_.cutadapt.fastq.
+[Wed Dec 30 17:36:01 2020]
+Finished job 34.
+38 of 112 steps (34%) done
+Removing temporary output file woHHR1_S1/cutadapt/woHHR1_S1_R1_.cutadapt.fastq.
+[Wed Dec 30 17:36:02 2020]
+Finished job 20.
+39 of 112 steps (35%) done
+Removing temporary output file 4HHHR2_S5/cutadapt/4HHHR2_S5_R1_.cutadapt.fastq.
+[Wed Dec 30 17:37:21 2020]
+Finished job 26.
+40 of 112 steps (36%) done
+Removing temporary output file 16HHHR1_S10/cutadapt/16HHHR1_S10_R1_.cutadapt.fastq.
+[Wed Dec 30 17:38:11 2020]
+Finished job 32.
+41 of 112 steps (37%) done
+Removing temporary output file woHHR2_S2/cutadapt/woHHR2_S2_R1_.cutadapt.fastq.
+[Wed Dec 30 17:38:36 2020]
+Finished job 36.
+42 of 112 steps (38%) done
+[Wed Dec 30 17:39:25 2020]
+Finished job 41.
+43 of 112 steps (38%) done
+
+[Wed Dec 30 17:39:25 2020]
+rule feature_counts_0:
+    input: 16HHHR2_S11/star_mapping/16HHHR2_S11_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 16HHHR2_S11/feature_counts_0/16HHHR2_S11_feature.out
+    log: 16HHHR2_S11/feature_counts_0/16HHHR2_S11.logs
+    jobid: 54
+    wildcards: sample=16HHHR2_S11
+
+Submitted job 54 with external jobid 'Submitted batch job 35352374'.
+
+[Wed Dec 30 17:39:26 2020]
+rule add_read_group:
+    input: 16HHHR2_S11/star_mapping/16HHHR2_S11_Aligned.sortedByCoord.out.bam
+    output: 16HHHR2_S11/add_read_group/16HHHR2_S11.bam
+    log: 16HHHR2_S11/logs/AddOrReplaceReadGroups/stdout.logs, 16HHHR2_S11/logs/AddOrReplaceReadGroups/stderr.logs
+    jobid: 92
+    wildcards: sample=16HHHR2_S11
+
+
+        picard AddOrReplaceReadGroups VALIDATION_STRINGENCY=SILENT I=16HHHR2_S11/star_mapping/16HHHR2_S11_Aligned.sortedByCoord.out.bam O=16HHHR2_S11/add_read_group/16HHHR2_S11.bam         ID=16HHHR2_S11 LB=16HHHR2_S11 PL=Illumina PU=H35CTBCXY SM=16HHHR2_S11 > 16HHHR2_S11/logs/AddOrReplaceReadGroups/stdout.logs 2> 16HHHR2_S11/logs/AddOrReplaceReadGroups/stderr.logs
+        samtools index 16HHHR2_S11/add_read_group/16HHHR2_S11.bam
+        
+Submitted job 92 with external jobid 'Submitted batch job 35352375'.
+
+[Wed Dec 30 17:39:26 2020]
+rule feature_counts_2:
+    input: 16HHHR2_S11/star_mapping/16HHHR2_S11_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 16HHHR2_S11/feature_counts_2/16HHHR2_S11_feature.out
+    log: 16HHHR2_S11/feature_counts_2/16HHHR2_S11.logs
+    jobid: 78
+    wildcards: sample=16HHHR2_S11
+
+Submitted job 78 with external jobid 'Submitted batch job 35352377'.
+
+[Wed Dec 30 17:39:28 2020]
+rule feature_counts_1:
+    input: 16HHHR2_S11/star_mapping/16HHHR2_S11_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 16HHHR2_S11/feature_counts_1/16HHHR2_S11_feature.out
+    log: 16HHHR2_S11/feature_counts_1/16HHHR2_S11.logs
+    jobid: 66
+    wildcards: sample=16HHHR2_S11
+
+Submitted job 66 with external jobid 'Submitted batch job 35352379'.
+[Wed Dec 30 17:41:25 2020]
+Finished job 45.
+44 of 112 steps (39%) done
+
+[Wed Dec 30 17:41:25 2020]
+rule feature_counts_1:
+    input: 4HHHR2_S5/star_mapping/4HHHR2_S5_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 4HHHR2_S5/feature_counts_1/4HHHR2_S5_feature.out
+    log: 4HHHR2_S5/feature_counts_1/4HHHR2_S5.logs
+    jobid: 70
+    wildcards: sample=4HHHR2_S5
+
+[Wed Dec 30 17:41:25 2020]
+Finished job 85.
+45 of 112 steps (40%) done
+[Wed Dec 30 17:41:25 2020]
+Finished job 73.
+46 of 112 steps (41%) done
+[Wed Dec 30 17:41:25 2020]
+Finished job 61.
+47 of 112 steps (42%) done
+Submitted job 70 with external jobid 'Submitted batch job 35352444'.
+
+[Wed Dec 30 17:41:27 2020]
+rule feature_counts_0:
+    input: 4HHHR2_S5/star_mapping/4HHHR2_S5_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 4HHHR2_S5/feature_counts_0/4HHHR2_S5_feature.out
+    log: 4HHHR2_S5/feature_counts_0/4HHHR2_S5.logs
+    jobid: 58
+    wildcards: sample=4HHHR2_S5
+
+Submitted job 58 with external jobid 'Submitted batch job 35352445'.
+
+[Wed Dec 30 17:41:29 2020]
+rule add_read_group:
+    input: 4HHHR2_S5/star_mapping/4HHHR2_S5_Aligned.sortedByCoord.out.bam
+    output: 4HHHR2_S5/add_read_group/4HHHR2_S5.bam
+    log: 4HHHR2_S5/logs/AddOrReplaceReadGroups/stdout.logs, 4HHHR2_S5/logs/AddOrReplaceReadGroups/stderr.logs
+    jobid: 100
+    wildcards: sample=4HHHR2_S5
+
+
+        picard AddOrReplaceReadGroups VALIDATION_STRINGENCY=SILENT I=4HHHR2_S5/star_mapping/4HHHR2_S5_Aligned.sortedByCoord.out.bam O=4HHHR2_S5/add_read_group/4HHHR2_S5.bam         ID=4HHHR2_S5 LB=4HHHR2_S5 PL=Illumina PU=H35CTBCXY SM=4HHHR2_S5 > 4HHHR2_S5/logs/AddOrReplaceReadGroups/stdout.logs 2> 4HHHR2_S5/logs/AddOrReplaceReadGroups/stderr.logs
+        samtools index 4HHHR2_S5/add_read_group/4HHHR2_S5.bam
+        
+Submitted job 100 with external jobid 'Submitted batch job 35352446'.
+
+[Wed Dec 30 17:41:29 2020]
+rule feature_counts_2:
+    input: 4HHHR2_S5/star_mapping/4HHHR2_S5_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 4HHHR2_S5/feature_counts_2/4HHHR2_S5_feature.out
+    log: 4HHHR2_S5/feature_counts_2/4HHHR2_S5.logs
+    jobid: 82
+    wildcards: sample=4HHHR2_S5
+
+Submitted job 82 with external jobid 'Submitted batch job 35352451'.
+[Wed Dec 30 17:41:51 2020]
+Finished job 69.
+48 of 112 steps (43%) done
+[Wed Dec 30 17:41:52 2020]
+Finished job 55.
+49 of 112 steps (44%) done
+[Wed Dec 30 17:42:05 2020]
+Finished job 87.
+50 of 112 steps (45%) done
+[Wed Dec 30 17:42:05 2020]
+Finished job 75.
+51 of 112 steps (46%) done
+[Wed Dec 30 17:42:05 2020]
+Finished job 63.
+52 of 112 steps (46%) done
+[Wed Dec 30 17:42:05 2020]
+Finished job 56.
+53 of 112 steps (47%) done
+[Wed Dec 30 17:42:06 2020]
+Finished job 80.
+54 of 112 steps (48%) done
+[Wed Dec 30 17:42:06 2020]
+Finished job 68.
+55 of 112 steps (49%) done
+[Wed Dec 30 17:42:42 2020]
+Finished job 79.
+56 of 112 steps (50%) done
+[Wed Dec 30 17:42:43 2020]
+Finished job 67.
+57 of 112 steps (51%) done
+[Wed Dec 30 17:43:06 2020]
+Finished job 57.
+58 of 112 steps (52%) done
+[Wed Dec 30 17:43:07 2020]
+Finished job 81.
+59 of 112 steps (53%) done
+[Wed Dec 30 17:43:41 2020]
+Finished job 54.
+60 of 112 steps (54%) done
+[Wed Dec 30 17:43:42 2020]
+Finished job 78.
+61 of 112 steps (54%) done
+[Wed Dec 30 17:44:36 2020]
+Finished job 94.
+62 of 112 steps (55%) done
+
+[Wed Dec 30 17:44:36 2020]
+rule mark_duplicates_ref:
+    input: woHHR1_S1/add_read_group/woHHR1_S1.bam
+    output: woHHR1_S1/mark_duplicates/woHHR1_S1.bam, woHHR1_S1/mark_duplicates/woHHR1_S1.metrics
+    log: woHHR1_S1/logs/mark_duplicates/stdout.logs, woHHR1_S1/logs/mark_duplicates/stderr.logs
+    jobid: 93
+    wildcards: sample=woHHR1_S1
+    threads: 4
+
+
+        (picard MarkDuplicates I=woHHR1_S1/add_read_group/woHHR1_S1.bam O=woHHR1_S1/mark_duplicates/woHHR1_S1.bam             M=woHHR1_S1/mark_duplicates/woHHR1_S1.metrics REMOVE_DUPLICATES=False             TMP_DIR=./tmp/ && samtools index woHHR1_S1/mark_duplicates/woHHR1_S1.bam)             > woHHR1_S1/logs/mark_duplicates/stdout.logs 2> woHHR1_S1/logs/mark_duplicates/stderr.logs
+        
+Submitted job 93 with external jobid 'Submitted batch job 35352619'.
+[Wed Dec 30 17:44:47 2020]
+Finished job 98.
+63 of 112 steps (56%) done
+
+[Wed Dec 30 17:44:48 2020]
+rule mark_duplicates_ref:
+    input: woHHR3_S3/add_read_group/woHHR3_S3.bam
+    output: woHHR3_S3/mark_duplicates/woHHR3_S3.bam, woHHR3_S3/mark_duplicates/woHHR3_S3.metrics
+    log: woHHR3_S3/logs/mark_duplicates/stdout.logs, woHHR3_S3/logs/mark_duplicates/stderr.logs
+    jobid: 97
+    wildcards: sample=woHHR3_S3
+    threads: 4
+
+
+        (picard MarkDuplicates I=woHHR3_S3/add_read_group/woHHR3_S3.bam O=woHHR3_S3/mark_duplicates/woHHR3_S3.bam             M=woHHR3_S3/mark_duplicates/woHHR3_S3.metrics REMOVE_DUPLICATES=False             TMP_DIR=./tmp/ && samtools index woHHR3_S3/mark_duplicates/woHHR3_S3.bam)             > woHHR3_S3/logs/mark_duplicates/stdout.logs 2> woHHR3_S3/logs/mark_duplicates/stderr.logs
+        
+[Wed Dec 30 17:44:48 2020]
+Finished job 96.
+64 of 112 steps (57%) done
+Submitted job 97 with external jobid 'Submitted batch job 35352630'.
+
+[Wed Dec 30 17:44:50 2020]
+rule mark_duplicates_ref:
+    input: 4HHHR1_S4/add_read_group/4HHHR1_S4.bam
+    output: 4HHHR1_S4/mark_duplicates/4HHHR1_S4.bam, 4HHHR1_S4/mark_duplicates/4HHHR1_S4.metrics
+    log: 4HHHR1_S4/logs/mark_duplicates/stdout.logs, 4HHHR1_S4/logs/mark_duplicates/stderr.logs
+    jobid: 95
+    wildcards: sample=4HHHR1_S4
+    threads: 4
+
+
+        (picard MarkDuplicates I=4HHHR1_S4/add_read_group/4HHHR1_S4.bam O=4HHHR1_S4/mark_duplicates/4HHHR1_S4.bam             M=4HHHR1_S4/mark_duplicates/4HHHR1_S4.metrics REMOVE_DUPLICATES=False             TMP_DIR=./tmp/ && samtools index 4HHHR1_S4/mark_duplicates/4HHHR1_S4.bam)             > 4HHHR1_S4/logs/mark_duplicates/stdout.logs 2> 4HHHR1_S4/logs/mark_duplicates/stderr.logs
+        
+Submitted job 95 with external jobid 'Submitted batch job 35352631'.
+[Wed Dec 30 17:45:10 2020]
+Finished job 70.
+65 of 112 steps (58%) done
+[Wed Dec 30 17:45:11 2020]
+Finished job 82.
+66 of 112 steps (59%) done
+[Wed Dec 30 17:45:43 2020]
+Finished job 49.
+67 of 112 steps (60%) done
+
+[Wed Dec 30 17:45:43 2020]
+rule feature_counts_2:
+    input: 4HHHR3_S6/star_mapping/4HHHR3_S6_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 4HHHR3_S6/feature_counts_2/4HHHR3_S6_feature.out
+    log: 4HHHR3_S6/feature_counts_2/4HHHR3_S6.logs
+    jobid: 86
+    wildcards: sample=4HHHR3_S6
+
+[Wed Dec 30 17:45:43 2020]
+Finished job 110.
+68 of 112 steps (61%) done
+Submitted job 86 with external jobid 'Submitted batch job 35352673'.
+
+[Wed Dec 30 17:45:43 2020]
+rule feature_counts_1:
+    input: 4HHHR3_S6/star_mapping/4HHHR3_S6_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 4HHHR3_S6/feature_counts_1/4HHHR3_S6_feature.out
+    log: 4HHHR3_S6/feature_counts_1/4HHHR3_S6.logs
+    jobid: 74
+    wildcards: sample=4HHHR3_S6
+
+Submitted job 74 with external jobid 'Submitted batch job 35352674'.
+
+[Wed Dec 30 17:45:44 2020]
+rule feature_counts_0:
+    input: 4HHHR3_S6/star_mapping/4HHHR3_S6_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 4HHHR3_S6/feature_counts_0/4HHHR3_S6_feature.out
+    log: 4HHHR3_S6/feature_counts_0/4HHHR3_S6.logs
+    jobid: 62
+    wildcards: sample=4HHHR3_S6
+
+Submitted job 62 with external jobid 'Submitted batch job 35352675'.
+
+[Wed Dec 30 17:45:44 2020]
+rule add_read_group:
+    input: 4HHHR3_S6/star_mapping/4HHHR3_S6_Aligned.sortedByCoord.out.bam
+    output: 4HHHR3_S6/add_read_group/4HHHR3_S6.bam
+    log: 4HHHR3_S6/logs/AddOrReplaceReadGroups/stdout.logs, 4HHHR3_S6/logs/AddOrReplaceReadGroups/stderr.logs
+    jobid: 108
+    wildcards: sample=4HHHR3_S6
+
+
+        picard AddOrReplaceReadGroups VALIDATION_STRINGENCY=SILENT I=4HHHR3_S6/star_mapping/4HHHR3_S6_Aligned.sortedByCoord.out.bam O=4HHHR3_S6/add_read_group/4HHHR3_S6.bam         ID=4HHHR3_S6 LB=4HHHR3_S6 PL=Illumina PU=H35CTBCXY SM=4HHHR3_S6 > 4HHHR3_S6/logs/AddOrReplaceReadGroups/stdout.logs 2> 4HHHR3_S6/logs/AddOrReplaceReadGroups/stderr.logs
+        samtools index 4HHHR3_S6/add_read_group/4HHHR3_S6.bam
+        
+Submitted job 108 with external jobid 'Submitted batch job 35352676'.
+
+[Wed Dec 30 17:45:44 2020]
+rule mark_duplicates_ref:
+    input: woHHR2_S2/add_read_group/woHHR2_S2.bam
+    output: woHHR2_S2/mark_duplicates/woHHR2_S2.bam, woHHR2_S2/mark_duplicates/woHHR2_S2.metrics
+    log: woHHR2_S2/logs/mark_duplicates/stdout.logs, woHHR2_S2/logs/mark_duplicates/stderr.logs
+    jobid: 109
+    wildcards: sample=woHHR2_S2
+    threads: 4
+
+
+        (picard MarkDuplicates I=woHHR2_S2/add_read_group/woHHR2_S2.bam O=woHHR2_S2/mark_duplicates/woHHR2_S2.bam             M=woHHR2_S2/mark_duplicates/woHHR2_S2.metrics REMOVE_DUPLICATES=False             TMP_DIR=./tmp/ && samtools index woHHR2_S2/mark_duplicates/woHHR2_S2.bam)             > woHHR2_S2/logs/mark_duplicates/stdout.logs 2> woHHR2_S2/logs/mark_duplicates/stderr.logs
+        
+Submitted job 109 with external jobid 'Submitted batch job 35352677'.
+[Wed Dec 30 17:46:17 2020]
+Finished job 92.
+69 of 112 steps (62%) done
+
+[Wed Dec 30 17:46:17 2020]
+rule mark_duplicates_ref:
+    input: 16HHHR2_S11/add_read_group/16HHHR2_S11.bam
+    output: 16HHHR2_S11/mark_duplicates/16HHHR2_S11.bam, 16HHHR2_S11/mark_duplicates/16HHHR2_S11.metrics
+    log: 16HHHR2_S11/logs/mark_duplicates/stdout.logs, 16HHHR2_S11/logs/mark_duplicates/stderr.logs
+    jobid: 91
+    wildcards: sample=16HHHR2_S11
+    threads: 4
+
+
+        (picard MarkDuplicates I=16HHHR2_S11/add_read_group/16HHHR2_S11.bam O=16HHHR2_S11/mark_duplicates/16HHHR2_S11.bam             M=16HHHR2_S11/mark_duplicates/16HHHR2_S11.metrics REMOVE_DUPLICATES=False             TMP_DIR=./tmp/ && samtools index 16HHHR2_S11/mark_duplicates/16HHHR2_S11.bam)             > 16HHHR2_S11/logs/mark_duplicates/stdout.logs 2> 16HHHR2_S11/logs/mark_duplicates/stderr.logs
+        
+Submitted job 91 with external jobid 'Submitted batch job 35352693'.
+[Wed Dec 30 17:47:24 2020]
+Finished job 100.
+70 of 112 steps (62%) done
+
+[Wed Dec 30 17:47:24 2020]
+rule mark_duplicates_ref:
+    input: 4HHHR2_S5/add_read_group/4HHHR2_S5.bam
+    output: 4HHHR2_S5/mark_duplicates/4HHHR2_S5.bam, 4HHHR2_S5/mark_duplicates/4HHHR2_S5.metrics
+    log: 4HHHR2_S5/logs/mark_duplicates/stdout.logs, 4HHHR2_S5/logs/mark_duplicates/stderr.logs
+    jobid: 99
+    wildcards: sample=4HHHR2_S5
+    threads: 4
+
+
+        (picard MarkDuplicates I=4HHHR2_S5/add_read_group/4HHHR2_S5.bam O=4HHHR2_S5/mark_duplicates/4HHHR2_S5.bam             M=4HHHR2_S5/mark_duplicates/4HHHR2_S5.metrics REMOVE_DUPLICATES=False             TMP_DIR=./tmp/ && samtools index 4HHHR2_S5/mark_duplicates/4HHHR2_S5.bam)             > 4HHHR2_S5/logs/mark_duplicates/stdout.logs 2> 4HHHR2_S5/logs/mark_duplicates/stderr.logs
+        
+Submitted job 99 with external jobid 'Submitted batch job 35352722'.
+[Wed Dec 30 17:48:09 2020]
+Finished job 66.
+71 of 112 steps (63%) done
+[Wed Dec 30 17:48:41 2020]
+Finished job 51.
+72 of 112 steps (64%) done
+
+[Wed Dec 30 17:48:41 2020]
+rule feature_counts_2:
+    input: 8HHHR3_S9/star_mapping/8HHHR3_S9_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 8HHHR3_S9/feature_counts_2/8HHHR3_S9_feature.out
+    log: 8HHHR3_S9/feature_counts_2/8HHHR3_S9.logs
+    jobid: 88
+    wildcards: sample=8HHHR3_S9
+
+Submitted job 88 with external jobid 'Submitted batch job 35352778'.
+
+[Wed Dec 30 17:48:41 2020]
+rule feature_counts_1:
+    input: 8HHHR3_S9/star_mapping/8HHHR3_S9_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 8HHHR3_S9/feature_counts_1/8HHHR3_S9_feature.out
+    log: 8HHHR3_S9/feature_counts_1/8HHHR3_S9.logs
+    jobid: 76
+    wildcards: sample=8HHHR3_S9
+
+Submitted job 76 with external jobid 'Submitted batch job 35352779'.
+
+[Wed Dec 30 17:48:41 2020]
+rule feature_counts_0:
+    input: 8HHHR3_S9/star_mapping/8HHHR3_S9_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 8HHHR3_S9/feature_counts_0/8HHHR3_S9_feature.out
+    log: 8HHHR3_S9/feature_counts_0/8HHHR3_S9.logs
+    jobid: 64
+    wildcards: sample=8HHHR3_S9
+
+Submitted job 64 with external jobid 'Submitted batch job 35352780'.
+
+[Wed Dec 30 17:48:41 2020]
+rule add_read_group:
+    input: 8HHHR3_S9/star_mapping/8HHHR3_S9_Aligned.sortedByCoord.out.bam
+    output: 8HHHR3_S9/add_read_group/8HHHR3_S9.bam
+    log: 8HHHR3_S9/logs/AddOrReplaceReadGroups/stdout.logs, 8HHHR3_S9/logs/AddOrReplaceReadGroups/stderr.logs
+    jobid: 112
+    wildcards: sample=8HHHR3_S9
+
+
+        picard AddOrReplaceReadGroups VALIDATION_STRINGENCY=SILENT I=8HHHR3_S9/star_mapping/8HHHR3_S9_Aligned.sortedByCoord.out.bam O=8HHHR3_S9/add_read_group/8HHHR3_S9.bam         ID=8HHHR3_S9 LB=8HHHR3_S9 PL=Illumina PU=H35CTBCXY SM=8HHHR3_S9 > 8HHHR3_S9/logs/AddOrReplaceReadGroups/stdout.logs 2> 8HHHR3_S9/logs/AddOrReplaceReadGroups/stderr.logs
+        samtools index 8HHHR3_S9/add_read_group/8HHHR3_S9.bam
+        
+Submitted job 112 with external jobid 'Submitted batch job 35352781'.
+[Wed Dec 30 17:49:51 2020]
+Finished job 86.
+73 of 112 steps (65%) done
+[Wed Dec 30 17:49:51 2020]
+Finished job 74.
+74 of 112 steps (66%) done
+[Wed Dec 30 17:49:51 2020]
+Finished job 62.
+75 of 112 steps (67%) done
+[Wed Dec 30 17:49:52 2020]
+Finished job 46.
+76 of 112 steps (68%) done
+
+[Wed Dec 30 17:49:52 2020]
+rule feature_counts_1:
+    input: 8HHHR2_S8/star_mapping/8HHHR2_S8_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 8HHHR2_S8/feature_counts_1/8HHHR2_S8_feature.out
+    log: 8HHHR2_S8/feature_counts_1/8HHHR2_S8.logs
+    jobid: 71
+    wildcards: sample=8HHHR2_S8
+
+Submitted job 71 with external jobid 'Submitted batch job 35352833'.
+
+[Wed Dec 30 17:49:54 2020]
+rule feature_counts_0:
+    input: 8HHHR2_S8/star_mapping/8HHHR2_S8_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 8HHHR2_S8/feature_counts_0/8HHHR2_S8_feature.out
+    log: 8HHHR2_S8/feature_counts_0/8HHHR2_S8.logs
+    jobid: 59
+    wildcards: sample=8HHHR2_S8
+
+Submitted job 59 with external jobid 'Submitted batch job 35352835'.
+
+[Wed Dec 30 17:49:56 2020]
+rule add_read_group:
+    input: 8HHHR2_S8/star_mapping/8HHHR2_S8_Aligned.sortedByCoord.out.bam
+    output: 8HHHR2_S8/add_read_group/8HHHR2_S8.bam
+    log: 8HHHR2_S8/logs/AddOrReplaceReadGroups/stdout.logs, 8HHHR2_S8/logs/AddOrReplaceReadGroups/stderr.logs
+    jobid: 102
+    wildcards: sample=8HHHR2_S8
+
+
+        picard AddOrReplaceReadGroups VALIDATION_STRINGENCY=SILENT I=8HHHR2_S8/star_mapping/8HHHR2_S8_Aligned.sortedByCoord.out.bam O=8HHHR2_S8/add_read_group/8HHHR2_S8.bam         ID=8HHHR2_S8 LB=8HHHR2_S8 PL=Illumina PU=H35CTBCXY SM=8HHHR2_S8 > 8HHHR2_S8/logs/AddOrReplaceReadGroups/stdout.logs 2> 8HHHR2_S8/logs/AddOrReplaceReadGroups/stderr.logs
+        samtools index 8HHHR2_S8/add_read_group/8HHHR2_S8.bam
+        
+Submitted job 102 with external jobid 'Submitted batch job 35352837'.
+
+[Wed Dec 30 17:49:56 2020]
+rule feature_counts_2:
+    input: 8HHHR2_S8/star_mapping/8HHHR2_S8_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 8HHHR2_S8/feature_counts_2/8HHHR2_S8_feature.out
+    log: 8HHHR2_S8/feature_counts_2/8HHHR2_S8.logs
+    jobid: 83
+    wildcards: sample=8HHHR2_S8
+
+Submitted job 83 with external jobid 'Submitted batch job 35352842'.
+[Wed Dec 30 17:51:13 2020]
+Finished job 91.
+77 of 112 steps (69%) done
+[Wed Dec 30 17:52:07 2020]
+Finished job 93.
+78 of 112 steps (70%) done
+[Wed Dec 30 17:52:30 2020]
+Finished job 109.
+79 of 112 steps (71%) done
+[Wed Dec 30 17:52:31 2020]
+Finished job 83.
+80 of 112 steps (71%) done
+[Wed Dec 30 17:52:55 2020]
+Finished job 58.
+81 of 112 steps (72%) done
+[Wed Dec 30 17:53:06 2020]
+Finished job 47.
+82 of 112 steps (73%) done
+
+[Wed Dec 30 17:53:06 2020]
+rule feature_counts_2:
+    input: 8HHHR1_S7/star_mapping/8HHHR1_S7_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 8HHHR1_S7/feature_counts_2/8HHHR1_S7_feature.out
+    log: 8HHHR1_S7/feature_counts_2/8HHHR1_S7.logs
+    jobid: 84
+    wildcards: sample=8HHHR1_S7
+
+Submitted job 84 with external jobid 'Submitted batch job 35353027'.
+
+[Wed Dec 30 17:53:06 2020]
+rule feature_counts_1:
+    input: 8HHHR1_S7/star_mapping/8HHHR1_S7_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 8HHHR1_S7/feature_counts_1/8HHHR1_S7_feature.out
+    log: 8HHHR1_S7/feature_counts_1/8HHHR1_S7.logs
+    jobid: 72
+    wildcards: sample=8HHHR1_S7
+
+Submitted job 72 with external jobid 'Submitted batch job 35353028'.
+
+[Wed Dec 30 17:53:06 2020]
+rule add_read_group:
+    input: 8HHHR1_S7/star_mapping/8HHHR1_S7_Aligned.sortedByCoord.out.bam
+    output: 8HHHR1_S7/add_read_group/8HHHR1_S7.bam
+    log: 8HHHR1_S7/logs/AddOrReplaceReadGroups/stdout.logs, 8HHHR1_S7/logs/AddOrReplaceReadGroups/stderr.logs
+    jobid: 104
+    wildcards: sample=8HHHR1_S7
+
+
+        picard AddOrReplaceReadGroups VALIDATION_STRINGENCY=SILENT I=8HHHR1_S7/star_mapping/8HHHR1_S7_Aligned.sortedByCoord.out.bam O=8HHHR1_S7/add_read_group/8HHHR1_S7.bam         ID=8HHHR1_S7 LB=8HHHR1_S7 PL=Illumina PU=H35CTBCXY SM=8HHHR1_S7 > 8HHHR1_S7/logs/AddOrReplaceReadGroups/stdout.logs 2> 8HHHR1_S7/logs/AddOrReplaceReadGroups/stderr.logs
+        samtools index 8HHHR1_S7/add_read_group/8HHHR1_S7.bam
+        
+Submitted job 104 with external jobid 'Submitted batch job 35353029'.
+
+[Wed Dec 30 17:53:06 2020]
+rule feature_counts_0:
+    input: 8HHHR1_S7/star_mapping/8HHHR1_S7_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 8HHHR1_S7/feature_counts_0/8HHHR1_S7_feature.out
+    log: 8HHHR1_S7/feature_counts_0/8HHHR1_S7.logs
+    jobid: 60
+    wildcards: sample=8HHHR1_S7
+
+Submitted job 60 with external jobid 'Submitted batch job 35353030'.
+[Wed Dec 30 17:53:17 2020]
+Finished job 108.
+83 of 112 steps (74%) done
+
+[Wed Dec 30 17:53:17 2020]
+rule mark_duplicates_ref:
+    input: 4HHHR3_S6/add_read_group/4HHHR3_S6.bam
+    output: 4HHHR3_S6/mark_duplicates/4HHHR3_S6.bam, 4HHHR3_S6/mark_duplicates/4HHHR3_S6.metrics
+    log: 4HHHR3_S6/logs/mark_duplicates/stdout.logs, 4HHHR3_S6/logs/mark_duplicates/stderr.logs
+    jobid: 107
+    wildcards: sample=4HHHR3_S6
+    threads: 4
+
+
+        (picard MarkDuplicates I=4HHHR3_S6/add_read_group/4HHHR3_S6.bam O=4HHHR3_S6/mark_duplicates/4HHHR3_S6.bam             M=4HHHR3_S6/mark_duplicates/4HHHR3_S6.metrics REMOVE_DUPLICATES=False             TMP_DIR=./tmp/ && samtools index 4HHHR3_S6/mark_duplicates/4HHHR3_S6.bam)             > 4HHHR3_S6/logs/mark_duplicates/stdout.logs 2> 4HHHR3_S6/logs/mark_duplicates/stderr.logs
+        
+Submitted job 107 with external jobid 'Submitted batch job 35353032'.
+[Wed Dec 30 17:53:29 2020]
+Finished job 97.
+84 of 112 steps (75%) done
+[Wed Dec 30 17:53:39 2020]
+Finished job 40.
+85 of 112 steps (76%) done
+
+[Wed Dec 30 17:53:39 2020]
+rule add_read_group:
+    input: 16HHHR3_S12/star_mapping/16HHHR3_S12_Aligned.sortedByCoord.out.bam
+    output: 16HHHR3_S12/add_read_group/16HHHR3_S12.bam
+    log: 16HHHR3_S12/logs/AddOrReplaceReadGroups/stdout.logs, 16HHHR3_S12/logs/AddOrReplaceReadGroups/stderr.logs
+    jobid: 90
+    wildcards: sample=16HHHR3_S12
+
+
+        picard AddOrReplaceReadGroups VALIDATION_STRINGENCY=SILENT I=16HHHR3_S12/star_mapping/16HHHR3_S12_Aligned.sortedByCoord.out.bam O=16HHHR3_S12/add_read_group/16HHHR3_S12.bam         ID=16HHHR3_S12 LB=16HHHR3_S12 PL=Illumina PU=H35CTBCXY SM=16HHHR3_S12 > 16HHHR3_S12/logs/AddOrReplaceReadGroups/stdout.logs 2> 16HHHR3_S12/logs/AddOrReplaceReadGroups/stderr.logs
+        samtools index 16HHHR3_S12/add_read_group/16HHHR3_S12.bam
+        
+Submitted job 90 with external jobid 'Submitted batch job 35353041'.
+
+[Wed Dec 30 17:53:40 2020]
+rule feature_counts_2:
+    input: 16HHHR3_S12/star_mapping/16HHHR3_S12_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 16HHHR3_S12/feature_counts_2/16HHHR3_S12_feature.out
+    log: 16HHHR3_S12/feature_counts_2/16HHHR3_S12.logs
+    jobid: 77
+    wildcards: sample=16HHHR3_S12
+
+Submitted job 77 with external jobid 'Submitted batch job 35353042'.
+
+[Wed Dec 30 17:53:40 2020]
+rule feature_counts_1:
+    input: 16HHHR3_S12/star_mapping/16HHHR3_S12_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 16HHHR3_S12/feature_counts_1/16HHHR3_S12_feature.out
+    log: 16HHHR3_S12/feature_counts_1/16HHHR3_S12.logs
+    jobid: 65
+    wildcards: sample=16HHHR3_S12
+
+Submitted job 65 with external jobid 'Submitted batch job 35353043'.
+
+[Wed Dec 30 17:53:41 2020]
+rule feature_counts_0:
+    input: 16HHHR3_S12/star_mapping/16HHHR3_S12_Aligned.sortedByCoord.out.bam, /pasteur/projets/specific/Biomics/resources/genomes/dmel9/dmel9.gff
+    output: 16HHHR3_S12/feature_counts_0/16HHHR3_S12_feature.out
+    log: 16HHHR3_S12/feature_counts_0/16HHHR3_S12.logs
+    jobid: 53
+    wildcards: sample=16HHHR3_S12
+
+Submitted job 53 with external jobid 'Submitted batch job 35353044'.
+[Wed Dec 30 17:53:50 2020]
+Finished job 112.
+86 of 112 steps (77%) done
+
+[Wed Dec 30 17:53:50 2020]
+rule mark_duplicates_ref:
+    input: 8HHHR3_S9/add_read_group/8HHHR3_S9.bam
+    output: 8HHHR3_S9/mark_duplicates/8HHHR3_S9.bam, 8HHHR3_S9/mark_duplicates/8HHHR3_S9.metrics
+    log: 8HHHR3_S9/logs/mark_duplicates/stdout.logs, 8HHHR3_S9/logs/mark_duplicates/stderr.logs
+    jobid: 111
+    wildcards: sample=8HHHR3_S9
+    threads: 4
+
+
+        (picard MarkDuplicates I=8HHHR3_S9/add_read_group/8HHHR3_S9.bam O=8HHHR3_S9/mark_duplicates/8HHHR3_S9.bam             M=8HHHR3_S9/mark_duplicates/8HHHR3_S9.metrics REMOVE_DUPLICATES=False             TMP_DIR=./tmp/ && samtools index 8HHHR3_S9/mark_duplicates/8HHHR3_S9.bam)             > 8HHHR3_S9/logs/mark_duplicates/stdout.logs 2> 8HHHR3_S9/logs/mark_duplicates/stderr.logs
+        
+Submitted job 111 with external jobid 'Submitted batch job 35353045'.
+[Wed Dec 30 17:54:13 2020]
+Finished job 84.
+87 of 112 steps (78%) done
+[Wed Dec 30 17:54:13 2020]
+Finished job 72.
+88 of 112 steps (79%) done
+[Wed Dec 30 17:56:05 2020]
+Finished job 88.
+89 of 112 steps (79%) done
+[Wed Dec 30 17:56:05 2020]
+Finished job 76.
+90 of 112 steps (80%) done
+[Wed Dec 30 17:56:06 2020]
+Finished job 95.
+91 of 112 steps (81%) done
+[Wed Dec 30 17:58:41 2020]
+Finished job 99.
+92 of 112 steps (82%) done
+[Wed Dec 30 18:01:03 2020]
+Finished job 111.
+93 of 112 steps (83%) done
+[Wed Dec 30 18:01:49 2020]
+Finished job 77.
+94 of 112 steps (84%) done
+[Wed Dec 30 18:01:51 2020]
+Finished job 65.
+95 of 112 steps (85%) done
+[Wed Dec 30 18:01:51 2020]
+Finished job 53.
+96 of 112 steps (86%) done
+[Wed Dec 30 18:03:43 2020]
+Finished job 71.
+97 of 112 steps (87%) done
+[Wed Dec 30 18:03:43 2020]
+Finished job 59.
+98 of 112 steps (88%) done
+[Wed Dec 30 18:03:53 2020]
+Finished job 90.
+99 of 112 steps (88%) done
+
+[Wed Dec 30 18:03:53 2020]
+rule mark_duplicates_ref:
+    input: 16HHHR3_S12/add_read_group/16HHHR3_S12.bam
+    output: 16HHHR3_S12/mark_duplicates/16HHHR3_S12.bam, 16HHHR3_S12/mark_duplicates/16HHHR3_S12.metrics
+    log: 16HHHR3_S12/logs/mark_duplicates/stdout.logs, 16HHHR3_S12/logs/mark_duplicates/stderr.logs
+    jobid: 89
+    wildcards: sample=16HHHR3_S12
+    threads: 4
+
+
+        (picard MarkDuplicates I=16HHHR3_S12/add_read_group/16HHHR3_S12.bam O=16HHHR3_S12/mark_duplicates/16HHHR3_S12.bam             M=16HHHR3_S12/mark_duplicates/16HHHR3_S12.metrics REMOVE_DUPLICATES=False             TMP_DIR=./tmp/ && samtools index 16HHHR3_S12/mark_duplicates/16HHHR3_S12.bam)             > 16HHHR3_S12/logs/mark_duplicates/stdout.logs 2> 16HHHR3_S12/logs/mark_duplicates/stderr.logs
+        
+Submitted job 89 with external jobid 'Submitted batch job 35353347'.
+[Wed Dec 30 18:05:04 2020]
+Finished job 64.
+100 of 112 steps (89%) done
+[Wed Dec 30 18:06:25 2020]
+Finished job 102.
+101 of 112 steps (90%) done
+
+[Wed Dec 30 18:06:25 2020]
+rule mark_duplicates_ref:
+    input: 8HHHR2_S8/add_read_group/8HHHR2_S8.bam
+    output: 8HHHR2_S8/mark_duplicates/8HHHR2_S8.bam, 8HHHR2_S8/mark_duplicates/8HHHR2_S8.metrics
+    log: 8HHHR2_S8/logs/mark_duplicates/stdout.logs, 8HHHR2_S8/logs/mark_duplicates/stderr.logs
+    jobid: 101
+    wildcards: sample=8HHHR2_S8
+    threads: 4
+
+
+        (picard MarkDuplicates I=8HHHR2_S8/add_read_group/8HHHR2_S8.bam O=8HHHR2_S8/mark_duplicates/8HHHR2_S8.bam             M=8HHHR2_S8/mark_duplicates/8HHHR2_S8.metrics REMOVE_DUPLICATES=False             TMP_DIR=./tmp/ && samtools index 8HHHR2_S8/mark_duplicates/8HHHR2_S8.bam)             > 8HHHR2_S8/logs/mark_duplicates/stdout.logs 2> 8HHHR2_S8/logs/mark_duplicates/stderr.logs
+        
+Submitted job 101 with external jobid 'Submitted batch job 35353372'.
+[Wed Dec 30 18:12:39 2020]
+Finished job 101.
+102 of 112 steps (91%) done
+[Wed Dec 30 18:15:02 2020]
+Finished job 89.
+103 of 112 steps (92%) done
+[Wed Dec 30 18:21:16 2020]
+Finished job 107.
+104 of 112 steps (93%) done
+[Wed Dec 30 18:32:59 2020]
+Finished job 106.
+105 of 112 steps (94%) done
+
+[Wed Dec 30 18:32:59 2020]
+rule mark_duplicates_ref:
+    input: 16HHHR1_S10/add_read_group/16HHHR1_S10.bam
+    output: 16HHHR1_S10/mark_duplicates/16HHHR1_S10.bam, 16HHHR1_S10/mark_duplicates/16HHHR1_S10.metrics
+    log: 16HHHR1_S10/logs/mark_duplicates/stdout.logs, 16HHHR1_S10/logs/mark_duplicates/stderr.logs
+    jobid: 105
+    wildcards: sample=16HHHR1_S10
+    threads: 4
+
+
+        (picard MarkDuplicates I=16HHHR1_S10/add_read_group/16HHHR1_S10.bam O=16HHHR1_S10/mark_duplicates/16HHHR1_S10.bam             M=16HHHR1_S10/mark_duplicates/16HHHR1_S10.metrics REMOVE_DUPLICATES=False             TMP_DIR=./tmp/ && samtools index 16HHHR1_S10/mark_duplicates/16HHHR1_S10.bam)             > 16HHHR1_S10/logs/mark_duplicates/stdout.logs 2> 16HHHR1_S10/logs/mark_duplicates/stderr.logs
+        
+Submitted job 105 with external jobid 'Submitted batch job 35353565'.
+[Wed Dec 30 18:40:30 2020]
+Finished job 105.
+106 of 112 steps (95%) done
+[Wed Dec 30 18:48:15 2020]
+Finished job 60.
+107 of 112 steps (96%) done
+
+[Wed Dec 30 18:48:15 2020]
+rule guess_strandness:
+    input: 16HHHR3_S12/feature_counts_0/16HHHR3_S12_feature.out, 16HHHR2_S11/feature_counts_0/16HHHR2_S11_feature.out, woHHR1_S1/feature_counts_0/woHHR1_S1_feature.out, 4HHHR1_S4/feature_counts_0/4HHHR1_S4_feature.out, woHHR3_S3/feature_counts_0/woHHR3_S3_feature.out, 4HHHR2_S5/feature_counts_0/4HHHR2_S5_feature.out, 8HHHR2_S8/feature_counts_0/8HHHR2_S8_feature.out, 8HHHR1_S7/feature_counts_0/8HHHR1_S7_feature.out, 16HHHR1_S10/feature_counts_0/16HHHR1_S10_feature.out, 4HHHR3_S6/feature_counts_0/4HHHR3_S6_feature.out, woHHR2_S2/feature_counts_0/woHHR2_S2_feature.out, 8HHHR3_S9/feature_counts_0/8HHHR3_S9_feature.out, 16HHHR3_S12/feature_counts_1/16HHHR3_S12_feature.out, 16HHHR2_S11/feature_counts_1/16HHHR2_S11_feature.out, woHHR1_S1/feature_counts_1/woHHR1_S1_feature.out, 4HHHR1_S4/feature_counts_1/4HHHR1_S4_feature.out, woHHR3_S3/feature_counts_1/woHHR3_S3_feature.out, 4HHHR2_S5/feature_counts_1/4HHHR2_S5_feature.out, 8HHHR2_S8/feature_counts_1/8HHHR2_S8_feature.out, 8HHHR1_S7/feature_counts_1/8HHHR1_S7_feature.out, 16HHHR1_S10/feature_counts_1/16HHHR1_S10_feature.out, 4HHHR3_S6/feature_counts_1/4HHHR3_S6_feature.out, woHHR2_S2/feature_counts_1/woHHR2_S2_feature.out, 8HHHR3_S9/feature_counts_1/8HHHR3_S9_feature.out, 16HHHR3_S12/feature_counts_2/16HHHR3_S12_feature.out, 16HHHR2_S11/feature_counts_2/16HHHR2_S11_feature.out, woHHR1_S1/feature_counts_2/woHHR1_S1_feature.out, 4HHHR1_S4/feature_counts_2/4HHHR1_S4_feature.out, woHHR3_S3/feature_counts_2/woHHR3_S3_feature.out, 4HHHR2_S5/feature_counts_2/4HHHR2_S5_feature.out, 8HHHR2_S8/feature_counts_2/8HHHR2_S8_feature.out, 8HHHR1_S7/feature_counts_2/8HHHR1_S7_feature.out, 16HHHR1_S10/feature_counts_2/16HHHR1_S10_feature.out, 4HHHR3_S6/feature_counts_2/4HHHR3_S6_feature.out, woHHR2_S2/feature_counts_2/woHHR2_S2_feature.out, 8HHHR3_S9/feature_counts_2/8HHHR3_S9_feature.out
+    output: rnadiff/feature_counts/16HHHR3_S12_feature.out, rnadiff/feature_counts/16HHHR2_S11_feature.out, rnadiff/feature_counts/woHHR1_S1_feature.out, rnadiff/feature_counts/4HHHR1_S4_feature.out, rnadiff/feature_counts/woHHR3_S3_feature.out, rnadiff/feature_counts/4HHHR2_S5_feature.out, rnadiff/feature_counts/8HHHR2_S8_feature.out, rnadiff/feature_counts/8HHHR1_S7_feature.out, rnadiff/feature_counts/16HHHR1_S10_feature.out, rnadiff/feature_counts/4HHHR3_S6_feature.out, rnadiff/feature_counts/woHHR2_S2_feature.out, rnadiff/feature_counts/8HHHR3_S9_feature.out, outputs/strand_summary.csv
+    jobid: 52
+
+Submitted job 52 with external jobid 'Submitted batch job 35353667'.
+[Wed Dec 30 18:49:06 2020]
+Finished job 52.
+108 of 112 steps (96%) done
+[Wed Dec 30 18:51:17 2020]
+Finished job 104.
+109 of 112 steps (97%) done
+
+[Wed Dec 30 18:51:17 2020]
+rule mark_duplicates_ref:
+    input: 8HHHR1_S7/add_read_group/8HHHR1_S7.bam
+    output: 8HHHR1_S7/mark_duplicates/8HHHR1_S7.bam, 8HHHR1_S7/mark_duplicates/8HHHR1_S7.metrics
+    log: 8HHHR1_S7/logs/mark_duplicates/stdout.logs, 8HHHR1_S7/logs/mark_duplicates/stderr.logs
+    jobid: 103
+    wildcards: sample=8HHHR1_S7
+    threads: 4
+
+
+        (picard MarkDuplicates I=8HHHR1_S7/add_read_group/8HHHR1_S7.bam O=8HHHR1_S7/mark_duplicates/8HHHR1_S7.bam             M=8HHHR1_S7/mark_duplicates/8HHHR1_S7.metrics REMOVE_DUPLICATES=False             TMP_DIR=./tmp/ && samtools index 8HHHR1_S7/mark_duplicates/8HHHR1_S7.bam)             > 8HHHR1_S7/logs/mark_duplicates/stdout.logs 2> 8HHHR1_S7/logs/mark_duplicates/stderr.logs
+        
+Submitted job 103 with external jobid 'Submitted batch job 35353681'.
+[Wed Dec 30 18:57:42 2020]
+Finished job 103.
+110 of 112 steps (98%) done
+
+[Wed Dec 30 18:57:43 2020]
+rule multiqc:
+    input: 16HHHR3_S12/fastqc_filtered/16HHHR3_S12.done, 16HHHR2_S11/fastqc_filtered/16HHHR2_S11.done, woHHR1_S1/fastqc_filtered/woHHR1_S1.done, 4HHHR1_S4/fastqc_filtered/4HHHR1_S4.done, woHHR3_S3/fastqc_filtered/woHHR3_S3.done, 4HHHR2_S5/fastqc_filtered/4HHHR2_S5.done, 8HHHR2_S8/fastqc_filtered/8HHHR2_S8.done, 8HHHR1_S7/fastqc_filtered/8HHHR1_S7.done, 16HHHR1_S10/fastqc_filtered/16HHHR1_S10.done, 4HHHR3_S6/fastqc_filtered/4HHHR3_S6.done, woHHR2_S2/fastqc_filtered/woHHR2_S2.done, 8HHHR3_S9/fastqc_filtered/8HHHR3_S9.done, 16HHHR3_S12/bowtie1_mapping_rna/16HHHR3_S12.sorted.bam, 16HHHR2_S11/bowtie1_mapping_rna/16HHHR2_S11.sorted.bam, woHHR1_S1/bowtie1_mapping_rna/woHHR1_S1.sorted.bam, 4HHHR1_S4/bowtie1_mapping_rna/4HHHR1_S4.sorted.bam, woHHR3_S3/bowtie1_mapping_rna/woHHR3_S3.sorted.bam, 4HHHR2_S5/bowtie1_mapping_rna/4HHHR2_S5.sorted.bam, 8HHHR2_S8/bowtie1_mapping_rna/8HHHR2_S8.sorted.bam, 8HHHR1_S7/bowtie1_mapping_rna/8HHHR1_S7.sorted.bam, 16HHHR1_S10/bowtie1_mapping_rna/16HHHR1_S10.sorted.bam, 4HHHR3_S6/bowtie1_mapping_rna/4HHHR3_S6.sorted.bam, woHHR2_S2/bowtie1_mapping_rna/woHHR2_S2.sorted.bam, 8HHHR3_S9/bowtie1_mapping_rna/8HHHR3_S9.sorted.bam, 16HHHR3_S12/star_mapping/16HHHR3_S12_Aligned.sortedByCoord.out.bam, 16HHHR2_S11/star_mapping/16HHHR2_S11_Aligned.sortedByCoord.out.bam, woHHR1_S1/star_mapping/woHHR1_S1_Aligned.sortedByCoord.out.bam, 4HHHR1_S4/star_mapping/4HHHR1_S4_Aligned.sortedByCoord.out.bam, woHHR3_S3/star_mapping/woHHR3_S3_Aligned.sortedByCoord.out.bam, 4HHHR2_S5/star_mapping/4HHHR2_S5_Aligned.sortedByCoord.out.bam, 8HHHR2_S8/star_mapping/8HHHR2_S8_Aligned.sortedByCoord.out.bam, 8HHHR1_S7/star_mapping/8HHHR1_S7_Aligned.sortedByCoord.out.bam, 16HHHR1_S10/star_mapping/16HHHR1_S10_Aligned.sortedByCoord.out.bam, 4HHHR3_S6/star_mapping/4HHHR3_S6_Aligned.sortedByCoord.out.bam, woHHR2_S2/star_mapping/woHHR2_S2_Aligned.sortedByCoord.out.bam, 8HHHR3_S9/star_mapping/8HHHR3_S9_Aligned.sortedByCoord.out.bam, rnadiff/feature_counts/16HHHR3_S12_feature.out, rnadiff/feature_counts/16HHHR2_S11_feature.out, rnadiff/feature_counts/woHHR1_S1_feature.out, rnadiff/feature_counts/4HHHR1_S4_feature.out, rnadiff/feature_counts/woHHR3_S3_feature.out, rnadiff/feature_counts/4HHHR2_S5_feature.out, rnadiff/feature_counts/8HHHR2_S8_feature.out, rnadiff/feature_counts/8HHHR1_S7_feature.out, rnadiff/feature_counts/16HHHR1_S10_feature.out, rnadiff/feature_counts/4HHHR3_S6_feature.out, rnadiff/feature_counts/woHHR2_S2_feature.out, rnadiff/feature_counts/8HHHR3_S9_feature.out, 16HHHR3_S12/mark_duplicates/16HHHR3_S12.bam, 16HHHR2_S11/mark_duplicates/16HHHR2_S11.bam, woHHR1_S1/mark_duplicates/woHHR1_S1.bam, 4HHHR1_S4/mark_duplicates/4HHHR1_S4.bam, woHHR3_S3/mark_duplicates/woHHR3_S3.bam, 4HHHR2_S5/mark_duplicates/4HHHR2_S5.bam, 8HHHR2_S8/mark_duplicates/8HHHR2_S8.bam, 8HHHR1_S7/mark_duplicates/8HHHR1_S7.bam, 16HHHR1_S10/mark_duplicates/16HHHR1_S10.bam, 4HHHR3_S6/mark_duplicates/4HHHR3_S6.bam, woHHR2_S2/mark_duplicates/woHHR2_S2.bam, 8HHHR3_S9/mark_duplicates/8HHHR3_S9.bam
+    output: multiqc/multiqc_report.html
+    log: multiqc/multiqc.log
+    jobid: 1
+
+
+        multiqc . -o multiqc   -c multiqc_config.yaml -f -x *_init_* -x *left_kept_reads* -x *fastqc_samples* -e htseq -e slamdunk  2> multiqc/multiqc.log
+        
+Submitted job 1 with external jobid 'Submitted batch job 35353693'.
+[Wed Dec 30 19:02:56 2020]
+Finished job 1.
+111 of 112 steps (99%) done
+
+[Wed Dec 30 19:02:56 2020]
+localrule rnaseq:
+    input: multiqc/multiqc_report.html, .sequana/rulegraph.svg, outputs/strand_summary.csv
+    jobid: 0
+
+[Wed Dec 30 19:02:56 2020]
+Finished job 0.
+112 of 112 steps (100%) done
+Complete log: /pasteur/projets/specific/Biomics/Projets_bioinfo/InProgress/RNABench/B2933/analysis/star_skip_cutadapt/rnaseq_50pct_moins_M/.snakemake/log/2020-12-30T164047.555354.snakemake.log
+[32mINFO    [sequana.pipelines_common]: [0m [34mCreating stats image[0m
+[32mINFO    [sequana.pipelines_common]: [0m [34mCreating stats image[0m
+[32mINFO    [sequana.pipelines_common]: [0m [34mOnce done, please clean up the directory using: 'make clean'[0m
+[32mINFO    [sequana.pipelines_common]: [0m [34mOnce done, please clean up the directory using: 'make clean'[0m
+[32mINFO    [sequana.pipelines_common]: [0m [34mBuilding input files for rnadiff analysis[0m
+[32mINFO    [sequana.pipelines_common]: [0m [34mBuilding input files for rnadiff analysis[0m
+chmod -R g+w .
+rm -rf rulegraph

@@ -23,32 +23,55 @@
 What is sequana_pipetools ?
 ============================
 
-**sequana_pipetools** is a set of tools to help us managing the different `**Sequana** <https://sequana.readthedocs.io>`_ pipelines.
+**sequana_pipetools** is a set of tools to help us managing the `Sequana <https://sequana.readthedocs.io>`_ pipelines (NGS pipelines such as RNA-seq, Variant, ChIP-seq, etc).
 
 The goal of this package is to make the deployment of `Sequana pipelines <https://sequana.readthedocs.io>`_ easier
 by moving some of the common tools used by the different pipelines in a pure
-Python library. Why moving it from Sequana ? Well, this is more modular. If we
-change Sequana, the pipelines are less likely to break. Similarly, if we update
-a tool used by all the pipelines, there is less chances to break Sequana itself. 
-Currently, this package provide completion for all the
-pipelines, metadata, common options to include in the user
-interface, and helper functions.
-
-What is Sequana ?
-=================
-
-**Sequana** is a versatile tool that provides 
-
-#. A Python library dedicated to NGS analysis (e.g., tools to visualise standard NGS formats).
-#. A set of Pipelines dedicated to NGS in the form of Snakefiles
-   (Makefile-like with Python syntax based on snakemake framework) with more
-   than 80 re-usable rules.
-#. Standalone applications.
-
-See the `sequana home page <https://sequana.readthedocs.io>`_ for details.
+Python library. 
 
 
-To join the project, please let us know on `github <https://github.com/sequana/sequana/issues/306>`_.
+The Sequana framework used to have all bioinformatics, snakemake rules,
+pipelines, tools to manage pipelines in a single library (Sequana) as described
+in **Fig 1** here below.
+
+.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/veryold.png
+    :scale: 40%
+
+    **Figure 1** Old Sequana framework will all pipelines and Sequana library in the same
+    place including pipetools (this library).
+
+Each time we changed anything, the entire library needed to be checked carefully
+(even though we had 80% test coverage). Each time a pipeline was added, new
+dependencies woule be needed, and so on. So, we first decided to make all
+pipelines independent as shown in **Fig 2**:
+
+.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/old.png
+    :scale: 40%
+    
+    **Figure 2** v0.8 of Sequana moved the Snakemake pipelines in indepdendent
+    repositories. A `cookie cutter <https://github.com/sequana/sequana_pipeline_template>`_ 
+    ease the creation of scuh pipelines
+
+That way, we could change a pipeline without the need to update Sequana, and
+vice-versa. This was already a great jump ahead. Yet, some tools reprensented
+here by the *pipetools* box were required by all pipelines. This was mostly for
+providing user interface, sanity check of input data, etc. This was moving fast
+with new pipelines added every month. To make the pipelines and Sequana more
+modular, we decided to create a pure Python library that would make the
+pipelines even more independent as shown in **Fig3**. We called it
+**sequana_pipetools**.
+
+
+.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/new.png
+    :scale: 40%
+
+    **Figure 3** New Sequana framework. The library itself with the core, the
+    bioinformatics tools is now independent of the pipelines. Besides, the
+    pipetools library provide common tools to all pipelines to help in their
+    creation/management. For instance, common parser for options.
+
+
+
 
 Installation
 ============
@@ -70,17 +93,27 @@ To get more help, go to the doc directory and build the local sphinx directory u
 Usage
 ======
 
-There is currently only one standalone tool to be used as follows::
+There are currently two standalone tools. The first one is for Linux users under
+bash to obtain completion of a sequana pipeline command line arguments::
 
     sequana_completion --pipeline fastqc
 
-The library is intended to help Sequana developers to design their pipelines. 
+The second is used to introspect slurm files to get a summary of the SLURM log
+files::
+
+    sequana_slurm_status --directory .
+
+Will print a short summary report with common errors (if any).
+
+
+The library is intended to help Sequana developers to design their pipelines.
 See the `Sequana organization repository for examples <https://github.com/sequana>`_.
 
-Currently, this library provides a set of Options classes that should be used to
+In addition to those standalones, sequana_pipetools goal to to provide utilities to help Sequana developers. 
+We currently provide a set of Options classes that should be used to
 design the API of your pipelines. For example, the
 sequana_pipetools.options.SlurmOptions can be used as follows inside a standard
-::
+Python module::
 
     import argparse
     from sequana_pipetools.options import *
@@ -103,11 +136,27 @@ sequana_pipetools.options.SlurmOptions can be used as follows inside a standard
 
 Then, for developers, one should look at e.g. module sequana_pipetools.options
 for the API reference and one of the official sequana pipeline (e.g.,
-https://github.com/sequana/sequana_variant_calling)
+https://github.com/sequana/sequana_variant_calling) to get help from examples. 
 
 The code above, can be create automatically using one of our cookie cutter tool
 available in https://github.com/sequana/sequana_pipeline_template and as a
 standalone in sequana (sequana_init_pipeline)
+
+What is Sequana ?
+=================
+
+**Sequana** is a versatile tool that provides 
+
+#. A Python library dedicated to NGS analysis (e.g., tools to visualise standard NGS formats).
+#. A set of Pipelines dedicated to NGS in the form of Snakefiles
+   (Makefile-like with Python syntax based on snakemake framework) with more
+   than 80 re-usable rules.
+#. Standalone applications.
+
+See the `sequana home page <https://sequana.readthedocs.io>`_ for details.
+
+
+To join the project, please let us know on `github <https://github.com/sequana/sequana/issues/306>`_.
 
 
 Changelog
@@ -116,6 +165,10 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.4.3     * add MANIFEST to include missing requirements.txt
+0.4.2     * add FeatureCounts options
+0.4.1     * add slurm status utility (sequana_slurm_status)
+0.4.0     * stable version
 0.3.1     * comment the prin_newest_version, which is too slow
 0.3.0     * stable release
 0.2.6     * previous new feature led to overhead of a few seconds with --help

@@ -1,0 +1,38 @@
+digraph sequana {
+    nodesep=1
+    graph[bgcolor=white, margin=0];
+    node[shape=box, style=rounded, fontname=sans, fontsize=10, penwidth=2];
+    edge[penwidth=2, color=grey, constraint=true];
+
+    subgraph cluster_pipeline {
+        color=yellow; 
+        style=filled;
+        margin=10;
+        label="Sequana pipelines"; 
+        labelloc="b";
+        rnaseq[style="rounded"];
+        chipseq[style="rounded"];
+        variant[style="rounded"];
+    }
+
+
+    subgraph cluster_sequana {
+        color=lightgrey; 
+        style=filled;
+        margin=10;
+        label="Sequana"; 
+        node[style=filled, color=white]
+        core[style="rounded"];
+        rules[style="rounded"];
+        pipetools[style="rounded"];
+        tools[style="rounded"];
+        core -> pipetools; 
+        core -> rules;
+        core -> tools;
+    }
+
+	tools -> {rnaseq,variant,chipseq}[color=red]
+	rules -> {rnaseq,  chipseq, variant}[color=blue]
+	pipetools -> {rnaseq,  chipseq, variant}[color=black]
+}            
+

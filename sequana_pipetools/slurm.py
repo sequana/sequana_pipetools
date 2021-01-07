@@ -1,7 +1,29 @@
-from pathlib import Path
-import parse
+# -*- coding: utf-8 -*-
+#
+#  This file is part of Sequana software
+#
+#  Copyright (c) 2016-2020 - Sequana Development Team
+#
+#  File author(s):
+#      Thomas Cokelaer <thomas.cokelaer@pasteur.fr>
+#      Etienne Kornobis <etienne.kornobis@pasteur.fr>
+#
+#  Distributed under the terms of the 3-clause BSD license.
+#  The full license is in the LICENSE file, distributed with this software.
+#
+#  website: https://github.com/sequana/sequana
+#  documentation: http://sequana.readthedocs.io
+#
+##############################################################################
+import os
+import sys
 import re
+import argparse
+from pathlib import Path
 
+import parse
+
+import re
 
 class DebugJob:
     """Helper for sequana jobs debugging on slurm cluster.
@@ -22,7 +44,7 @@ class DebugJob:
         self.path = Path(path)
         self.context = context
         self.slurm_out = sorted([f for f in self.path.glob("slurm*.out")])
-
+        print("Found {} slurm files to introspect. Please wait.".format(len(self.slurm_out)))
         if not self.slurm_out:
             raise IOError(f"No slurm*.out files were found in {path}")
 
@@ -32,6 +54,13 @@ class DebugJob:
         self.percent = self._get_percent()
         self.errors = self._get_rules_with_errors()
         self.n_errors = len(self.errors)
+
+        for x in self.slurm_out:
+            error = self._error_command_not_found(x)
+            if error:
+                self.n_errors += 1
+                ID = os.path.basename(x)
+                self.errors.append({'rule': "NA", 'slurm_id': ID, 'hint': error })
 
     def __repr__(self):
 
@@ -44,12 +73,16 @@ class DebugJob:
         message += f"Errors are comming from rule(s): {','.join(set([e['rule'] for e in self.errors]))}\n\n"
 
         for e in self.errors:
-            message += f"Rule: {e['rule']}, SlurmID: {e['slurm_id']}\n"
 
-            message += self._get_error_message(self.path / e["log"])
-            message += self._get_error_message(
-                self.path / ("slurm-" + str(e["slurm_id"]) + ".out")
-            )
+            if 'log' in e:
+                message += f"Rule: {e['rule']}, SlurmID: {e['slurm_id']}\n"
+                message += self._get_error_message(self.path / e["log"])
+                message += self._get_error_message(
+                    self.path / ("slurm-" + str(e["slurm_id"]) + ".out")
+                )
+            if 'hint' in e:
+                message += f" - slurm file: {e['slurm_id']}"
+                message += "; Hints: {}".format(e['hint'])
 
         message += "\n" + "#" * 80
 
@@ -107,3 +140,50 @@ class DebugJob:
     cluster_jobid: Submitted batch job {slurm_id:d}"""
 
         return list(parse.findall(errors, self.snakemaster))
+
+
+    def _error_command_not_found(self, log_file):
+        with open(log_file, "r") as f:
+            data = f.read()
+            if "command not found" in data:
+                return "Command not found"
+
+
+class Options(argparse.ArgumentParser):
+    def __init__(self, prog="sequana_slurm_status"):
+        usage = """
+    sequana_slurm_status
+    sequana_slurm_status --directory ./rnaseq/
+    """
+
+        super(Options, self).__init__(usage=usage, prog=prog,
+            description="""This tool scan slurm jobs trying o infer useful
+summary of errorse""", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+        self.add_argument("--directory", type=str, default=".",
+            help="""Directory where to introspect slurm jobs""")
+        self.add_argument("--context", type=int, default=5,
+            help="""Number of errors to show""")
+ 
+
+
+
+def main(args=None):
+
+    if args is None:
+        args = sys.argv[:]
+
+    user_options = Options()
+
+    if "--help" in args:
+        user_options.parse_args(["prog", "--help"])
+    else:
+       options = user_options.parse_args(args[1:])
+
+    dj = DebugJob(options.directory, context=options.context)
+    print(dj)
+
+if __name__ == "__main__":
+    main()
+
+

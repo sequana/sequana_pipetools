@@ -1,0 +1,5 @@
+recursive-exclude * __pycache__
+recursive-exclude * *pyc
+include requirements*txt
+include README.rst
+prune test

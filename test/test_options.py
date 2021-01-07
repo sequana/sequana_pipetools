@@ -19,7 +19,10 @@ def test_misc():
     except:
         pass
 
-
+def test_feature_counts():
+    p = argparse.ArgumentParser()
+    so = FeatureCountsOptions()
+    so.add_options(p)
 
 
 def test_cutadapt_options():
