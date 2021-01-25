@@ -69,7 +69,8 @@ class DebugJob:
     def _report(self):
 
         message = "#" * 33 + " DEBUG REPORT " + "#" * 33 + "\n\n"
-        message += f"The analysis reached {self.percent}%. A total of {self.n_errors} errors has been found.\n\n"
+        message += f"The analysis reached {self.percent}%. A total of {self.n_errors} errors has been found.\n"
+        message += f"Errors are comming from rule(s): {','.join(set([e['rule'] for e in self.errors]))}\n\n"
 
         for e in self.errors:
 
