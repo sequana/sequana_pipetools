@@ -34,20 +34,17 @@ Open Source Software, 2(16), 352, JOSS DOI doi:10.21105/joss.00352
 
 """)
 
-sequana_prolog = """Welcome to Sequana project
-This script prepares the pipeline {name} and stored the pipeline and its 
-configuration in the requested working directory. Please check out the 
-documentation carefully. Pipelines can be run locally or on cluster. For 
-a local run, 
+sequana_prolog = """Welcome to Sequana project (https://sequana.readthedocs.io)
 
-sequana_pipelines_{name} --run-mode local
+This script prepares the pipeline sequana_{name}. It stores the pipeline and its 
+configuration file in the requested working directory ({name} by default). 
+Please check out the documentation carefully. In case of issues, please report
+on https://github.com/sequana/sequana/issues or https://github.com/sequana/{name}/issues
 
-and for a SLURM cluster:
+Pipelines can be run locally or on a SLURM cluster. If not slurm commands are
+found, te pipeline is in mode 'local', otherwise in mode 'slurm'.
 
-sequana_pipelines_{name} --run-mode slurm
-
-although the pipelines should figure out what to do. A working directory called
-will be created with instructions on how to run the pipeline.
+A working directory called {name} is created with a {name}.sh script to be executed.
 """
 
 
