@@ -19,6 +19,8 @@ def test_misc():
     except:
         pass
 
+
+
 def test_feature_counts():
     p = argparse.ArgumentParser()
     so = FeatureCountsOptions()
@@ -130,8 +132,10 @@ def test_snakemake_options():
     from sequana_pipetools.options import SnakemakeOptions
     p = argparse.ArgumentParser()
     so = SnakemakeOptions()
+    so._default_jobs() #test sheduler
     so.add_options(p)
     p.parse_args([])
+
 
 
 def test_krakenl_options():

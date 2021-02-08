@@ -165,6 +165,8 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.5.0     * add new module called error to be added in onerror sections of all
+            pipelines. Usual test update. Pin to stable version
 0.4.3     * add MANIFEST to include missing requirements.txt
 0.4.2     * add FeatureCounts options
 0.4.1     * add slurm status utility (sequana_slurm_status)
