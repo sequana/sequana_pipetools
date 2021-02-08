@@ -2,7 +2,7 @@
 #
 #  This file is part of Sequana_pipetools software (Sequana Projetc)
 #
-#  Copyright (c) 2020 - Sequana Development Team
+#  Copyright (c) 2020-2021 - Sequana Development Team
 #
 #  File author(s):
 #      Thomas Cokelaer <thomas.cokelaer@pasteur.fr>

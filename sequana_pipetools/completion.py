@@ -2,7 +2,7 @@
 #
 #  This file is part of Sequana software
 #
-#  Copyright (c) 2016-2020 Sequana Development Team
+#  Copyright (c) 2016-2021 Sequana Development Team
 #
 #  File author(s):
 #      Thomas Cokelaer <thomas.cokelaer@pasteur.fr>
@@ -125,7 +125,7 @@ complete -o  default -F _mycomplete_{pipeline_name} sequana_{pipeline_name}
         path = sequana_config_path + os.sep + "pipelines"
         if os.path.exists(path):
             pass
-        else:
+        else: #pragma: no cover
             os.mkdir(path)
         self.config_path = path
         return path
@@ -222,10 +222,10 @@ def main(args=None):
             c.save_completion_script()
             print("source ~/.config/sequana/pipelines/{}.sh".format(name))
         print("\nto activate the completion")
-    else:
+    else: #pragma: no cover
         print("Stopping creation of completion scripts")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": #pragma: no cover
     main()
 

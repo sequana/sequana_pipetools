@@ -2,7 +2,7 @@
 #
 #  This file is part of Sequana_pipetools software (Sequana project)
 #
-#  Copyright (c) 2020 - Sequana Development Team
+#  Copyright (c) 2020-2021 - Sequana Development Team
 #
 #  File author(s):
 #      Thomas Cokelaer <thomas.cokelaer@pasteur.fr>
@@ -92,7 +92,7 @@ def guess_scheduler():
     If not, we assume a local run is expected.
     """
     from easydev import cmd_exists
-    if cmd_exists("sbatch") and cmd_exists("srun"):
+    if cmd_exists("sbatch") and cmd_exists("srun"): #pragma: no cover
         return 'slurm'
     else:
         return 'local'

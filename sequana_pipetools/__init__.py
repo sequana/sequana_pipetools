@@ -5,3 +5,12 @@ except: #pragma: no cover
     version = ">=0.2.0"
 
 
+from easydev.logging_tools import Logging
+logger = Logging("sequana_pipetools", "WARNING")
+# To keep the inheritance/propagation of levels. Logging from easydev will do
+# the formatting only.
+import colorlog
+logger = colorlog.getLogger(logger.name)
+
+
+

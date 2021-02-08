@@ -2,7 +2,7 @@
 #
 #  This file is part of Sequana software
 #
-#  Copyright (c) 2016-2020 - Sequana Development Team
+#  Copyright (c) 2016-2021 - Sequana Development Team
 #
 #  File author(s):
 #      Thomas Cokelaer <thomas.cokelaer@pasteur.fr>
@@ -25,6 +25,14 @@ import parse
 
 import re
 
+
+import colorlog
+logger = colorlog.getLogger(__name__)
+
+
+__all__ = ['Development']
+
+
 class DebugJob:
     """Helper for sequana jobs debugging on slurm cluster.
 
@@ -46,7 +54,8 @@ class DebugJob:
         self.slurm_out = sorted([f for f in self.path.glob("slurm*.out")])
         print("Found {} slurm files to introspect. Please wait.".format(len(self.slurm_out)))
         if not self.slurm_out:
-            raise IOError(f"No slurm*.out files were found in {path}")
+            logger.warning(f"No slurm*.out files were found in {path}")
+            sys.exit(0)
 
         with open(self.slurm_out[0], "r") as f:
             self.snakemaster = f.read()
@@ -152,8 +161,10 @@ class DebugJob:
 class Options(argparse.ArgumentParser):
     def __init__(self, prog="sequana_slurm_status"):
         usage = """
+
     sequana_slurm_status
     sequana_slurm_status --directory ./rnaseq/
+
     """
 
         super(Options, self).__init__(usage=usage, prog=prog,
@@ -165,8 +176,6 @@ summary of errorse""", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         self.add_argument("--context", type=int, default=5,
             help="""Number of errors to show""")
  
-
-
 
 def main(args=None):
 
