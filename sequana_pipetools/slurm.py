@@ -193,8 +193,6 @@ summary of errorse""",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         )
 
-<<<<<<< HEAD
-=======
         self.add_argument(
             "--directory",
             type=str,
@@ -206,7 +204,6 @@ summary of errorse""",
         )
 
 
->>>>>>> 7c1ab6435e35d3fadf2ae3066514d2a35b3f102e
 def main(args=None):
 
     if args is None:
