@@ -16,7 +16,7 @@
 :Overview: A set of tools to help building or using sequana pipelines
 :Status: Production
 :Issues: Please fill a report on `github <https://github.com/sequana/sequana/issues>`__
-:Python version: Python 3.6, 3.7.3; most modules are Python2.7 compatible.
+:Python version: Python 3.6, 3.7.3
 :Citation: Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352,  `JOSS DOI doi:10.21105/joss.00352 <http://www.doi2bib.org/bib/10.21105%2Fjoss.00352>`_
 
 
@@ -90,13 +90,13 @@ To get more help, go to the doc directory and build the local sphinx directory u
     make html
     browse build/html/index.html
 
-Usage
-======
+Quick tour
+==========
 
 There are currently two standalone tools. The first one is for Linux users under
 bash to obtain completion of a sequana pipeline command line arguments::
 
-    sequana_completion --pipeline fastqc
+    sequana_completion --name fastqc
 
 The second is used to introspect slurm files to get a summary of the SLURM log
 files::
@@ -109,11 +109,11 @@ Will print a short summary report with common errors (if any).
 The library is intended to help Sequana developers to design their pipelines.
 See the `Sequana organization repository for examples <https://github.com/sequana>`_.
 
-In addition to those standalones, sequana_pipetools goal to to provide utilities to help Sequana developers. 
+In addition to those standalones, sequana_pipetools goal is to provide utilities to help Sequana developers. 
 We currently provide a set of Options classes that should be used to
 design the API of your pipelines. For example, the
 sequana_pipetools.options.SlurmOptions can be used as follows inside a standard
-Python module::
+Python module (the last two lines is where the magic happens)::
 
     import argparse
     from sequana_pipetools.options import *
@@ -134,13 +134,17 @@ Python module::
             so = SlurmOptions()
             so.add_options(self)
 
-Then, for developers, one should look at e.g. module sequana_pipetools.options
-for the API reference and one of the official sequana pipeline (e.g.,
-https://github.com/sequana/sequana_variant_calling) to get help from examples. 
 
-The code above, can be create automatically using one of our cookie cutter tool
-available in https://github.com/sequana/sequana_pipeline_template and as a
-standalone in sequana (sequana_init_pipeline)
+Developers should look at e.g. module sequana_pipetools.options
+for the API reference and one of the official sequana pipeline (e.g.,
+https://github.com/sequana/sequana_variant_calling) to get help from examples.
+
+
+The Options classes provided can be used and combined to design pipelines. The
+code from sequana_pipetools is used within our template to automatically create
+pipeline tree structure using a cookie cutter. This cookie cutter is available  
+in https://github.com/sequana/sequana_pipeline_template and as a
+standalone in Sequana itself (sequana_init_pipeline).
 
 What is Sequana ?
 =================
@@ -159,12 +163,14 @@ See the `sequana home page <https://sequana.readthedocs.io>`_ for details.
 To join the project, please let us know on `github <https://github.com/sequana/sequana/issues/306>`_.
 
 
+
 Changelog
 =========
 
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.5.2     * add TrimmingOptions class intended at replacing CutadaptOptions
 0.5.1     * fix typo
 0.5.0     * add new module called error to be added in onerror sections of all
             pipelines. Usual test update. Pin to stable version

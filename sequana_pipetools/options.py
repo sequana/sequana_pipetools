@@ -18,8 +18,9 @@ import sys
 from sequana_pipetools.misc import Colors, print_version, print_newest_version
 
 
-__all__ = ["GeneralOptions", "SlurmOptions", "SnakemakeOptions", "Trimming",
-    "KrakenOptions", "InputOptions", "FeatureCountsOptions"]
+__all__ = ["GeneralOptions", "SlurmOptions", "SnakemakeOptions",
+            "TrimmingOptions", "KrakenOptions", "InputOptions", 
+            "FeatureCountsOptions"]
 
 
 def init_pipeline(NAME):
@@ -200,7 +201,7 @@ class KrakenOptions():
                 performed as explained in online sequana documentation""")
 
 
-class Trimming():
+class TrimmingOptions():
     description = """
     This section is dedicated to reads trimming and filtering and adapter
     trimming. We currently provide supports for Cutadapt and FastP tools.
@@ -295,7 +296,7 @@ class CutadaptOptions():
 
     def __init__(self, group_name="section_cutadapt"):
         self.group_name = group_name
-        print("CutadaptOptions is deprecated. Will be removed in future versions. Use AdapterTrimming instead")
+        print("CutadaptOptions is deprecated. Will be removed in future versions. Use TrimmingOptions instead")
 
     def add_options(self, parser):
 
