@@ -243,17 +243,17 @@ read1""")
 otherwise. For cutadapt, default is 20 and for fastp, 15. We use 20 for both by
 default.""")
 
-
         def quality(x):
             x = int(x)
             if x < 0:
                 raise argparse.ArgumentTypeError("quality must be positive")
             return x
         group.add_argument("--trimming-quality", dest="trimming_quality",
-            default=30, type=quality,
-            help="""30 means keep bases with quality above 30; 
-default of fastp is 15, default of cutadapt is 33. 
-                Here we set the default to 30.""")
+            default=-1, type=quality,
+            help="""Trimming quality parameter depends on the algorithm used by 
+the software behind the scene an may vary greatly; consequently, not provide 
+a default value. Cutadapt uses 30 by default, fastp uses 15 by default. If
+unset, the rnaseq pipeline set the default to 30 for cutadapt and 15 for fastp""")
 
         # Cutadapt specific
         group.add_argument("--trimming-cutadapt-mode", dest="trimming_cutadapt_mode",
@@ -265,9 +265,6 @@ default of fastp is 15, default of cutadapt is 33.
             help="""additional options understood by cutadapt. Here, we trim the
 Ns; -O 6 is the minimum overlap length between read and adapter for an adapter
 to be found""")
-
-
-
 
 
 class CutadaptOptions(): #pragma: no cover
