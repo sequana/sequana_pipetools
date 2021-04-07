@@ -1,6 +1,7 @@
 from sequana_pipetools.completion import Complete
 from mock import patch
 
+
 def test_complete():
     c = Complete("rnaseq")
     c.save_completion_script()
