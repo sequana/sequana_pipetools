@@ -44,6 +44,12 @@ class DebugJob:
     :param path: Path to a working directory from a sequana pipeline execution
     (Directory containing slurm_*.out files)
     :param context: The number of lines to print around the error line.
+
+    TODO:
+
+    - if " It can be removed with the --unlock argument.: can recommend to start
+      sh unlock.sh
+
     """
 
     def __init__(self, path, context=5):

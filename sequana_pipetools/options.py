@@ -18,8 +18,8 @@ import sys
 from sequana_pipetools.misc import Colors, print_version, print_newest_version
 
 
-__all__ = ["GeneralOptions", "SlurmOptions", "SnakemakeOptions",
-    "CutadaptOptions", "KrakenOptions", "InputOptions", "FeatureCountsOptions"]
+__all__ = ["GeneralOptions", "SlurmOptions", "SnakemakeOptions", "Trimming",
+    "KrakenOptions", "InputOptions", "FeatureCountsOptions"]
 
 
 def init_pipeline(NAME):
@@ -200,6 +200,75 @@ class KrakenOptions():
                 performed as explained in online sequana documentation""")
 
 
+class Trimming():
+    description = """
+    This section is dedicated to reads trimming and filtering and adapter
+    trimming. We currently provide supports for Cutadapt and FastP tools.
+
+    This section uniformizes the options for such tools
+
+
+    """
+    def __init__(self, group_name="section_trimming"):
+        self.group_name = group_name
+
+    def add_options(self, parser):
+
+        group = parser.add_argument_group(self.group_name, self.description)
+
+
+
+        group.add_argument("--software-choice", dest="trimming_software_choice",
+            default="fastp", choices=["cutadapt", "atropos", "fastp"],
+            help="""additional options understood by cutadapt""")
+
+        group.add_argument("--disable-trimming", action="store_true",
+            default=False,
+            help="If provided, disable trimming ")
+
+
+        group.add_argument("--trimming-adapter-read1", dest="trimming_adapter_read1",
+            default="", help="""fastp auto-detects adapters. You may specify the
+adapter sequence specificically for fastp or cutadapt/atropos with option for
+read1""")
+
+        group.add_argument("--trimming-adapter-read2", dest="trimming_adapter_read2",
+            default="", help="""fastp auto-detects adapters. You may specify the
+adapter sequence specificically for fastp or cutadapt/atropos with option for
+read1""")
+
+        group.add_argument("--trimming-minimum-length", 
+            default=20, help="""minimum number of bases required; read discarded
+otherwise. For cutadapt, default is 20 and for fastp, 15. We use 20 for both by
+default.""")
+
+
+        def quality(x):
+            x = int(x)
+            if x < 0:
+                raise argparse.ArgumentTypeError("quality must be positive")
+            return x
+        group.add_argument("--trimming-quality", dest="trimming_quality",
+            default=30, type=quality,
+            help="""30 means keep bases with quality above 30; 
+default of fastp is 15, default of cutadapt is 33. 
+                Here we set the default to 30.""")
+
+        # Cutadapt specific
+        group.add_argument("--trimming-cutadapt-mode", dest="trimming_cutadapt_mode",
+            default="b", choices=["g", "a", "b"],
+            help="""Mode used to remove adapters. g for 5', a for 3', b for both
+                5'/3' as defined in cutadapt documentation""")
+        group.add_argument("--trimming-cutadapt-options", dest="trimming_cutadapt_options",
+            default=" -O 6 --trim-n",
+            help="""additional options understood by cutadapt. Here, we trim the
+Ns; -O 6 is the minimum overlap length between read and adapter for an adapter
+to be found""")
+
+
+
+
+
 class CutadaptOptions():
     description = """
     This section allows you to trim bases (--cutadapt-quality) with poor
@@ -226,6 +295,7 @@ class CutadaptOptions():
 
     def __init__(self, group_name="section_cutadapt"):
         self.group_name = group_name
+        print("CutadaptOptions is deprecated. Will be removed in future versions. Use AdapterTrimming instead")
 
     def add_options(self, parser):
 
