@@ -270,7 +270,7 @@ to be found""")
 
 
 
-class CutadaptOptions():
+class CutadaptOptions(): #pragma: no cover
     description = """
     This section allows you to trim bases (--cutadapt-quality) with poor
     quality and/or remove adapters.

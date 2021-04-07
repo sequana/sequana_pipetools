@@ -66,7 +66,6 @@ class Colors:
         return self.BLUE + msg + self.ENDC
 
 
-
 def error(msg, pipeline):
     color = Colors()
     print(color.error("ERROR [sequana.{}]::".format(pipeline) +  msg), flush=True)
