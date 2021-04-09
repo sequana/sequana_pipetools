@@ -77,7 +77,7 @@ function _mycomplete_{pipeline_name}()
 
 }}
 #complete -d -X '.[^./]*' -F _mycomplete_ sequana_{pipeline_name}
-complete -o  default -F _mycomplete_{pipeline_name} sequana_{pipeline_name}
+complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_name}
     """
 
     def __init__(self, pipeline_name):
