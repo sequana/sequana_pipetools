@@ -171,6 +171,7 @@ Changelog
 Version   Description
 ========= ====================================================================
 0.5.2     * add TrimmingOptions class intended at replacing CutadaptOptions
+          * to avoid extra spaces, add '-o nospace' in all completion files
 0.5.1     * fix typo
 0.5.0     * add new module called error to be added in onerror sections of all
             pipelines. Usual test update. Pin to stable version
