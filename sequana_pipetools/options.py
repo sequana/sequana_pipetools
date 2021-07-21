@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
-#
-#  This file is part of Sequana_pipetools software (Sequana project)
+##############################################################################
 #
 #  Copyright (c) 2020-2021 - Sequana Development Team
 #
-#  File author(s):
-#      Thomas Cokelaer <thomas.cokelaer@pasteur.fr>
-#
-#  Distributed under the terms of the 3-clause BSD license.
 #  The full license is in the LICENSE file, distributed with this software.
 #
 #  website: https://github.com/sequana/sequana
@@ -204,23 +198,25 @@ class KrakenOptions():
 class TrimmingOptions():
     description = """
     This section is dedicated to reads trimming and filtering and adapter
-    trimming. We currently provide supports for Cutadapt and FastP tools.
+    trimming. We currently provide supports for Cutadapt/Atropos and FastP tools.
 
     This section uniformizes the options for such tools
 
 
     """
-    def __init__(self, group_name="section_trimming"):
+    def __init__(self, 
+            group_name="section_trimming", 
+            software=['cutadapt', 'atropos', 'fastp']):
         self.group_name = group_name
+        self.software = software
+        self.software_default = "fastp"
 
     def add_options(self, parser):
 
         group = parser.add_argument_group(self.group_name, self.description)
 
-
-
         group.add_argument("--software-choice", dest="trimming_software_choice",
-            default="fastp", choices=["cutadapt", "atropos", "fastp"],
+            default=self.software_default, choices=self.software,
             help="""additional options understood by cutadapt""")
 
         group.add_argument("--disable-trimming", action="store_true",
