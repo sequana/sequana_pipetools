@@ -41,8 +41,8 @@ configuration file in the requested working directory ({name} by default).
 Please check out the documentation carefully. In case of issues, please report
 on https://github.com/sequana/sequana/issues or https://github.com/sequana/{name}/issues
 
-Pipelines can be run locally or on a SLURM cluster. If not slurm commands are
-found, te pipeline is in mode 'local', otherwise in mode 'slurm'.
+Pipelines can be run locally or on a SLURM cluster. If no slurm commands are
+found, the pipeline is run in 'local' mode, otherwise in 'slurm' mode.
 
 A working directory called {name} is created with a {name}.sh script to be executed.
 """
