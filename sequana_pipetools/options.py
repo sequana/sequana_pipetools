@@ -1,4 +1,5 @@
-##############################################################################
+#
+#  This file is part of Sequana_pipetools software (Sequana project)
 #
 #  Copyright (c) 2020-2021 - Sequana Development Team
 #
@@ -20,6 +21,7 @@ __all__ = ["GeneralOptions", "SlurmOptions", "SnakemakeOptions",
 def init_pipeline(NAME):
     print('init_pipeline is deprecated, please use before_pipeline instead')
     before_pipeline(NAME)
+
 
 def before_pipeline(NAME):
     """A function to provide --version and --deps for all pipelines
@@ -91,7 +93,6 @@ def guess_scheduler():
         return 'slurm'
     else:
         return 'local'
-
 
 
 class SnakemakeOptions():
