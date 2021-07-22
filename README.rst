@@ -170,6 +170,10 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.5.3     * The feature of parallelising cutadapt adapter removal has been 
+            removed from sequana since it is now available in e.g. atropos
+            This removed the 'design' option from the cutadapt rules and needed
+            to be updated in the sequana_pipetools.options
 0.5.2     * add TrimmingOptions class intended at replacing CutadaptOptions
           * to avoid extra spaces, add '-o nospace' in all completion files
 0.5.1     * fix typo
