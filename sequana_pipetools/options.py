@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
-#
-#  This file is part of Sequana_pipetools software (Sequana project)
+##############################################################################
 #
 #  Copyright (c) 2020-2021 - Sequana Development Team
 #
-#  File author(s):
-#      Thomas Cokelaer <thomas.cokelaer@pasteur.fr>
-#
-#  Distributed under the terms of the 3-clause BSD license.
 #  The full license is in the LICENSE file, distributed with this software.
 #
 #  website: https://github.com/sequana/sequana
@@ -204,23 +198,25 @@ class KrakenOptions():
 class TrimmingOptions():
     description = """
     This section is dedicated to reads trimming and filtering and adapter
-    trimming. We currently provide supports for Cutadapt and FastP tools.
+    trimming. We currently provide supports for Cutadapt/Atropos and FastP tools.
 
     This section uniformizes the options for such tools
 
 
     """
-    def __init__(self, group_name="section_trimming"):
+    def __init__(self, 
+            group_name="section_trimming", 
+            software=['cutadapt', 'atropos', 'fastp']):
         self.group_name = group_name
+        self.software = software
+        self.software_default = "fastp"
 
     def add_options(self, parser):
 
         group = parser.add_argument_group(self.group_name, self.description)
 
-
-
         group.add_argument("--software-choice", dest="trimming_software_choice",
-            default="fastp", choices=["cutadapt", "atropos", "fastp"],
+            default=self.software_default, choices=self.software,
             help="""additional options understood by cutadapt""")
 
         group.add_argument("--disable-trimming", action="store_true",
@@ -272,24 +268,13 @@ class CutadaptOptions(): #pragma: no cover
     This section allows you to trim bases (--cutadapt-quality) with poor
     quality and/or remove adapters.
 
-    To remove adapters, several options are possible:
-
-    (1) you may use an experimental design file (--cutadapt-design-file),
-    in which case the type of adapters is also required with the option
-    --cutadapt-adapter-choice.
-    (2) specify the name of the adapters(--cutadapt-adapter-choice)
-    e.g. PCRFree. You may specify "universal" to remove universal
-    adapters only.
-    (3) provide the adapters directly as a string (or a file) using
-    --cutadapt-fwd (AND --cutadapt-rev" for paired-end data).
+    To remove adapters, you can provide the adapters directly as a 
+    string (or a file) using  --cutadapt-fwd (AND --cutadapt-rev" for paired-end data).
 
     If you set the --cutadapt-adapter-choice to 'none', fwd and reverse
     adapters are set to XXXX (see cutadapt documentation).
 
     """
-
-    adapters_choice = ["none", "universal", "Nextera", "Rubicon", "PCRFree",
-        "TruSeq", "SMARTer", "Small"]
 
     def __init__(self, group_name="section_cutadapt"):
         self.group_name = group_name
@@ -330,16 +315,6 @@ class CutadaptOptions(): #pragma: no cover
             default="cutadapt", choices=["cutadapt", "atropos"],
             help="Select the prefered tool. Default is cutadapt")
 
-        group.add_argument("--cutadapt-adapter-choice",
-            dest="cutadapt_adapter_choice",
-            default=None, choices=self.adapters_choice,
-            help="""Select the adapters used that may possibly still be
-                present in the sequences""")
-
-        group.add_argument("--cutadapt-design-file", dest="cutadapt_design_file",
-            default=None,
-            help="A valid CSV file with mapping of adapter index and sample name")
-
         group.add_argument("--cutadapt-mode", dest="cutadapt_mode",
             default="b", choices=["g", "a", "b"],
             help="""Mode used to remove adapters. g for 5', a for 3', b for both
@@ -352,39 +327,12 @@ class CutadaptOptions(): #pragma: no cover
     def check_options(self, options):
         """
         """
-        design = options.cutadapt_design_file
         adapter_choice = options.cutadapt_adapter_choice
         adapter_fwd = options.cutadapt_fwd
         adapter_rev = options.cutadapt_rev
 
-        if design:
-            if adapter_fwd or adapter_rev:
-                logger.critical(
-                    "When using --cutadapt-design-file, one must not"
-                    " set the forward/reverse adapters with --cutadapt-fwd"
-                    " and/or --cutadapt-rev\n\n" + self.description)
-                sys.exit(1) #pragma: no cover
-
-            # otherwise, we just check the format but we need the adapter choice
-            if options.cutadapt_adapter_choice in [None, 'none']:
-                logger.critical(
-                    "When using --cutadapt-design-file, you must also"
-                    " provide the type of adapters using --cutadapt-adapter-choice"
-                    " (set to one of %s )" % self.adapters_choice)
-                sys.exit(1) #pragma: no cover
-
-            from sequana import FindAdaptersFromDesign
-            fa = FindAdaptersFromDesign(design, options.cutadapt_adapter_choice)
-            try: 
-                fa.check()
-            except:
-                logger.critical("Your design file contains indexes not found "
-                    "in the list of adapters from {}".format(options.cutadapt_adapter_choice))
-                sys.exit(1)  #pragma: no cover
-
-        # No design provided here below
         # do we need to remove adapters at all ?
-        elif options.cutadapt_adapter_choice == "none":
+        if options.cutadapt_adapter_choice == "none":
             options.cutadapt_adapter_choice = None
             options.cutadapt_fwd = "XXXX"
             options.cutadapt_rev = "XXXX"
