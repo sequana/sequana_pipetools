@@ -1,13 +1,10 @@
-<<<<<<< Updated upstream
-##############################################################################
-=======
 #
 #  This file is part of Sequana_pipetools software (Sequana project)
->>>>>>> Stashed changes
 #
 #  Copyright (c) 2020-2021 - Sequana Development Team
 #
 #  The full license is in the LICENSE file, distributed with this software.
+#
 #  website: https://github.com/sequana/sequana
 #  documentation: http://sequana.readthedocs.io
 #
