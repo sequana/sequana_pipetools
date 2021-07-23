@@ -32,4 +32,4 @@ jobs:
     
     - name: Test with pytest
       run: |
-        pytest --cov-report term --cov=fitter
+        pytest --cov-report term --cov=sequana_pipetools
