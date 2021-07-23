@@ -42,8 +42,7 @@ jobs:
          
     - name: testing 
       run: |
-        pytest --cov-report term --cov=sequana_pipetools -k 'not complete'
-        
+        pytest --cov-report term --cov=sequana_pipetools 
     - name: coveralls            
       run: |
         echo $COVERALLS_REPO_TOKEN
