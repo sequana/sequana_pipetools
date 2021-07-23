@@ -44,7 +44,7 @@ jobs:
         
     - name: coveralls            
       run: |
-        coveralls
+        coveralls --service=gihtub
       env:
           GITHUB_TOKEN: ${{ github.token }}
           
