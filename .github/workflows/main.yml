@@ -35,8 +35,9 @@ jobs:
     - name: testing 
       run: |
         pytest --cov-report term --cov=sequana_pipetools -k 'not complete'
-    - name: coveralls      
-      uses: coverallsapp/github-action@master
+    - name: coveralls            
+      run: |
+        coveralls
       with:
           github-token: ${{ github.token }}
-          path-to-lcov: /home/runner/work/sequana_pipetools/sequana_pipetools/coverage/lcov.info
+          
