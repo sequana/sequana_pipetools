@@ -47,4 +47,4 @@ jobs:
         coveralls --service=gihtub
       env:
           GITHUB_TOKEN: ${{ github.token }}
-          
+          COVERALLS_REPO_TOKEN: ${{ secrets.coverall }}
