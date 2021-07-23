@@ -38,7 +38,7 @@ jobs:
     - name: install package itself
       run: |
          pip install .
-         pipi install sequana_pipetools
+         pip install sequana_rnaseq
          
     - name: testing 
       run: |
