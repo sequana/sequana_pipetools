@@ -44,6 +44,7 @@ jobs:
         
     - name: coveralls            
       run: |
+        echo $COVERALLS_REPO_TOKEN
         coveralls --service=gihtub
       env:
           GITHUB_TOKEN: ${{ github.token }}
