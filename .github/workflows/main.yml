@@ -27,9 +27,9 @@ jobs:
         echo $CONDA/bin >> $GITHUB_PATH
     - name: Install dependencies
       run: |
-        pip install -y coveralls
-        pip install -y pytest pytest-cov mock
-        pip install -y sequana_rnaseq
+        pip install coveralls
+        pip install  pytest pytest-cov mock
+        pip install  sequana_rnaseq
     - name: install package itself
       run: |
          pip install .
