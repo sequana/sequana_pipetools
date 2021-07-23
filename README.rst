@@ -4,7 +4,7 @@
     :target: https://pypi.python.org/pypi/sequana_pipetools
 
 .. image:: https://github.com/sequana/sequana_pipetools/actions/workflows/main.yml/badge.svg?branch=master
-    :target: http://travis-ci.com/sequana/sequana_pipetools
+    :target: https://github.com/sequana/sequana_pipetools/actions/workflows/main.yml
     
 .. image:: https://coveralls.io/repos/github/sequana/sequana_pipetools/badge.svg?branch=master
     :target: https://coveralls.io/github/sequana/sequana_pipetools?branch=master 
