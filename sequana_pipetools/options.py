@@ -10,7 +10,7 @@
 #
 ##############################################################################
 import sys
-from sequana_pipetools.misc import Colors, print_version, print_newest_version
+from .misc import print_version, print_newest_version
 
 
 __all__ = ["GeneralOptions", "SlurmOptions", "SnakemakeOptions",

@@ -12,9 +12,7 @@
 import sys
 import os
 import argparse
-import shutil
 from subprocess import check_call
-import subprocess
 
 __all__ = ['Complete']
 

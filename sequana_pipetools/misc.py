@@ -14,6 +14,14 @@ import os
 __all__ = ["Colors", "print_version", "error"]
 
 
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+
 class Colors:
     """
 
@@ -127,3 +135,7 @@ def print_newest_version(name=None):
             print(color.warning(
                 "A newest version ({}) is available for {}. You have {}".format(
                 new_version, pkg, local_version)))
+
+
+class PipetoolsException(Exception):
+    pass 

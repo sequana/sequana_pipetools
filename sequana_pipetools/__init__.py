@@ -12,5 +12,5 @@ logger = Logging("sequana_pipetools", "WARNING")
 import colorlog
 logger = colorlog.getLogger(logger.name)
 
-
+from .snaketools import Module, SequanaConfig
 

@@ -3,18 +3,18 @@ from mock import patch
 
 
 def test_complete():
-    c = Complete("rnaseq")
+    c = Complete("fastqc")
     c.save_completion_script()
 
 
 def test_main(monkeypatch):
     from sequana_pipetools.completion import main
     import sys
-    sys.argv = ["dummy", "--name", "rnaseq"]
+    sys.argv = ["dummy", "--name", "fastqc"]
     monkeypatch.setattr("builtins.input", lambda x: 'y')
     main()
 
-    sys.argv = ["dummy", "--name", "rnaseq", "--force"]
+    sys.argv = ["dummy", "--name", "fastqc", "--force"]
     main()
 
 

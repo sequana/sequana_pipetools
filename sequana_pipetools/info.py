@@ -18,7 +18,7 @@
 ##############################################################################
 """.. rubric:: misc utilities"""
 
-from sequana_pipetools.misc import Colors
+from .misc import Colors
 
 
 __all__ = ["sequana_epilog"]
