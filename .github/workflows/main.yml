@@ -32,8 +32,8 @@ jobs:
         
     - name: Install dependencies
       run: |
-        pip install coveralls
-        pip install  pytest pytest-cov mock
+        pip install coveralls pytest-cov
+        pip install -r requirements_dev.txt
         
     - name: install package itself
       run: |

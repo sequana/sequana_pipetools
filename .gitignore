@@ -20,6 +20,7 @@ lib64/
 parts/
 sdist/
 var/
+doc/_build
 *.egg-info/
 .installed.cfg
 *.egg
@@ -50,4 +51,4 @@ coverage.xml
 *.mo
 *.pot
 
-
+.vscode

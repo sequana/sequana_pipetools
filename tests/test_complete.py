@@ -1,5 +1,8 @@
+import sys
+import pytest
+
+from sequana_pipetools.completion import main
 from sequana_pipetools.completion import Complete
-from mock import patch
 
 
 def test_complete():
@@ -8,8 +11,6 @@ def test_complete():
 
 
 def test_main(monkeypatch):
-    from sequana_pipetools.completion import main
-    import sys
     sys.argv = ["dummy", "--name", "fastqc"]
     monkeypatch.setattr("builtins.input", lambda x: 'y')
     main()
@@ -17,20 +18,13 @@ def test_main(monkeypatch):
     sys.argv = ["dummy", "--name", "fastqc", "--force"]
     main()
 
-
     sys.argv = ["dummy", "--help"]
-    try:
+    with pytest.raises(SystemExit):
         main()
-        assert False
-    except:
-        assert True
 
     sys.argv = ["dummy"]
-    try:
+    with pytest.raises(SystemExit):
         main()
-        assert False
-    except:
-        assert True
 
     sys.argv = ["dummy", "--name", "all"]
     monkeypatch.setattr("builtins.input", lambda x: 'y')
