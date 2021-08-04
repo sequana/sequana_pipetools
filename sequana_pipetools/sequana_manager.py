@@ -328,13 +328,11 @@ class SequanaManager:
         # the schema if any
         if self.module.schema_config:
             schema_name = os.path.basename(self.module.schema_config)
-            shutil.copy(schema_name, "{}".format(self.workdir))
+            shutil.copy(self.module.schema_config, "{}".format(self.workdir))
 
             # This is the place where we can check the entire validity of the
             # inputs based on the schema
             if check_schema:
-                from sequana import SequanaConfig
-
                 cfg = SequanaConfig(f"{self.workdir}/{config_name}")
                 cfg.check_config_with_schema(f"{self.workdir}/{schema_name}")
 
