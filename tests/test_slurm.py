@@ -6,8 +6,8 @@ import sys
 #info = pkg_resources.get_distribution("sequana_pipetools")
 #sharedir = os.sep.join([info.location , "sequana_pipetools", 'data'])
 
-if os.path.exists("test/data"):
-    sharedir = "test/data"
+if os.path.exists("tests/data"):
+    sharedir = "tests/data"
 else:
     sharedir = "data"
 

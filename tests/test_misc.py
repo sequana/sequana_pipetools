@@ -1,4 +1,4 @@
-from sequana_pipetools.misc import Colors, print_version, error
+from sequana_pipetools.misc import Colors, print_version, print_newest_version, error
 
 
 
@@ -16,6 +16,7 @@ def test_colors():
     c.blue(msg)
     c.green(msg)
 
+
 def test_error():
     try:
         error("message", "rnaseq")
@@ -23,18 +24,19 @@ def test_error():
     except:
         assert True
 
-def test_print_version():
-    from sequana_pipetools.misc import print_version
-    try:print_version("quality_control")
-    except:pass
-    try:print_version("sequana_dummy")
-    except:pass
 
+def test_print_version():
+    try:
+        print_version("quality_control")
+    except:
+        pass
+    try:
+        print_version("sequana_dummy")
+    except:
+        pass
 
 
 def test_new_version():
-    
-    from sequana_pipetools.misc import print_newest_version
     print_newest_version()
     print_newest_version("sequana-pipetools")
     print_newest_version(["sequana-pipetools"])

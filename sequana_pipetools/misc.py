@@ -1,17 +1,30 @@
-#  This file is part of Sequana_pipetools software (Sequana Projetc)
 #
-#  Copyright (c) 2020-2021 - Sequana Development Team
+#  This file is part of Sequana software
 #
+#  Copyright (c) 2016-2021 - Sequana Dev Team (https://sequana.readthedocs.io)
+#
+#  Distributed under the terms of the 3-clause BSD license.
 #  The full license is in the LICENSE file, distributed with this software.
 #
-#  website: https://github.com/sequana/sequana
-#  documentation: http://sequana.readthedocs.io
-#
+#  Website:       https://github.com/sequana/sequana
+#  Documentation: http://sequana.readthedocs.io
+#  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import sys
-import os
+import pkg_resources
+import subprocess
+
 
 __all__ = ["Colors", "print_version", "error"]
+
+
+class Singleton(type):
+    _instances = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
 
 class Colors:
@@ -23,6 +36,7 @@ class Colors:
         print(color.failed("msg"))
 
     """
+
     PURPLE = "\033[95m"
     BLUE = "\033[94m"
     GREEN = "\033[92m"
@@ -62,26 +76,23 @@ class Colors:
 
 def error(msg, pipeline):
     color = Colors()
-    print(color.error("ERROR [sequana.{}]::".format(pipeline) +  msg), flush=True)
+    print(color.error("ERROR [sequana.{}]::".format(pipeline) + msg), flush=True)
     sys.exit(1)
 
 
 def print_version(name):
     try:
-        import pkg_resources
         version = pkg_resources.require("sequana")[0].version
         print("Sequana version used: {}".format(version))
-    except Exception as err: #pragma: no cover
-        print(err)
-        print("Sequana version used: ?".format(name))
+    except Exception:  # pragma: no cover
+        pass
 
     try:
-        import pkg_resources
         version = pkg_resources.require("sequana_pipetools")[0].version
         print("Sequana_pipetools version used: {}".format(version))
-    except Exception as err: #pragma: no cover
+    except Exception as err:  # pragma: no cover
         print(err)
-        print("Sequana_pipetools version used: ?".format(name))
+        print("Sequana_pipetools version used: ?")
 
     try:
         ver = pkg_resources.require("sequana_{}".format(name))[0].version
@@ -90,7 +101,7 @@ def print_version(name):
         print(err)
         print("pipeline sequana_{} version used: ?".format(name))
         sys.exit(1)
-    print(Colors().purple("\nHow to help ?\n- Please, consider citing us (see sequana.readthedocs.io)".format(version)))
+    print(Colors().purple("\nHow to help ?\n- Please, consider citing us (see sequana.readthedocs.io)"))
     print(Colors().purple("- Contribute to the code or documentation"))
     print(Colors().purple("- Fill issues on https://github.com/sequana/sequana/issues/new/choose"))
     print(Colors().purple("- Star us https://github.com/sequana/sequana/stargazers"))
@@ -99,16 +110,13 @@ def print_version(name):
 def print_newest_version(name=None):
     # This is slow
     color = Colors()
-    import subprocess
+
     ret = subprocess.run(["pip", "list", "--outdated"], stdout=subprocess.PIPE)
 
-    if name:
-        if isinstance(name, str):
-            names = [name]
-        elif isinstance(name, list):
-            names = name
-    else:
-        names = None
+    try:
+        names = name.split()
+    except AttributeError:
+        names = name
 
     for line in ret.stdout.strip().decode().split("\n"):
 
@@ -117,13 +125,21 @@ def print_newest_version(name=None):
                 pkg = line.split()[0]
                 local_version = line.split()[1]
                 new_version = line.split()[2]
-                print(color.warning(
-                    "A newest version ({}) is available for {}. You have {}".format(
-                    new_version, pkg, local_version)))
+                print(
+                    color.warning(
+                        "A newest version ({}) is available for {}. You have {}".format(new_version, pkg, local_version)
+                    )
+                )
         elif line.split()[0].startswith("sequana"):
             pkg = line.split()[0]
             local_version = line.split()[1]
             new_version = line.split()[2]
-            print(color.warning(
-                "A newest version ({}) is available for {}. You have {}".format(
-                new_version, pkg, local_version)))
+            print(
+                color.warning(
+                    "A newest version ({}) is available for {}. You have {}".format(new_version, pkg, local_version)
+                )
+            )
+
+
+class PipetoolsException(Exception):
+    pass

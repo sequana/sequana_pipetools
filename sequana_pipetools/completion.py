@@ -1,22 +1,23 @@
 #
 #  This file is part of Sequana software
 #
-#  Copyright (c) 2016-2021 Sequana Development Team
+#  Copyright (c) 2016-2021 - Sequana Dev Team (https://sequana.readthedocs.io)
 #
+#  Distributed under the terms of the 3-clause BSD license.
 #  The full license is in the LICENSE file, distributed with this software.
 #
-#  website: https://github.com/sequana/sequana
-#  documentation: http://sequana.readthedocs.io
-#
+#  Website:       https://github.com/sequana/sequana
+#  Documentation: http://sequana.readthedocs.io
+#  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import sys
 import os
 import argparse
-import shutil
-from subprocess import check_call
-import subprocess
+import pkgutil
+import importlib
 
-__all__ = ['Complete']
+
+__all__ = ["Complete"]
 
 
 class Options(argparse.ArgumentParser):
@@ -26,28 +27,35 @@ class Options(argparse.ArgumentParser):
     sequana_completion --name all
     """
 
-        super(Options, self).__init__(usage=usage, prog=prog,
+        super(Options, self).__init__(
+            usage=usage,
+            prog=prog,
             description="""This tool creates completion script for sequana
 pipelines. Each pipeline has its own in .config/sequana/pipelines that you can
 source at your convenience""",
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        )
 
-        self.add_argument("--force", action="store_true",
-            help="""overwrite files in sequana config pipeline directory""")
-        self.add_argument("--name",  type=str,
+        self.add_argument(
+            "--force", action="store_true", help="""overwrite files in sequana config pipeline directory"""
+        )
+        self.add_argument(
+            "--name",
+            type=str,
             help="""Name of a pipelines for which you wish to
             create the completion file. Set to a valid name ror to create all
-scripts, use --name all """)
+scripts, use --name all """,
+        )
 
 
-class Complete():
+class Complete:
 
     # For the -o default, this was an issue with compgen removing the slashes on
-    # directrories . Solution was found here: 
+    # directrories . Solution was found here:
     # https://stackoverflow.com/questions/12933362/getting-compgen-to-include-slashes-on-directories-when-looking-for-files
     # Before using this option, a second directory could not be completed e.g.
     # in --databases, only the first argument could be completed, which was
-    # really annoying. 
+    # really annoying.
 
     # KEEP '#version:' on first line as it it since it is used in
     # sequana/pipeline_common.py right now
@@ -85,6 +93,7 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
         self._pipeline_name = name
         self._init_config_file()
         self._init_version()
+
     pipeline_name = property(_get_pipeline_name, _set_pipeline_name)
 
     def save_completion_script(self):
@@ -96,13 +105,15 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
         arguments = self.get_arguments()
 
         with open(output_filename, "w") as fout:
-            fout.write(self.setup.format(version=self.pipeline_version,
-                                        pipeline_name=pipeline_name,
-                                         options=" ".join(arguments)))
+            fout.write(
+                self.setup.format(
+                    version=self.pipeline_version, pipeline_name=pipeline_name, options=" ".join(arguments)
+                )
+            )
             for action in self._actions:
                 option_name = action.option_strings[0]
                 if action.choices:
-                    option_choices = " ".join(action.choices )
+                    option_choices = " ".join(action.choices)
                     fout.write(self.set_option_with_choice(option_name, option_choices))
                 elif option_name.endswith("-directory"):
                     fout.write(self.set_option_directory(option_name))
@@ -115,42 +126,38 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
     def _init_config_file(self):
         # do not import sequana, save time, let us use easydev
         from easydev import CustomConfig
+
         configuration = CustomConfig("sequana", verbose=False)
         sequana_config_path = configuration.user_config_dir
         path = sequana_config_path + os.sep + "pipelines"
         if os.path.exists(path):
             pass
-        else: #pragma: no cover
+        else:  # pragma: no cover
             os.mkdir(path)
         self.config_path = path
         return path
 
     def _init_version(self):
-        import importlib
-        pname = self.pipeline_name
-        mod = importlib.import_module('sequana_pipelines.{}'.format(pname))
-        mod = importlib.import_module('sequana_pipelines.{}.main'.format(pname))
-        module = sys.modules['sequana_pipelines.{}'.format(self.pipeline_name)]
+        importlib.import_module("sequana_pipelines.{}".format(self.pipeline_name))
+        importlib.import_module("sequana_pipelines.{}.main".format(self.pipeline_name))
+        module = sys.modules["sequana_pipelines.{}".format(self.pipeline_name)]
         version = module.version
         self.pipeline_version = version
 
     def get_arguments(self):
-        import importlib
-        pname = self.pipeline_name
-        mod = importlib.import_module('sequana_pipelines.{}'.format(pname))
-        mod = importlib.import_module('sequana_pipelines.{}.main'.format(pname))
-        module = sys.modules['sequana_pipelines.{}'.format(self.pipeline_name)]
+        importlib.import_module("sequana_pipelines.{}".format(self.pipeline_name))
+        importlib.import_module("sequana_pipelines.{}.main".format(self.pipeline_name))
+        module = sys.modules["sequana_pipelines.{}".format(self.pipeline_name)]
 
-        main = module.__getattribute__('main')
+        main = module.__getattribute__("main")
         opt = main.Options()
         to_exclude = ["-h", "--help"]
-        self._actions = [a for a in opt._actions if a.option_strings[0] not in
-to_exclude]
+        self._actions = [a for a in opt._actions if a.option_strings[0] not in to_exclude]
         arguments = [a.option_strings[0] for a in self._actions]
         return arguments
 
     def set_option_with_choice(self, option_name, option_choices):
-        data =  f"""
+        data = f"""
             {option_name})
                 local choices="{option_choices}"
                 COMPREPLY=( $(compgen -W "${{choices}}" -- ${{cur}}) )
@@ -178,9 +185,6 @@ to_exclude]
         return data
 
 
-
-
-
 def main(args=None):
 
     if args is None:
@@ -192,20 +196,20 @@ def main(args=None):
     if len(args) == 1:
         user_options.parse_args(["prog", "--help"])
     else:
-       options = user_options.parse_args(args[1:])
+        options = user_options.parse_args(args[1:])
 
-    names = []
     if options.name == "all":
-        import pkgutil
-        import sequana_pipelines
-        for ff, module_name, valid in pkgutil.iter_modules(sequana_pipelines.__path__):
-            names.append(module_name)
+        try:
+            import sequana_pipelines
+
+            names = [module_name for ff, module_name, valid in pkgutil.iter_modules(sequana_pipelines.__path__)]
+        except ModuleNotFoundError:
+            pass
     else:
         names = [options.name]
 
     if options.force is False:
-        msg = ("This will replace files in ./config/sequana/pipelines. "
-            "Do you want to proceed y/n: ")
+        msg = "This will replace files in ./config/sequana/pipelines. " "Do you want to proceed y/n: "
         choice = input(msg)
     else:
         choice = "y"
@@ -217,10 +221,9 @@ def main(args=None):
             c.save_completion_script()
             print("source ~/.config/sequana/pipelines/{}.sh".format(name))
         print("\nto activate the completion")
-    else: #pragma: no cover
+    else:  # pragma: no cover
         print("Stopping creation of completion scripts")
 
 
-if __name__ == "__main__": #pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     main()
-

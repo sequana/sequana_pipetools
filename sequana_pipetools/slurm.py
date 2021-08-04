@@ -1,13 +1,14 @@
 #
 #  This file is part of Sequana software
 #
-#  Copyright (c) 2016-2021 - Sequana Development Team
+#  Copyright (c) 2016-2021 - Sequana Dev Team (https://sequana.readthedocs.io)
 #
+#  Distributed under the terms of the 3-clause BSD license.
 #  The full license is in the LICENSE file, distributed with this software.
 #
-#  website: https://github.com/sequana/sequana
-#  documentation: http://sequana.readthedocs.io
-#
+#  Website:       https://github.com/sequana/sequana
+#  Documentation: http://sequana.readthedocs.io
+#  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import os
 import sys
@@ -15,14 +16,11 @@ import re
 import argparse
 from pathlib import Path
 import parse
-import re
 
 
 import colorlog
+
 logger = colorlog.getLogger(__name__)
-
-
-__all__ = ['Development']
 
 
 class DebugJob:
@@ -50,11 +48,7 @@ class DebugJob:
         self.path = Path(path)
         self.context = context
         self.slurm_out = sorted([f for f in self.path.glob("slurm*.out")])
-        print(
-            "Found {} slurm files to introspect. Please wait.".format(
-                len(self.slurm_out)
-            )
-        )
+        print("Found {} slurm files to introspect. Please wait.".format(len(self.slurm_out)))
         if not self.slurm_out:
             logger.warning(f"No slurm*.out files were found in {path}")
             sys.exit(0)
@@ -88,17 +82,13 @@ class DebugJob:
             if "log" in e:
                 message += f"Rule: {e['rule']}, SlurmID: {e['slurm_id']}\n"
                 message += self._get_error_message(self.path / e["log"])
-                message += self._get_error_message(
-                    self.path / ("slurm-" + str(e["slurm_id"]) + ".out")
-                )
+                message += self._get_error_message(self.path / ("slurm-" + str(e["slurm_id"]) + ".out"))
             if "hint" in e:
                 message += f" - slurm file: {e['slurm_id']}"
                 message += "; Hints: {}".format(e["hint"])
             else:
                 message += f"Rule: {e['rule']}, SlurmID: {e['slurm_id']}\n"
-                message += self._get_error_message(
-                    self.path / ("slurm-" + str(e["slurm_id"]) + ".out")
-                )
+                message += self._get_error_message(self.path / ("slurm-" + str(e["slurm_id"]) + ".out"))
 
         message += "\n" + "#" * 80
 
@@ -111,19 +101,13 @@ class DebugJob:
         with open(log_file, "r") as f:
 
             # Get lines with "error" in:
-            error_lines = [
-                i
-                for i, line in enumerate(f)
-                if re.findall("error", line, re.IGNORECASE)
-            ]
+            error_lines = [i for i, line in enumerate(f) if re.findall("error", line, re.IGNORECASE)]
 
             if not error_lines:
                 return "-" * 80 + f"\nNo error found in {log_file}.\n" + "-" * 80 + "\n"
 
             # Add a number of lines around (ie the context)
-            lines_to_print = [
-                list(range(i - self.context, i + self.context + 1)) for i in error_lines
-            ]
+            lines_to_print = [list(range(i - self.context, i + self.context + 1)) for i in error_lines]
             # Flats and uniquify the list of list
             lines_to_print = set([y for x in lines_to_print for y in x])
 
@@ -199,9 +183,7 @@ summary of errorse""",
             default=".",
             help="""Directory where to introspect slurm jobs""",
         )
-        self.add_argument(
-            "--context", type=int, default=5, help="""Number of errors to show"""
-        )
+        self.add_argument("--context", type=int, default=5, help="""Number of errors to show""")
 
 
 def main(args=None):
