@@ -355,7 +355,7 @@ class SequanaManager:
         with open(self.workdir + "/.sequana/info.txt", "w") as fout:
             from . import version
 
-            fout.write(f"# sequana_pipetooles version: {version}\n")
+            fout.write(f"# sequana_pipetools version: {version}\n")
             fout.write(f"# sequana_{self.name} version: {self._get_package_version()}\n")
             cmd1 = os.path.basename(sys.argv[0])
             fout.write(" ".join([cmd1] + sys.argv[1:]))
