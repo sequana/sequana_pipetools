@@ -16,3 +16,4 @@ import colorlog
 logger = colorlog.getLogger(logger.name)
 
 from .snaketools import Module, SequanaConfig
+from .sequana_manager import SequanaManager
