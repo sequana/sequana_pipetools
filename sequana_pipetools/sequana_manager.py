@@ -333,8 +333,6 @@ class SequanaManager:
             # This is the place where we can check the entire validity of the
             # inputs based on the schema
             if check_schema:
-                from sequana import SequanaConfig
-
                 cfg = SequanaConfig(f"{self.workdir}/{config_name}")
                 cfg.check_config_with_schema(f"{self.workdir}/{schema_name}")
 
