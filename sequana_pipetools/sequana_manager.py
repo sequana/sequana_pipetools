@@ -16,10 +16,11 @@ import shutil
 import subprocess
 import sys
 
-from .snaketools import Module, SequanaConfig
+from .snaketools import Module, SequanaConfig, FastQFactory
 from .misc import Colors, print_version
 
 import colorlog
+
 logger = colorlog.getLogger(__name__)
 
 
@@ -234,8 +235,6 @@ class SequanaManager:
                 sys.exit(1)
 
     def check_fastq_files(self):
-        from sequana import FastQFactory
-
         cfg = self.config.config
         try:
             ff = FastQFactory(cfg.input_directory + os.sep + cfg.input_pattern, read_tag=cfg.input_readtag)
@@ -354,11 +353,10 @@ class SequanaManager:
 
         # Save an info.txt with the command used
         with open(self.workdir + "/.sequana/info.txt", "w") as fout:
-            #
-            from sequana import version
+            from . import version
 
-            fout.write("# sequana version: {}\n".format(version))
-            fout.write("# sequana_{} version: {}\n".format(self.name, self._get_package_version()))
+            fout.write(f"# sequana_pipetools version: {version}\n")
+            fout.write(f"# sequana_{self.name} version: {self._get_package_version()}\n")
             cmd1 = os.path.basename(sys.argv[0])
             fout.write(" ".join([cmd1] + sys.argv[1:]))
 
