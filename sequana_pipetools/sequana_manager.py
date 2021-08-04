@@ -412,3 +412,14 @@ class SequanaManager:
                 config[section_name][option_name] = getattr(options, section_name + "_" + option_name)
             except AttributeError:
                 logger.debug("update_config. Could not find {}".format(option_name))
+
+
+def get_pipeline_location(pipeline_name):
+    class Opt:
+        pass
+
+    options = Opt()
+    options.workdir = "."
+    options.version = False
+    p = SequanaManager(options, pipeline_name)
+    return p._get_package_location()
