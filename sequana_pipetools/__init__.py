@@ -16,4 +16,4 @@ import colorlog
 logger = colorlog.getLogger(logger.name)
 
 from .snaketools import Module, SequanaConfig
-from .sequana_manager import SequanaManager
+from .sequana_manager import SequanaManager, get_pipeline_location
