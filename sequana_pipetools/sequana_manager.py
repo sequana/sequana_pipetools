@@ -32,8 +32,10 @@ class SequanaManager:
 
         options must be an object with at least the following attributes:
 
-        - version
+        - version to True or False
         - working_directory
+        - force set to True for testing
+        - job set to 1
 
         The working_directory is uesd to copy the pipeline in it.
 
@@ -228,7 +230,7 @@ class SequanaManager:
         logger.info(f"Found {len(filenames)} files matching your input  pattern ({cfg.input_pattern})")
 
         if len(filenames) == 0:
-            logger.critical("Found no files with your matching pattern ({})".format(cfg.input_pattern))
+            logger.critical(f"Found no files with your matching pattern ({cfg.input_pattern}) in {cfg.input_directory}")
             if "*" not in cfg.input_pattern and "?" not in cfg.input_pattern:
                 logger.critical("No wildcard used in your input pattern, please use a * or ? character")
             if stop_on_error:

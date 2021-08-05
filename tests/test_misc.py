@@ -37,6 +37,8 @@ def test_print_version():
 
 
 def test_new_version():
-    print_newest_version()
-    print_newest_version("sequana-pipetools")
-    print_newest_version(["sequana-pipetools"])
+    try:
+        print_newest_version("quality_control")
+        assert False
+    except NotImplementedError:
+        assert True
