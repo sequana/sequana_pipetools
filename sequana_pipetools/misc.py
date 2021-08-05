@@ -108,8 +108,12 @@ def print_version(name):
 
 
 def print_newest_version(name=None):
-    # This is slow
-    color = Colors()
+    # the previous version usig pip list --outdated is far too slow.
+    raise NotImplementedError
+
+    
+    """DEPRECATED will be replace by a check on the websites of the pipelines
+    once we have a proper integration with pypi on github itself.
 
     ret = subprocess.run(["pip", "list", "--outdated"], stdout=subprocess.PIPE)
 
@@ -139,7 +143,7 @@ def print_newest_version(name=None):
                     "A newest version ({}) is available for {}. You have {}".format(new_version, pkg, local_version)
                 )
             )
-
+        """
 
 class PipetoolsException(Exception):
     pass
