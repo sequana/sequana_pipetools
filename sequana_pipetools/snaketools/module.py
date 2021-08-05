@@ -181,10 +181,11 @@ or open a Python shell and type::
 
     def _get_schema_config(self):
         # The default config file for that module
-        filename = self._get_file("schema.yaml")
-        if filename is None:
-            # or the sequana default config file
-            filename = self._get_file("../schema.yaml")
+        default_filenames = ("schema.yaml", "schema.yml", "../schema.yaml", "../schema.yml")
+        for default_filename in default_filenames:
+            filename = self._get_file(default_filename)
+            if filename:
+                return filename
         return filename
 
     schema_config = property(_get_schema_config, doc="full path to the schema config file of the module")
