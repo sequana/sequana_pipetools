@@ -243,7 +243,7 @@ def test_pipeline_manager_generic(tmpdir):
     file1 = os.sep.join((DATA_DIR, "Hm2_GTGAAA_L005_R1_001.fastq.gz"))
     cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
     cfg.config.input_pattern = "Hm*gz"
-    pm = snaketools.pipeline_manager.PipelineManagerGeneric("quality_control", cfg)
+    pm = snaketools.pipeline_manager.PipelineManagerGeneric("fastqc", cfg)
     pm.getlogdir("fastqc")
     pm.getwkdir("fastqc")
     pm.getrawdata()
@@ -337,10 +337,11 @@ def test_onsuccess(tmpdir):
     onsuc.makefile_cleanup = p2
 
 
-def test_onsuccess_cleaner():
-    fh = tempfile.TemporaryDirectory()
+def test_onsuccess_cleaner(tmpdir):
+    directory = tmpdir.mkdir("onsuccess")
+    p1 = directory.join("Makefile")
     onsucc = snaketools.OnSuccessCleaner()
-    onsucc.makefile_filename = fh.name + os.sep + "Makefile"
+    onsucc.makefile_filename = str(p1)
     onsucc.add_bundle()
     onsucc.add_makefile()
 

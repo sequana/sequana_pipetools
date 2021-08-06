@@ -19,7 +19,7 @@ def test_colors():
 
 def test_error():
     try:
-        error("message", "rnaseq")
+        error("message", "fastqc")
         assert False
     except:
         assert True
@@ -27,7 +27,7 @@ def test_error():
 
 def test_print_version():
     try:
-        print_version("quality_control")
+        print_version("fastqc")
     except:
         pass
     try:
@@ -38,7 +38,7 @@ def test_print_version():
 
 def test_new_version():
     try:
-        print_newest_version("quality_control")
+        print_newest_version("fastqc")
         assert False
     except NotImplementedError:
         assert True
