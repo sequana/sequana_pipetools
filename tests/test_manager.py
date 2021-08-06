@@ -25,9 +25,10 @@ def test_sequana_manager(tmpdir):
     pm = SequanaManager(
         AttrDict(**{"version": False, "workdir": wkdir, 
                     "jobs":1, "run_mode": None, "force": True}), 
-        "quality_control")
+        "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
     pm.config.config.input_pattern = f"Hm2*gz"
+    pm.config.config.input_readtag = f"_R[12]_"
 
     pm.setup()
     pm.teardown()
@@ -35,5 +36,5 @@ def test_sequana_manager(tmpdir):
 
 
 def test_location():
-    get_pipeline_location("quality_control")
+    get_pipeline_location("fastqc")
 

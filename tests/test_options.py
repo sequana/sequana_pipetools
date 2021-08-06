@@ -9,13 +9,13 @@ def test_misc():
     sys.argv.append("--version")
     from sequana_pipetools.options import init_pipeline
     try:
-        init_pipeline("rnaseq")
+        init_pipeline("fastqc")
     except:
         pass
     sys.argv.remove("--version")
     sys.argv.append("--deps")
     try:
-        init_pipeline("rnaseq")
+        init_pipeline("fastqc")
     except:
         pass
 

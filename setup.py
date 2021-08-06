@@ -51,7 +51,7 @@ setup(
     # package installation
     packages=find_packages(exclude=["tests*"]),
     install_requires=open("requirements.txt").read(),
-    tests_require=["pytest", "coverage", "pytest-cov", "sequana_rnaseq", "sequana_quality_control"],
+    tests_require=["pytest", "coverage", "pytest-cov"],
     # This is recursive include of data files
     exclude_package_data={"": ["__pycache__"]},
     package_data={

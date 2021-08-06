@@ -18,32 +18,32 @@ jobs:
     steps:
     - name: checkout git repo
       uses: actions/checkout@v2
-      
+
     - name: Set up Python 3.X
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python }}
-        
-    - name: conda 
+
+    - name: conda
       run: |
         # $CONDA is an environment variable pointing to the root of the miniconda directory
-        echo $CONDA/bin >> $GITHUB_PATH        
+        echo $CONDA/bin >> $GITHUB_PATH
         conda update ruamel_yaml
-        
+
     - name: Install dependencies
       run: |
         pip install coveralls pytest-cov
         pip install -r requirements_dev.txt
-        
+
     - name: install package itself
       run: |
          pip install .
-         pip install sequana_rnaseq
-         
-    - name: testing 
+         pip install sequana_fastqc
+
+    - name: testing
       run: |
-        pytest --cov-report term --cov=sequana_pipetools 
-    - name: coveralls            
+        pytest --cov-report term --cov=sequana_pipetools
+    - name: coveralls
       run: |
         echo $COVERALLS_REPO_TOKEN
         coveralls --service=github
