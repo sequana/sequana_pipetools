@@ -170,6 +170,9 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.6.0     * Move all modules related to pipelines rom sequana into 
+            sequana_pipetools; This release should now be the entry point for 
+            all Sequana pipelines (no need to import sequana itself).
 0.5.3     * feature removed in sequana to deal with adapter removal and
             changes updated in the package (removed the 'design' option 
             from the cutadapt rules and needed)
