@@ -57,7 +57,6 @@ setup(
         "pytest-cov",
         "sequana_rnaseq",
         "sequana_quality_control",
-        "sphinx",
     ],
     # This is recursive include of data files
     exclude_package_data={"": ["__pycache__"]},
