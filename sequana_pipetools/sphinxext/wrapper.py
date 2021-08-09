@@ -27,14 +27,19 @@ def get_rule_doc(name):
     """Decode and return the docstring(s) of a sequana wrapper."""
 
 
-    url ="https://raw.githubusercontent.com/sequana/sequana-wrappers/master/sequana-wrappers/"
-    r = requests.get(f"{url}/{name}/example.smk")
-    
+    url ="https://raw.githubusercontent.com/sequana/sequana-wrappers/main/wrappers"
+    url = f"{url}/{name}/example.smk"
+    r = requests.get(url)
+
+    title = f"**{name}**\n\n"
     data = r.content.decode()
     # Try to identify the rule and therefore possible docstring
     # It may be a standard rule or a dynamic rule !
     # standard one
     rulename_tag = "rule %s" % name
+    if "404: Not Found" in data:
+        print(f"URL not found: {url}")
+        return title + "**docstring for {name} wrapper not yet available (no example.smk found)**"
     if rulename_tag in data:
         data = data.split(rulename_tag, 1)[1]
     else:
@@ -62,7 +67,10 @@ def get_rule_doc(name):
         return "no end of docstring found for %s " % name
 
     docstring = data[start + 3 : end]
-    return docstring
+    code = data[end+3:]
+    code = "\n".join(["    " + line for line in code.split("\n")])
+    rst = title + docstring + f"\nExample:: \n\n    rule {name}:" + code
+    return rst
 
 
 class snakemake_base(Body, Element):
@@ -109,7 +117,7 @@ def setup(app):
         w = Writer()
         try:
             res = core.publish_parts(node.rule_docstring, writer=w)["html_body"]
-            self.body.append('<div class="sequana_wrapper">' + res + "</div>")
+            self.body.append('<div class="sequana_wrapper">' + res +"</div><br>")
             node.children = []
         except Exception as err:
             print(err)
@@ -132,7 +140,7 @@ def setup(app):
     )
 
     return {
-        "version": "todo in sequana_pipetools.sphinext",
+        "version": "todo in sequana_pipetools.sphinxext",
         "parallel_read_safe": True,
         "parallel_write_safe": True,
     }

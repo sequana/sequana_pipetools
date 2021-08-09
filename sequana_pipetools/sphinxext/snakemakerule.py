@@ -145,7 +145,7 @@ def setup(app):
     )
 
     return {
-        "version": "todo in sequana_pipetools.sphinext",
+        "version": "todo in sequana_pipetools.sphinxext",
         "parallel_read_safe": True,
         "parallel_write_safe": True,
     }
