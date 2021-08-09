@@ -27,14 +27,13 @@ def get_rule_doc(name):
     """Decode and return the docstring(s) of a sequana wrapper."""
 
 
-    r = requests.get("https://raw.githubusercontent.com/sequana/sequana-wrappers/master/sequana-wrappers/{name}/test/Snakefile")
+    url ="https://raw.githubusercontent.com/sequana/sequana-wrappers/master/sequana-wrappers/"
+    r = requests.get(f"{url}/{name}/example.smk")
     
     data = r.content.decode()
     # Try to identify the rule and therefore possible docstring
     # It may be a standard rule or a dynamic rule !
     # standard one
-    if name.endswith("_dynamic"):
-        name = name[:-8]
     rulename_tag = "rule %s" % name
     if rulename_tag in data:
         data = data.split(rulename_tag, 1)[1]
@@ -71,13 +70,17 @@ class snakemake_base(Body, Element):
         return []
 
 
-class sequana_wrappers(snakemake_base):
+class sequana_wrapper(snakemake_base):
     pass
 
 
 def run(content, node_class, state, content_offset):
     node = node_class("")  # shall we add something here ?
-    node.rule_docstring = get_rule_doc(content[0])
+    name = content[0]
+    try:
+        node.rule_docstring = get_rule_doc(name)
+    except Exception:
+        node.rule_docstring(f"Could not read or interpret documentation for {name}")
     state.nested_parse(content, content_offset, node)
     return [node]
 
