@@ -65,7 +65,8 @@ class SequanaManager:
         self.module = Module(self.name)
         if self.module.is_pipeline() is False:
             raise ValueError("{} does not seem to be installed or is not a valid pipeline".format(self.name))
-        self.module.is_executable()
+        self.module.check()
+        #self.module.is_executable()
 
         # If this is a pipeline, let us load its config file
         # Do we start from an existing project with a valid config file
