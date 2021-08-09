@@ -28,7 +28,7 @@ intersphinx_mapping = {}
 
 
 def test_sequana_pipeline():
-    res = sequana_pipeline.get_rule_doc("quality_control")
+    res = sequana_pipeline.get_rule_doc("fastqc")
 
     with tempfile.TemporaryDirectory() as tmpdir:
 
@@ -42,6 +42,22 @@ def test_sequana_pipeline():
 
         app = Sphinx(tmpdir, tmpdir, tmpdir + "/temp", tmpdir, "html")
         app.build()
+
+def test_wrapper():
+    with tempfile.TemporaryDirectory() as tmpdir:
+
+        # Create the conf and index in tmpdir
+        with open(tmpdir + os.sep + "index.rst", "w") as fh:
+            fh.write(".. sequana_wrappers:: multiqc\n")
+
+        with open(tmpdir + os.sep + "conf.py", "w") as fh:
+            print(fh.name)
+            fh.write(data)
+
+        app = Sphinx(tmpdir, tmpdir, tmpdir + "/temp", tmpdir, "html")
+        app.build()
+
+
 
 
 def test_doc():

@@ -23,7 +23,7 @@ def test_sequana_manager(tmpdir):
     # normal behaviour
     from easydev import AttrDict
     pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": wkdir, 
+        AttrDict(**{"version": False, "workdir": wkdir,'level':"INFO", 
                     "jobs":1, "run_mode": None, "force": True}), 
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"

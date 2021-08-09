@@ -280,13 +280,12 @@ or open a Python shell and type::
 
     required_binaries = property(_get_required_binaries)
 
-    def is_executable(self, verbose=False):
+    def is_executable(self):
         """Is the module executable
 
         A Pipeline Module should have a requirements.txt file that is
         introspected to check if all executables are available;
 
-        :param verbose:
         :return: a tuple. First element is a boolean to tell if it executable.
             Second element is the list of missing executables.
         """
@@ -335,10 +334,6 @@ or open a Python shell and type::
             except Exception:
                 # is this a Python code ?
                 if len(easydev.get_dependencies(req)) == 0:
-                    logger.error(
-                        f"{req} requirement not found !! Let us move on but you must"
-                        " probably install it to benefit from all fonctionalities."
-                    )
                     executable = False
                     missing.append(req)
                 else:
@@ -346,15 +341,25 @@ or open a Python shell and type::
         return executable, missing
 
     def check(self, mode="warning"):
-        executable, missing = self.is_executable(verbose=False)
+
+        executable, missing = self.is_executable()
+
         if executable is False:
-            _ = self.is_executable(verbose=True)
-            txt = "Some executable or Python packages are not available:\n"
-            txt += "Some functionalities may not work "
+            #_ = self.is_executable()
+            missing = " ".join(missing)
+            txt = f"""Some executable or Python packages are not available: {missing}
+Some functionalities may not work. Consider adding them with  conda or damona (singularity based): 
+
+            pip install damona
+            damona install sequana_tools 
+            damona activate sequana_tools
+
+            """
+
             if mode == "warning":
-                logger.warning(txt)
+                logger.critical(txt)
             elif mode == "error":
-                txt += "Use \n conda install missing_package_name;"
+                txt += "Use \n conda install {missing};"
                 for this in missing:
                     txt += "- %s\n" % this
                 raise ValueError(txt)

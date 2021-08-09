@@ -42,7 +42,13 @@ class SequanaManager:
 
         .. todo:: allows options to be None and fill it with miminum contents
         """
-        # logger.setLevel(options.level)
+        # the logger must be defined here because from a pipeline, it may not
+        # have been defined yet.
+        try:
+            logger.setLevel(options.level)
+        except AttributeError:
+            logger.warning("Your pipeline does not have a level option.")
+            options.level = "INFO"
 
         self.options = options
 
@@ -59,7 +65,8 @@ class SequanaManager:
         self.module = Module(self.name)
         if self.module.is_pipeline() is False:
             raise ValueError("{} does not seem to be installed or is not a valid pipeline".format(self.name))
-        self.module.is_executable()
+        self.module.check()
+        #self.module.is_executable()
 
         # If this is a pipeline, let us load its config file
         # Do we start from an existing project with a valid config file
@@ -170,7 +177,22 @@ class SequanaManager:
         logger.info("Welcome to Sequana pipelines suite (sequana.readthedocs.io)")
 
         snakefilename = os.path.basename(self.module.snakefile)
-        self.command = f"#!/bin/bash\nsnakemake -s {snakefilename} --stats stats.txt"
+        self.command = f"#!/bin/bash\nsnakemake -s {snakefilename} "
+
+        if 'SEQUANA_WRAPPERS' in os.environ:
+            sequana_wrappers = os.environ['SEQUANA_WRAPPERS']
+            self.command += f" --wrapper-prefix git+file:{sequana_wrappers} "
+            logger.info(f"Using sequana-wrappers from {sequana_wrappers}")
+        else:
+            logger.warning(
+                "\nSequana pipelines required the SEQUANA_WRAPPERS variable"
+                " to be defined. You can type \n\n"
+                "     export SEQUANA_WRAPPERS=https://github.com/sequana/sequana-wrappers \n\n"
+                "now or later. Under linux, consider adding the previous line in"
+                "your HOME/.bashrc for instance. If you are a developer you can"
+                "have a local clone of the github repositoty and set the"
+                "SEQUANA_WRAPPERS to the local directory")
+
 
         # FIXME a job is not a core. Ideally, we should add a core option
         if self._guess_scheduler() == "local":
@@ -209,9 +231,9 @@ class SequanaManager:
         # Now we create the directory to store the config/pipeline
         if os.path.exists(self.workdir):
             if self.options.force:
-                print(self.colors.warning(f"Path {self.workdir} exists already but you set --force to overwrite it"))
+                logger.warning(f"Path {self.workdir} exists already but you set --force to overwrite it")
             else:
-                print(self.colors.failed(f"Output path {self.workdir} exists already. Use --force"))
+                logger.error(f"Output path {self.workdir} exists already. Use --force to overwrite")
                 sys.exit()
         else:
             os.mkdir(self.workdir)
