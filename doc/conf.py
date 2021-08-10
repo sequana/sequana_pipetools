@@ -22,25 +22,15 @@ sys.path.insert(0, os.path.abspath('sphinxext'))
 
 pkg_name = "sequana_pipetools"
 
-# This is for ReadTheDoc
-import matplotlib
-matplotlib.use('Agg')
-
 
 import pkg_resources
 version = pkg_resources.require(pkg_name)[0].version
 
-import matplotlib
-import matplotlib.sphinxext
-
 release = version
 author = "Thomas Cokelaer"
 title = "sequana_pipetools"
-copyright = author + ", 2020"
+copyright = author + ", 2021"
 project = 'Sequana pipetools'
-
-import easydev
-from easydev import get_path_sphinx_themes
 
 
 # -- General configuration -----------------------------------------------------
@@ -153,21 +143,13 @@ numpydoc_show_class_members = False
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-on_rtd = os.environ.get("READTHEDOCS", None) == "True"
-if not on_rtd:
-    import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-else:
-    html_theme = "default"
+import sphinx_rtd_theme
+html_theme = 'sphinx_rtd_theme'
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
 # the user theme contains the otpions 'homepage', which is populated here
 #html_theme_options = {'homepage': init_sphinx.url}
 # Add any paths that contain custom themes here, relative to this directory.
-#html_theme_path = [get_path_sphinx_themes()]
 
 
 
