@@ -1,4 +1,5 @@
 easydev
 parse
 ruamel.yaml
+pykwalify
 sphinx

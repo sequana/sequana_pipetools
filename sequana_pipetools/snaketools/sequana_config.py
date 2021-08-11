@@ -17,6 +17,7 @@ import warnings
 
 from easydev import AttrDict, TempFile
 from urllib.request import urlretrieve
+from pykwalify.core import Core
 import ruamel.yaml
 
 import colorlog
@@ -102,9 +103,9 @@ class SequanaConfig:
             self.cleanup()  # changes the config and yaml_code to remove %()s
 
         # get the YAML formatted code and save it
-        yaml = ruamel.yaml.YAML() 
+        yaml = ruamel.yaml.YAML()
         yaml.default_style = ""
-        yaml.indent = 4 
+        yaml.indent = 4
         yaml.block_seq_indent = 4
 
         with open(filename, 'w') as fh:
@@ -199,14 +200,12 @@ class SequanaConfig:
                     output = requirement.split("/")[-1]
                     urlretrieve(requirement, filename=os.sep.join((target, output)))
 
-    def check_config_with_schema(self, schemafile):
+    def check_config_with_schema(self, schemafile, use_ext_script=False):
         """Check the config file with respect to a schema file
 
         Sequana pipelines should have a schema file in the Module.
 
         """
-        from pykwalify.core import Core
-
         # causes issue with ruamel.yaml 0.12.13. Works for 0.15
         warnings.simplefilter("ignore", ruamel.yaml.error.UnsafeLoaderWarning)
         try:
