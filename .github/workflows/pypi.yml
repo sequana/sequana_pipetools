@@ -19,7 +19,7 @@ jobs:
     - name: Build source tarball
       run: >-
           rm -rf dist
-          python setup.py sdist --outdir dist/
+          python setup.py sdist
  
     - name: Publish distribution to Test PyPI
       uses: pypa/gh-action-pypi-publish@master
