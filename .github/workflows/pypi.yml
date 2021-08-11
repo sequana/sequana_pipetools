@@ -13,13 +13,14 @@ jobs:
         python-version: 3.7
 
     - name: Install package 
-      run: >-
+      run: |
           pip install build
 
     - name: Build source tarball
-      run: >-
-          rm -rf dist
+      run: |
+          rm -rf dist;
           python setup.py sdist
+          echo 
  
     - name: Publish distribution to Test PyPI
       uses: pypa/gh-action-pypi-publish@master
