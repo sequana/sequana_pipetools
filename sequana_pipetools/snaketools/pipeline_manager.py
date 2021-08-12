@@ -32,10 +32,13 @@ class PipelineManagerBase:
 
     """
 
-    def __init__(self, name, config):
+    def __init__(self, name, config, schema=None):
         # Make sure the config is valid
         self.name = name
         cfg = SequanaConfig(config)
+        if schema:
+            if not cfg.check_config_with_schema(schema):
+                raise PipetoolsException("Please check the config file, some mandatory values are missing.")
 
         # Used by the dynamic rules to defined the location where to copy
         # dynamic rules.
@@ -46,7 +49,7 @@ class PipelineManagerBase:
         self.config.pipeline_name = name
 
     def error(self, msg):
-        msg += "\nPlease check the content of your config file. You must have " "input_directory set, or input_pattern."
+        msg += "\nPlease check the content of your config file. You must have input_directory set, or input_pattern."
         raise PipetoolsException(msg)
 
     def getname(self, rulename, suffix=None):
@@ -60,7 +63,7 @@ class PipelineManagerBase:
         return "{1}{0}report_{2}_{1}{0}".format(os.sep, self.sample, acronym)
 
     def getwkdir(self, rulename):
-        return self.sample + os.sep + rulename + os.sep
+        return os.path.join(self.sample, rulename)
 
     def getlogdir(self, rulename):
         """Create log directory: ``*/sample/logs/sample_rule.logs``"""
@@ -283,7 +286,7 @@ class PipelineManager(PipelineManagerGeneric):
 
     """
 
-    def __init__(self, name, config, pattern="*.fastq.gz", fastq=True):
+    def __init__(self, name, config, pattern="*.fastq.gz", fastq=True, schema=None):
         """.. rubric:: Constructor
 
         :param name: name of the pipeline
@@ -291,7 +294,7 @@ class PipelineManager(PipelineManagerGeneric):
         :param pattern: a default pattern if not provided in the configuration
             file as an *input_pattern* field.
         """
-        super().__init__(name, config)
+        super().__init__(name, config, schema)
 
         cfg = SequanaConfig(config)
         cfg.config.pipeline_name = self.name
