@@ -2,4 +2,4 @@ easydev
 parse
 ruamel.yaml
 pykwalify
-sphinx
+importlib_resources

@@ -98,3 +98,36 @@ def test_copy_requirements(tmpdir):
 def test_check_config_with_schema():
     schema = Module("fastqc").schema_config
     SequanaConfig(Module("fastqc").config).check_config_with_schema(schema)
+
+
+def test_check_bad_config_with_schema():
+    cfg_name = os.path.join(test_dir, "data", "config.yml")
+    schema = os.path.join(test_dir, "data", "schema.yml")
+
+    cfg = SequanaConfig(cfg_name)
+    # threads can not be a string
+    cfg.config["busco"]["threads"] = ""
+    cfg._update_yaml()
+    assert not cfg.check_config_with_schema(schema)
+
+
+def test_check_config_with_schema_and_ext(tmpdir):
+    cfg_name = os.path.join(test_dir, "data", "config.yml")
+    schema = os.path.join(test_dir, "data", "schema.yml")
+
+    cfg = SequanaConfig(cfg_name)
+    assert cfg.check_config_with_schema(schema)
+
+    # not nullable key cannot be empty
+    cfg.config["busco"]["lineage"] = ""
+    cfg._update_yaml()
+    assert not cfg.check_config_with_schema(schema)
+
+    # but it is not a problem the rule is not necessary
+    cfg.config["busco"]["do"] = False
+    cfg._update_yaml()
+    assert cfg.check_config_with_schema(schema)
+
+    cfg.config["busco"].update({"do": True, "lineage": "bacteria", "threads": ""})
+    cfg._update_yaml()
+    assert not cfg.check_config_with_schema(schema)

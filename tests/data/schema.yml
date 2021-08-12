@@ -1,0 +1,19 @@
+type: map
+mapping:
+  "busco":
+    type: map
+    func: ext_map_optionnal
+    mapping:
+      "do":
+        type: bool
+        required: true
+      "options":
+        type: text
+        required: false
+      "lineage":
+        type: str
+        required: true
+        nullable: false
+      "threads":
+        type: int
+        required: true

@@ -1,0 +1,5 @@
+busco:
+  do: true
+  options: 
+  lineage: 'bacteria'
+  threads: 4

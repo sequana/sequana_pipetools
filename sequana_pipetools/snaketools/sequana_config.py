@@ -17,10 +17,17 @@ import warnings
 
 from easydev import AttrDict, TempFile
 from urllib.request import urlretrieve
-from pykwalify.core import Core
+from pykwalify.core import Core, CoreError, SchemaError
 import ruamel.yaml
 
+try:
+    import importlib.resources as pkg_resources
+except ImportError:
+    # Try backported to PY<37 `importlib_resources`.
+    import importlib_resources as pkg_resources
+
 import colorlog
+
 logger = colorlog.getLogger(__name__)
 
 
@@ -48,7 +55,7 @@ class SequanaConfig:
 
     """
 
-    def __init__(self, data=None, converts_none_to_str=True):
+    def __init__(self, data=None):
         """Could be a JSON or a YAML file
 
         :param str data: Dictionnary or filename to a config file in json or YAML format.
@@ -66,7 +73,7 @@ class SequanaConfig:
                 self.config = AttrDict(**data)
                 self._yaml_code = ruamel.yaml.comments.CommentedMap(self.config.copy())
             except TypeError:
-                if hasattr(data, 'config'):
+                if hasattr(data, "config"):
                     self.config = AttrDict(**data.config)
                     self._yaml_code = ruamel.yaml.comments.CommentedMap(self.config.copy())
                 else:
@@ -79,7 +86,7 @@ class SequanaConfig:
     def _read_file(self, data):
         """Read yaml or json file"""
         try:
-            is_yml = data.endswith(('.yaml', '.yml'))
+            is_yml = data.endswith((".yaml", ".yml"))
         except AttributeError:
             raise IOError("Data param does not have the good format. It's a filename or a dict")
 
@@ -108,7 +115,7 @@ class SequanaConfig:
         yaml.indent = 4
         yaml.block_seq_indent = 4
 
-        with open(filename, 'w') as fh:
+        with open(filename, "w") as fh:
             yaml.dump(self._yaml_code, fh)
 
     def _recursive_update(self, target, data):
@@ -200,20 +207,24 @@ class SequanaConfig:
                     output = requirement.split("/")[-1]
                     urlretrieve(requirement, filename=os.sep.join((target, output)))
 
-    def check_config_with_schema(self, schemafile, use_ext_script=False):
+    def check_config_with_schema(self, schemafile):
         """Check the config file with respect to a schema file
 
         Sequana pipelines should have a schema file in the Module.
 
         """
+        # add custom extensions
+        with pkg_resources.path('sequana_pipetools.resources', 'ext.py') as ext_name:
+            extensions = [str(ext_name)]
         # causes issue with ruamel.yaml 0.12.13. Works for 0.15
         warnings.simplefilter("ignore", ruamel.yaml.error.UnsafeLoaderWarning)
         try:
             # open the config and the schema file
             with TempFile(suffix=".yaml") as fh:
                 self.save(fh.name)
-                c = Core(source_file=fh.name, schema_files=[schemafile])
+                c = Core(source_file=fh.name, schema_files=[schemafile], extensions=extensions)
                 c.validate()
-        except Exception as err:
-            print(err)
+                return True
+        except (SchemaError, CoreError) as err:
+            logger.warning(err.msg)
             return False
