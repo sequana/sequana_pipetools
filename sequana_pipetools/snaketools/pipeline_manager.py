@@ -204,8 +204,8 @@ class PipelineManagerGeneric(PipelineManagerBase):
 
     """
 
-    def __init__(self, name, config, sample_func=None):
-        super(PipelineManagerGeneric, self).__init__(name, config)
+    def __init__(self, name, config, sample_func=None, schema=None):
+        super(PipelineManagerGeneric, self).__init__(name, config, schema)
 
         cfg = SequanaConfig(config)
         path = cfg.config["input_directory"]
