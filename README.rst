@@ -170,6 +170,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.6.1     * update schema handling
 0.6.0     * Move all modules related to pipelines rom sequana into 
             sequana_pipetools; This release should now be the entry point for 
             all Sequana pipelines (no need to import sequana itself).
