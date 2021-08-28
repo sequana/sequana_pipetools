@@ -213,7 +213,7 @@ class SequanaManager:
                 )
 
             if self.module.cluster_config:
-                self.command += ' --cluster "sbatch --mem={{cluster.ram}} --cpus-per-task={{threads}}"'
+                self.command += ' --cluster "sbatch --mem={cluster.ram} --cpus-per-task={threads}"'
                 self.command += " --cluster-config cluster_config.json "
             else:
                 self.command += ' --cluster "sbatch --mem {} -c {} {}"'.format(
