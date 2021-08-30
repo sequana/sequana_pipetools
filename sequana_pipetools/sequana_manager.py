@@ -181,7 +181,7 @@ class SequanaManager:
 
         if 'SEQUANA_WRAPPERS' in os.environ:
             sequana_wrappers = os.environ['SEQUANA_WRAPPERS']
-            self.command += f" --wrapper-prefix git+file:{sequana_wrappers} "
+            self.command += f" --wrapper-prefix git+file://{sequana_wrappers} "
             logger.info(f"Using sequana-wrappers from {sequana_wrappers}")
         else:
             logger.warning(
