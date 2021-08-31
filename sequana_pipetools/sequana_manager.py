@@ -181,7 +181,7 @@ class SequanaManager:
 
         if 'SEQUANA_WRAPPERS' in os.environ:
             sequana_wrappers = os.environ['SEQUANA_WRAPPERS']
-            self.command += f" --wrapper-prefix git+file:{sequana_wrappers} "
+            self.command += f" --wrapper-prefix git+file://{sequana_wrappers} "
             logger.info(f"Using sequana-wrappers from {sequana_wrappers}")
         else:
             logger.warning(
@@ -213,7 +213,7 @@ class SequanaManager:
                 )
 
             if self.module.cluster_config:
-                self.command += ' --cluster "sbatch --mem={{cluster.ram}} --cpus-per-task={{threads}}"'
+                self.command += ' --cluster "sbatch --mem={cluster.ram} --cpus-per-task={threads}"'
                 self.command += " --cluster-config cluster_config.json "
             else:
                 self.command += ' --cluster "sbatch --mem {} -c {} {}"'.format(
