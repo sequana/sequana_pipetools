@@ -14,6 +14,7 @@ import sys
 import os
 import argparse
 import pkgutil
+from pkg_resources import DistributionNotFound
 import importlib
 
 
@@ -217,9 +218,12 @@ def main(args=None):
     if choice == "y":
         print("Please source the files using:: \n")
         for name in names:
-            c = Complete(name)
-            c.save_completion_script()
-            print("source ~/.config/sequana/pipelines/{}.sh".format(name))
+            try:
+                c = Complete(name)
+                c.save_completion_script()
+                print("source ~/.config/sequana/pipelines/{}.sh".format(name))
+            except DistributionNotFound:
+                print(f"# Warning {name} could not be imported. Nothing done")
         print("\nto activate the completion")
     else:  # pragma: no cover
         print("Stopping creation of completion scripts")

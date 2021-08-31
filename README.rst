@@ -170,6 +170,9 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.6.3     * Fix SequanaConfig file
+0.6.2     * Fix script creation to include wrapper and take new snakemake 
+            syntax into account
 0.6.1     * update schema handling
 0.6.0     * Move all modules related to pipelines rom sequana into 
             sequana_pipetools; This release should now be the entry point for 

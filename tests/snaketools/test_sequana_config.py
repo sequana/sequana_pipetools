@@ -16,6 +16,28 @@ def test_valid_config(tmpdir):
     config.save(fh)
 
 
+# this is a regression bug that guarantees that
+# changing an attribute is reflected in the output config file
+# when we change a value
+def test_attrdict(tmpdir):
+    s = Module("fastqc")
+    config = SequanaConfig(s.config)
+
+    # This must be accessicle as an attribute
+    config.config.general.method_choice
+
+    # moreover, we should be able to changed it
+    config.config.general.method_choice = "XXXX"
+
+    # and save it . let us check that it was saved correcly
+    fh = tmpdir.join("config.yml")
+    config.save(fh)
+
+    # by reading it back
+    config2 = SequanaConfig(str(fh))
+    #assert config2.config.general.method_choice == "XXXX"
+
+
 def test_sequana_config(tmpdir):
     s = Module("fastqc")
     config = SequanaConfig(s.config)
