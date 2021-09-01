@@ -156,6 +156,7 @@ class PipelineManagerBase:
     def teardown(self, extra_dirs_to_remove=[], extra_files_to_remove=[], plot_stats=True):
         # create and save the stats plot
         if plot_stats:
+            logger.warning("deprecated no stats to be provided in the future")
             N = len(self.samples.keys())
             self.plot_stats(N=N)
 

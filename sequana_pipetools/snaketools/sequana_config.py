@@ -20,9 +20,10 @@ from urllib.request import urlretrieve
 from pykwalify.core import Core, CoreError, SchemaError
 import ruamel.yaml
 
+
 try:
     import importlib.resources as pkg_resources
-except ImportError:
+except ImportError:  # pragma: no cover
     # Try backported to PY<37 `importlib_resources`.
     import importlib_resources as pkg_resources
 
@@ -75,39 +76,45 @@ class SequanaConfig:
             except TypeError:
                 if hasattr(data, "config"):
                     self.config = AttrDict(**data.config)
-                    self._yaml_code = ruamel.yaml.comments.CommentedMap(self.config.copy())
+                    self._yaml_code = ruamel.yaml.comments.CommentedMap(
+                        self.config.copy()
+                    )
                 else:
-                    self.config = self._read_file(data)
+                    # populate self._yaml_code
+                    config = self._read_file(data)
+                    self.config = AttrDict(**config)
         else:
             self.config = AttrDict()
             self._yaml_code = ruamel.yaml.comments.CommentedMap()
-        self.cleanup_config()
+
+        # remove templates and None->""
+        self._recursive_cleanup(self.config)
 
     def _read_file(self, data):
-        """Read yaml or json file"""
-        try:
-            is_yml = data.endswith((".yaml", ".yml"))
-        except AttributeError:
-            raise IOError("Data param does not have the good format. It's a filename or a dict")
+        """Read yaml"""
+        if not data.endswith((".yaml", ".yml")):
+            logger.warning("You should use a YAML file with .yaml or .yml extension")
 
         if os.path.exists(data):
             yaml = ruamel.yaml.YAML()
-            if is_yml:
-                with open(data, "r") as fh:
-                    self._yaml_code = yaml.load(fh.read())
-            else:
-                # read a JSON
-                with open(data, "r") as fh:
-                    self._yaml_code = yaml.load(json.dumps(json.loads(fh.read())))
+            with open(data, "r") as fh:
+                self._yaml_code = yaml.load(fh.read())
+
+            # import the Python yaml module to avoid ruamel.yaml ordereddict and
+            # other structures. We only want the data
+            with open(data, "r") as fh:
+                import yaml as _yaml
+
+                config = _yaml.load(fh, Loader=_yaml.FullLoader)
+            return config
         else:
             raise FileNotFoundError(f"input string must be an existing file {data}")
-        return AttrDict(**self._yaml_code.copy())
 
-    def save(self, filename="config.yaml", cleanup=True):
+    def save(self, filename="config.yaml"):
         """Save the yaml code in _yaml_code with comments"""
-        # This works only if the input data was a yaml
-        if cleanup:
-            self.cleanup()  # changes the config and yaml_code to remove %()s
+        # make sure that the changes made in the config are saved into the yaml
+        # before saving it
+        self._update_yaml()
 
         # get the YAML formatted code and save it
         yaml = ruamel.yaml.YAML()
@@ -124,8 +131,8 @@ class SequanaConfig:
 
         # !! essential to use the update() method of the dictionary otherwise
         # comments are lost
-
         for key, value in data.items():
+
             if isinstance(value, dict):
                 target.update({key: self._recursive_update(target[key], value)})
             elif isinstance(value, list):
@@ -141,10 +148,12 @@ class SequanaConfig:
                     value = data[key]
                     target.update({key: value})
                 else:
-                    logger.warning("This %s key was not in the original config" " but added" % key)
+                    logger.warning(
+                        "This %s key was not in the original config" " but added" % key
+                    )
                     value = data[key]
                     target.update({key: value})
-            else:
+            else:  # pragma: no cover
                 raise NotImplementedError(
                     "Only dictionaries and list are authorised in the input configuration file."
                     f" Key/value that cause error are {key}/{value}"
@@ -153,11 +162,6 @@ class SequanaConfig:
 
     def _update_yaml(self):
         self._recursive_update(self._yaml_code, self.config)
-
-    def _update_config(self):
-        # probably useless function now since we do not use json as input
-        # anymore
-        self._recursive_update(self.config, self._yaml_code)
 
     def _recursive_cleanup(self, d):
         # expand the tilde (see https://github.com/sequana/sequana/issues/486)
@@ -169,24 +173,15 @@ class SequanaConfig:
                 if value is None:
                     d[key] = ""
                 elif isinstance(value, str):
-                    if value.startswith("%("):
-                        d[key] = None
-                    else:
-                        d[key] = value.strip()
+                    d[key] = value.strip()
+
                     # https://github.com/sequana/sequana/issues/486
                     if key.endswith("_directory") and value.startswith("~/"):
                         d[key] = os.path.expanduser(value)
                     if key.endswith("_file") and value.startswith("~/"):
                         d[key] = os.path.expanduser(value)
 
-    def cleanup_config(self):
-        self._recursive_cleanup(self.config)
-        # self._update_yaml()
-
-    def cleanup(self):
-        """Remove template elements and change None to empty string."""
-        self._recursive_cleanup(self._yaml_code)
-        self._update_config()
+        self._update_yaml()
 
     def copy_requirements(self, target):
         """Copy files to run the pipeline
@@ -194,13 +189,14 @@ class SequanaConfig:
         If a requirement file exists, it is copied in the target directory.
         If not, it can be either an http resources or a sequana resources.
         """
-
+        # make sure that if the config changed, the yaml is up-to-date
+        self._update_yaml()
         if "requirements" in self._yaml_code.keys():
             for requirement in self._yaml_code["requirements"]:
                 if os.path.exists(requirement):
                     try:
                         shutil.copy(requirement, target)
-                    except shutil.SameFileError:
+                    except shutil.SameFileError: #pragma: no cover
                         pass  # the target and input may be the same
                 elif requirement.startswith("http"):
                     logger.info(f"This file {requirement} will be needed. Downloading")
@@ -214,7 +210,7 @@ class SequanaConfig:
 
         """
         # add custom extensions
-        with pkg_resources.path('sequana_pipetools.resources', 'ext.py') as ext_name:
+        with pkg_resources.path("sequana_pipetools.resources", "ext.py") as ext_name:
             extensions = [str(ext_name)]
         # causes issue with ruamel.yaml 0.12.13. Works for 0.15
         warnings.simplefilter("ignore", ruamel.yaml.error.UnsafeLoaderWarning)
@@ -222,7 +218,11 @@ class SequanaConfig:
             # open the config and the schema file
             with TempFile(suffix=".yaml") as fh:
                 self.save(fh.name)
-                c = Core(source_file=fh.name, schema_files=[schemafile], extensions=extensions)
+                c = Core(
+                    source_file=fh.name,
+                    schema_files=[schemafile],
+                    extensions=extensions,
+                )
                 c.validate()
                 return True
         except (SchemaError, CoreError) as err:
