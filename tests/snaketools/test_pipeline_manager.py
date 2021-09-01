@@ -17,20 +17,17 @@ def test_pipeline_manager(tmpdir):
     # normal behaviour but no input provided:
     config = Module("fastqc")._get_config()
     cfg = SequanaConfig(config)
-    cfg.cleanup()  # remove templates
     with pytest.raises(ValueError):
         pm = snaketools.PipelineManager("custom", cfg)
 
     # normal behaviour
     cfg = SequanaConfig(config)
-    cfg.cleanup()  # remove templates
     file1 = os.path.join(test_dir, "data", "Hm2_GTGAAA_L005_R1_001.fastq.gz")
     cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
     pm = snaketools.PipelineManager("custom", cfg)
     assert not pm.paired
 
     cfg = SequanaConfig(config)
-    cfg.cleanup()  # remove templates
     cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
     cfg.config.input_pattern = "Hm*gz"
     pm = snaketools.PipelineManager("custom", cfg)
@@ -130,7 +127,12 @@ def test_pipeline_manager_generic(tmpdir):
     wf = WF()
     gg["workflow"] = wf
     pm.setup(gg)
-    pm.teardown()
+    try:
+        pm.teardown()
+    except Exception:
+        assert False
+    finally:
+        os.remove("Makefile")
 
     multiqc = tmpdir.join('multiqc.html')
     with open(multiqc, 'w') as fh:

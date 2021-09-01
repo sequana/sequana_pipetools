@@ -86,7 +86,9 @@ class SequanaConfig:
         else:
             self.config = AttrDict()
             self._yaml_code = ruamel.yaml.comments.CommentedMap()
-        self.cleanup_config()
+
+        # remove templates and None->""
+        self._recursive_cleanup(self.config)
 
     def _read_file(self, data):
         """Read yaml"""
@@ -108,11 +110,11 @@ class SequanaConfig:
         else:
             raise FileNotFoundError(f"input string must be an existing file {data}")
 
-    def save(self, filename="config.yaml", cleanup=True):
+    def save(self, filename="config.yaml"):
         """Save the yaml code in _yaml_code with comments"""
-        # This works only if the input data was a yaml
-        if cleanup:
-            self.cleanup()  # changes the config and yaml_code to remove %()s
+        # make sure that the changes made in the config are saved into the yaml
+        # before saving it
+        self._update_yaml()
 
         # get the YAML formatted code and save it
         yaml = ruamel.yaml.YAML()
@@ -161,11 +163,6 @@ class SequanaConfig:
     def _update_yaml(self):
         self._recursive_update(self._yaml_code, self.config)
 
-    def _update_config(self):
-        # probably useless function now since we do not use json as input
-        # anymore
-        self._recursive_update(self.config, self._yaml_code)
-
     def _recursive_cleanup(self, d):
         # expand the tilde (see https://github.com/sequana/sequana/issues/486)
         # remove the %() templates
@@ -176,24 +173,15 @@ class SequanaConfig:
                 if value is None:
                     d[key] = ""
                 elif isinstance(value, str):
-                    if value.startswith("%("):
-                        d[key] = None
-                    else:
-                        d[key] = value.strip()
+                    d[key] = value.strip()
+
                     # https://github.com/sequana/sequana/issues/486
                     if key.endswith("_directory") and value.startswith("~/"):
                         d[key] = os.path.expanduser(value)
                     if key.endswith("_file") and value.startswith("~/"):
                         d[key] = os.path.expanduser(value)
 
-    def cleanup_config(self):
-        self._recursive_cleanup(self.config)
-        # self._update_yaml()
-
-    def cleanup(self):
-        """Remove template elements and change None to empty string."""
-        self._recursive_cleanup(self._yaml_code)
-        self._update_config()
+        self._update_yaml()
 
     def copy_requirements(self, target):
         """Copy files to run the pipeline
@@ -201,13 +189,14 @@ class SequanaConfig:
         If a requirement file exists, it is copied in the target directory.
         If not, it can be either an http resources or a sequana resources.
         """
-
+        # make sure that if the config changed, the yaml is up-to-date
+        self._update_yaml()
         if "requirements" in self._yaml_code.keys():
             for requirement in self._yaml_code["requirements"]:
                 if os.path.exists(requirement):
                     try:
                         shutil.copy(requirement, target)
-                    except shutil.SameFileError:
+                    except shutil.SameFileError: #pragma: no cover
                         pass  # the target and input may be the same
                 elif requirement.startswith("http"):
                     logger.info(f"This file {requirement} will be needed. Downloading")

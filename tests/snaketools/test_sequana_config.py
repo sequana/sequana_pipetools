@@ -31,11 +31,13 @@ def test_attrdict(tmpdir):
 
     # and save it . let us check that it was saved correcly
     fh = tmpdir.join("config.yml")
+
     config.save(fh)
 
     # by reading it back
     config2 = SequanaConfig(str(fh))
-    #assert config2.config.general.method_choice == "XXXX"
+    assert config2.config.general.method_choice == "XXXX"
+
 
 
 def test_sequana_config(tmpdir):
@@ -49,17 +51,18 @@ def test_sequana_config(tmpdir):
     config = SequanaConfig()
     config = SequanaConfig({"test": 1})
     assert config.config.test == 1
+
     # with a dictionary
     config = SequanaConfig(config.config)
+
     # with a sequanaConfig instance
     config = SequanaConfig(config)
-    # with a non-yaml file
-    json = os.path.join(test_dir, "data", "test_summary_fastq_stats.json")
-    config = SequanaConfig(json)
+
+    # with a non-existing file
     with pytest.raises(FileNotFoundError):
         config = SequanaConfig("dummy_dummy")
 
-    # Test an exception
+    # Test warning
     s = Module("fastqc")
     config = SequanaConfig(s.config)
     config._recursive_update(config._yaml_code, {"input_directory_dummy": "test"})
@@ -74,17 +77,25 @@ def test_sequana_config(tmpdir):
     #
     # is unchanged
 
+    # test all installed pipelines saving/reading config file
     output = tmpdir.join("test.yml")
     for pipeline in snaketools.pipeline_names:
         config_filename = Module(pipeline)._get_config()
         cfg1 = SequanaConfig(config_filename)
-        cfg1.cleanup()  # remove templates and strip strings
 
         cfg1.save(output)
         cfg2 = SequanaConfig(str(output))
         assert cfg2._yaml_code == cfg1._yaml_code
-        cfg2._update_config()
         assert cfg1.config == cfg2.config
+
+    # test config with a _directory or _file  based on the fastqc pipeline
+    cfg = SequanaConfig(s.config)
+    cfg.config.input_directory = "~/"
+    cfg.config.multiqc.config_file = "~/"
+    cfg._recursive_cleanup(cfg.config) 
+    assert cfg.config.input_directory.startswith("/")
+    assert cfg.config.multiqc.config_file.startswith("/")
+
 
 
 def test_copy_requirements(tmpdir):
@@ -106,10 +117,10 @@ def test_copy_requirements(tmpdir):
     cfg.config.requirements = [
         "phiX174.fa",
         str(tmp_require),
-        # localfile,
+        "__init__.py",
+        "setup.py",
         "https://raw.githubusercontent.com/sequana/sequana/master/README.rst",
     ]
-    cfg._update_yaml()
     cfg.copy_requirements(target=str(tmpdir))
 
     # error
@@ -129,7 +140,6 @@ def test_check_bad_config_with_schema():
     cfg = SequanaConfig(cfg_name)
     # threads can not be a string
     cfg.config["busco"]["threads"] = ""
-    cfg._update_yaml()
     assert not cfg.check_config_with_schema(schema)
 
 
@@ -142,14 +152,11 @@ def test_check_config_with_schema_and_ext(tmpdir):
 
     # not nullable key cannot be empty
     cfg.config["busco"]["lineage"] = ""
-    cfg._update_yaml()
     assert not cfg.check_config_with_schema(schema)
 
     # but it is not a problem the rule is not necessary
     cfg.config["busco"]["do"] = False
-    cfg._update_yaml()
     assert cfg.check_config_with_schema(schema)
 
     cfg.config["busco"].update({"do": True, "lineage": "bacteria", "threads": ""})
-    cfg._update_yaml()
     assert not cfg.check_config_with_schema(schema)
