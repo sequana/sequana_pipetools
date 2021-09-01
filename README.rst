@@ -16,7 +16,7 @@
 :Overview: A set of tools to help building or using sequana pipelines
 :Status: Production
 :Issues: Please fill a report on `github <https://github.com/sequana/sequana/issues>`__
-:Python version: Python 3.7, 3.8
+:Python version: Python 3.7, 3.8, 3.9
 :Citation: Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352,  `JOSS DOI doi:10.21105/joss.00352 <http://www.doi2bib.org/bib/10.21105%2Fjoss.00352>`_
 
 
