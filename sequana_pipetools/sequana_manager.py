@@ -98,6 +98,10 @@ class SequanaManager:
         # define the data path of the pipeline
         self.datapath = self._get_package_location()
 
+        # Set wrappers as attribute so that ia may be changed by the
+        # user/developer
+        self.sequana_wrappers = "https://raw.githubusercontent.com/sequana/sequana-wrappers/"
+
     def exists(self, filename, exit_on_error=True, warning_only=False):
         if not os.path.exists(filename):
             if warning_only:
@@ -179,19 +183,9 @@ class SequanaManager:
         snakefilename = os.path.basename(self.module.snakefile)
         self.command = f"#!/bin/bash\nsnakemake -s {snakefilename} "
 
-        if 'SEQUANA_WRAPPERS' in os.environ:
-            sequana_wrappers = os.environ['SEQUANA_WRAPPERS']
-            self.command += f" --wrapper-prefix git+file://{sequana_wrappers} "
-            logger.info(f"Using sequana-wrappers from {sequana_wrappers}")
-        else:
-            logger.warning(
-                "\nSequana pipelines required the SEQUANA_WRAPPERS variable"
-                " to be defined. You can type \n\n"
-                "     export SEQUANA_WRAPPERS=https://github.com/sequana/sequana-wrappers \n\n"
-                "now or later. Under linux, consider adding the previous line in"
-                "your HOME/.bashrc for instance. If you are a developer you can"
-                "have a local clone of the github repositoty and set the"
-                "SEQUANA_WRAPPERS to the local directory")
+        if self.sequana_wrappers:
+            self.command += f" --wrapper-prefix {self.sequana_wrappers} "
+            logger.info(f"Using sequana-wrappers from {self.sequana_wrappers}")
 
 
         # FIXME a job is not a core. Ideally, we should add a core option
