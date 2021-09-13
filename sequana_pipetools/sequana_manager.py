@@ -74,7 +74,8 @@ class SequanaManager:
         self.config = None
         if "from_project" in dir(options) and options.from_project:
             possible_filenames = (
-                options.from_project,  # exact config file path
+                # from project tries to find a valid config.yaml
+                #options.from_project,  # exact config file path
                 f"{options.from_project}/{config_name}",  # config file in project path
                 f"{options.from_project}/.sequana/{config_name}",  # config file in .sequana dir
             )

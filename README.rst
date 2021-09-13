@@ -170,6 +170,7 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+0.7.1     * Fix the --from-project option
 0.7.0     * Set the --wrapper-prefix to point to the  sequana-wrappers github
 0.6.3     * Fix SequanaConfig file
 0.6.2     * Fix script creation to include wrapper and take new snakemake 
