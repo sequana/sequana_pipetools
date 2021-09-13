@@ -170,8 +170,11 @@ Changelog
 ========= ====================================================================
 Version   Description
 ========= ====================================================================
+<<<<<<< HEAD
 0.7.3     * add schema pipeline manager directory & fix attrdict error with yaml 
 0.7.2     * allows pipeline and rules to have the same name
+=======
+>>>>>>> 39db59d... Update metadata
 0.7.1     * Fix the --from-project option
 0.7.0     * Set the --wrapper-prefix to point to the  sequana-wrappers github
 0.6.3     * Fix SequanaConfig file
