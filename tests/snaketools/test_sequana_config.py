@@ -4,6 +4,8 @@ import pytest
 
 from sequana_pipetools import snaketools, Module, SequanaConfig
 
+from urllib.error import URLError
+
 from .. import test_dir
 
 
@@ -121,7 +123,14 @@ def test_copy_requirements(tmpdir):
         "setup.py",
         "https://raw.githubusercontent.com/sequana/sequana/master/README.rst",
     ]
-    cfg.copy_requirements(target=str(tmpdir))
+
+    # if not internet connection, catch the URLError
+    try:
+        cfg.copy_requirements(target=str(tmpdir))
+    except URLError:
+        assert True
+    except Exception:
+        assert False
 
     # error
     cfg.config.requirements = ["dummy"]
