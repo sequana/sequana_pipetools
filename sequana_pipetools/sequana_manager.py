@@ -62,8 +62,9 @@ class SequanaManager:
         self.colors = Colors()
 
         # load the pipeline (to check it is possible and if it is a pipeline)
-        self.module = Module(self.name)
-        if self.module.is_pipeline() is False:
+        try:
+            self.module = Module(f"pipeline:{self.name}")
+        except: 
             raise ValueError("{} does not seem to be installed or is not a valid pipeline".format(self.name))
         self.module.check()
         #self.module.is_executable()

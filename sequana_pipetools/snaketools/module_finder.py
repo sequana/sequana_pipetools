@@ -98,7 +98,6 @@ class ModuleFinder(metaclass=Singleton):
                 self._paths[module_name] = whatever + os.sep + version
             else:
                 self._paths[module_name] = whatever + os.sep + module_name
-            self._type[module_name] = "rule"
 
     def _add_pipelines(self):
         try:
@@ -110,8 +109,7 @@ class ModuleFinder(metaclass=Singleton):
         import pkgutil
 
         for ff, module_name, _ in pkgutil.iter_modules(sequana_pipelines.__path__):
-            self._paths[module_name] = ff.path + os.sep + module_name
-            self._type[module_name] = "pipeline"
+            self._paths[f"pipeline:{module_name}"] = ff.path + os.sep + module_name
 
             logger.debug("Found {} pipeline".format(module_name))
 
@@ -131,6 +129,3 @@ class ModuleFinder(metaclass=Singleton):
         if name not in self.names:
             return False
         return True
-
-    def is_pipeline(self, name):
-        return self._type[name] == "pipeline"
