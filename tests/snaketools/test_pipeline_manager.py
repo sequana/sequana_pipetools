@@ -15,7 +15,7 @@ def test_pipeline_manager(tmpdir):
         pm = snaketools.PipelineManager("custom", cfg)
 
     # normal behaviour but no input provided:
-    config = Module("fastqc")._get_config()
+    config = Module("pipeline:fastqc")._get_config()
     cfg = SequanaConfig(config)
     with pytest.raises(ValueError):
         pm = snaketools.PipelineManager("custom", cfg)
@@ -31,14 +31,13 @@ def test_pipeline_manager(tmpdir):
     cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
     cfg.config.input_pattern = "Hm*gz"
     pm = snaketools.PipelineManager("custom", cfg)
-    pm.plot_stats()
     assert pm.paired
 
-    pm.getlogdir("fastqc")
-    pm.getwkdir("fastqc")
+    pm.getlogdir("pipeline:fastqc")
+    pm.getwkdir("pipeline:fastqc")
     pm.getrawdata()
-    pm.getreportdir("test")
-    pm.getname("fastqc")
+    pm.getreportdir("pipeline:test")
+    pm.getname("pipeline:fastqc")
 
     # Test different configuration of input_directory, input_readtag,
     # input_pattern

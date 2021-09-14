@@ -83,20 +83,6 @@ class PipelineManagerBase:
             )
         return lambda wildcards: self.samples[wildcards.sample]
 
-    def plot_stats(self, outputdir=".sequana", filename="snakemake_stats.png", N=1):
-        logger.info("Creating stats image")
-        try:
-            from sequana.snaketools import SnakeMakeStats
-
-            sms = SnakeMakeStats("stats.txt", N=N)
-            if sms._parse_data() == {"total_runtime": 0, "rules": {}, "files": {}}:
-                return
-
-            sms.plot_and_save(outputdir=outputdir, filename=filename)
-        except Exception as err:
-            logger.warning(err)
-            logger.warning("Could not process stats.txt file. run snakemake with --stats stats.txt nex time")
-
     def message(self, msg):
         message(msg)
 
@@ -153,12 +139,7 @@ class PipelineManagerBase:
 
         shutil.move(filename + "_tmp_", filename)
 
-    def teardown(self, extra_dirs_to_remove=[], extra_files_to_remove=[], plot_stats=True):
-        # create and save the stats plot
-        if plot_stats:
-            logger.warning("deprecated no stats to be provided in the future")
-            N = len(self.samples.keys())
-            self.plot_stats(N=N)
+    def teardown(self, extra_dirs_to_remove=[], extra_files_to_remove=[]):
 
         # add a Makefile
         cleaner = OnSuccessCleaner(self.name)
