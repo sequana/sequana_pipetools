@@ -12,7 +12,7 @@ from .. import test_dir
 def test_valid_config(tmpdir):
     config = SequanaConfig(None)
 
-    s = Module("fastqc")
+    s = Module("pipeline:fastqc")
     config = SequanaConfig(s.config)
     fh = tmpdir.join("config.yml")
     config.save(fh)
@@ -22,7 +22,7 @@ def test_valid_config(tmpdir):
 # changing an attribute is reflected in the output config file
 # when we change a value
 def test_attrdict(tmpdir):
-    s = Module("fastqc")
+    s = Module("pipeline:fastqc")
     config = SequanaConfig(s.config)
 
     # This must be accessicle as an attribute
@@ -43,7 +43,7 @@ def test_attrdict(tmpdir):
 
 
 def test_sequana_config(tmpdir):
-    s = Module("fastqc")
+    s = Module("pipeline:fastqc")
     config = SequanaConfig(s.config)
 
     assert config.config.get("input_pattern") == "*fastq.gz"
@@ -65,7 +65,7 @@ def test_sequana_config(tmpdir):
         config = SequanaConfig("dummy_dummy")
 
     # Test warning
-    s = Module("fastqc")
+    s = Module("pipeline:fastqc")
     config = SequanaConfig(s.config)
     config._recursive_update(config._yaml_code, {"input_directory_dummy": "test"})
 
@@ -138,8 +138,8 @@ def test_copy_requirements(tmpdir):
 
 
 def test_check_config_with_schema():
-    schema = Module("fastqc").schema_config
-    SequanaConfig(Module("fastqc").config).check_config_with_schema(schema)
+    schema = Module("pipeline:fastqc").schema_config
+    SequanaConfig(Module("pipeline:fastqc").config).check_config_with_schema(schema)
 
 
 def test_check_bad_config_with_schema():

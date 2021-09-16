@@ -2,7 +2,7 @@ from sequana_pipetools import snaketools, Module
 
 
 def test_md5():
-    m = Module("fastqc")
+    m = Module("pipeline:fastqc")
     m.md5()
 
 
@@ -28,7 +28,7 @@ def test_module():
     m.check()
 
     # a pipeline
-    m = snaketools.Module("fastqc")
+    m = snaketools.Module("pipeline:fastqc")
     m.is_executable()
     m.check()
     m.snakefile

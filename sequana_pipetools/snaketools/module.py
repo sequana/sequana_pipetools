@@ -123,14 +123,16 @@ or open a Python shell and type::
 
         self._name = name
 
-        # could look into ./rules or ./pipelines
         self._snakefile = None
         self._description = None
         self._requirements = None
 
     def is_pipeline(self):
         """Return true is this module is a pipeline"""
-        return self._mf.is_pipeline(self._name)
+        if self._name.startswith("pipeline:"):
+            return True
+        else:
+            return False
 
     def _get_file(self, name):
         filename = os.sep.join((self._path, name))
@@ -157,8 +159,8 @@ or open a Python shell and type::
             return self.name.split("/")[1]
         elif self.is_pipeline():
             import pkg_resources
-
-            ver = pkg_resources.require("sequana_{}".format(self.name))[0].version
+            name = self.name.replace("pipeline:", "")
+            ver = pkg_resources.require(f"sequana_{name}")[0].version
             return ver
 
     version = property(_get_version, doc="Get version")
@@ -231,7 +233,11 @@ or open a Python shell and type::
             return self._snakefile
 
         # tuple of all possible snakefiles
-        possible_snakefiles = ("Snakefile", f"Snakefile.{self.name}", f"{self.name}.rules", f"{self.name}.smk")
+        possible_snakefiles = ("Snakefile", f"Snakefile.{self.name}", f"{self.name}.rules", 
+            f"{self.name}.smk", 
+            f"{self.name.replace('pipeline:', '')}.rules",
+            f"{self.name.replace('pipeline:', '')}.smk"
+            )
 
         # find the good one
         for snakefile in possible_snakefiles:
