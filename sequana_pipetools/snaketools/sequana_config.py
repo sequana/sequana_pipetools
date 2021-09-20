@@ -72,13 +72,11 @@ class SequanaConfig:
         if data:
             try:
                 self.config = AttrDict(**data)
-                self._yaml_code = ruamel.yaml.comments.CommentedMap(self.config.copy())
+                self._yaml_code = ruamel.yaml.comments.CommentedMap(data.copy())
             except TypeError:
                 if hasattr(data, "config"):
                     self.config = AttrDict(**data.config)
-                    self._yaml_code = ruamel.yaml.comments.CommentedMap(
-                        self.config.copy()
-                    )
+                    self._yaml_code = ruamel.yaml.comments.CommentedMap(data.config.copy())
                 else:
                     # populate self._yaml_code
                     config = self._read_file(data)

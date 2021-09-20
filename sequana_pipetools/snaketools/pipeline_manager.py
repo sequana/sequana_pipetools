@@ -225,8 +225,8 @@ class PipelineManagerDirectory(PipelineManagerBase):
 
     """
 
-    def __init__(self, name, config):
-        super().__init__(name, config)
+    def __init__(self, name, config, schema=None):
+        super().__init__(name, config, schema)
 
 
 class PipelineManager(PipelineManagerGeneric):
