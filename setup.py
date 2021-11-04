@@ -3,11 +3,7 @@ from setuptools import setup, find_packages
 
 _MAJOR = 0
 _MINOR = 7
-<<<<<<< HEAD
 _MICRO = 3
-=======
-_MICRO = 1
->>>>>>> 39db59d... Update metadata
 version = f"{_MAJOR}.{_MINOR}.{_MICRO}"
 release = f"{_MAJOR}.{_MINOR}"
 

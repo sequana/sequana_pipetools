@@ -205,8 +205,8 @@ class SequanaManager:
             if self.options.slurm_queue == "common":
                 slurm_queue = ""
             else:
-                slurm_queue = "-A {} --qos {} -p {}".format(
-                    self.options.slurm_queue, self.options.slurm_queue, self.options.slurm_queue
+                slurm_queue = " --qos {} -p {}".format(
+                    self.options.slurm_queue, self.options.slurm_queue
                 )
 
             if self.module.cluster_config:
