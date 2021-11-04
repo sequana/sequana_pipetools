@@ -13,7 +13,7 @@ def test_modules():
 
 def test_module():
     # a rule without README
-    m = snaketools.Module("mark_duplicates_dynamic")
+    m = snaketools.Module("fastp")
     m.description
     m  # test __repr__
     m.__repr__()

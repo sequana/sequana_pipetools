@@ -126,10 +126,21 @@ class FastQFactory(FileFactory):
 
     The PREFIX indicates the sample name. The SUFFIX does not convey any
     information per se. The default read tag ("_R[12]_") handle this case.
-    It can be changed if data have another read tags. (e.g. "[12].fastq.gz")
 
-    Yet, in long reads experiments (for instance), naming convention is
-    different and may nor be single/paired end convention.
+
+    The following commands expect to find data with a readtag _R1_ or _R2_::
+
+        FastQFactory("*fastq.gz")
+
+    This behaviour can be changed if data have another read tags. (e.g. "[12].fastq.gz")
+        
+        FastQFactory("*fastq.gz", read_tag="_[12].")
+
+    Sometimes, e.g. in long reads experiments (for instance), naming convention is
+    different and may nor be single/paired end convention. If so, set the
+    readtag to None.
+        
+        FastQFactory("*ccs.fastq.gz", read_tag=None)
 
     In a directory (recursively or not), there could be lots of samples. This
     class can be used to get all the sample prefix in the :attr:`tags`
@@ -165,7 +176,8 @@ class FastQFactory(FileFactory):
         if self.read_tag:
             logger.info(f"readtag: {self.read_tag}")
         else:
-            logger.info("No readtag provided (for paired Illumina data only).")
+            logger.info("No readtag provided.")
+
         if self.read_tag:
             remaining = [filename for filename in self._glob if re.search(self.read_tag, os.path.basename(filename))]
             if len(remaining) < len(self._glob):
