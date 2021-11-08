@@ -167,9 +167,10 @@ To join the project, please let us know on `github <https://github.com/sequana/s
 Changelog
 =========
 
-========= ====================================================================
+========= ======================================================================
 Version   Description
-========= ====================================================================
+========= ======================================================================
+0.7.4     * switch biomics to biomicspole for the slurm queue (internal change)
 0.7.3     * add schema pipeline manager directory & fix attrdict error with yaml 
 0.7.2     * allows pipeline and rules to have the same name
 0.7.1     * Fix the --from-project option
@@ -212,4 +213,4 @@ Version   Description
 0.1.2     add version of the pipeline in the output completion file 
 0.1.1     release bug fix
 0.1.0     creation of the package
-========= ====================================================================
+========= ======================================================================
