@@ -33,10 +33,8 @@ def test_pipeline_manager(tmpdir):
     pm = snaketools.PipelineManager("custom", cfg)
     assert pm.paired
 
-    pm.getlogdir("pipeline:fastqc")
     pm.getwkdir("pipeline:fastqc")
     pm.getrawdata()
-    pm.getreportdir("pipeline:test")
     pm.getname("pipeline:fastqc")
 
     # Test different configuration of input_directory, input_readtag,
@@ -110,10 +108,8 @@ def test_pipeline_manager_generic(tmpdir):
     cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
     cfg.config.input_pattern = "Hm*gz"
     pm = snaketools.pipeline_manager.PipelineManagerGeneric("fastqc", cfg)
-    pm.getlogdir("fastqc")
     pm.getwkdir("fastqc")
     pm.getrawdata()
-    pm.getreportdir("test")
     pm.getname("fastqc")
     gg = globals()
     gg["__snakefile__"] = "dummy"
