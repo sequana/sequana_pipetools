@@ -5,9 +5,9 @@
 
 .. image:: https://github.com/sequana/sequana_pipetools/actions/workflows/main.yml/badge.svg?branch=master
     :target: https://github.com/sequana/sequana_pipetools/actions/workflows/main.yml
-    
+
 .. image:: https://coveralls.io/repos/github/sequana/sequana_pipetools/badge.svg?branch=master
-    :target: https://coveralls.io/github/sequana/sequana_pipetools?branch=master 
+    :target: https://coveralls.io/github/sequana/sequana_pipetools?branch=master
 
 .. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
    :target: http://joss.theoj.org/papers/10.21105/joss.00352
@@ -47,7 +47,7 @@ pipelines independent as shown in **Fig 2**:
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/old.png
     :scale: 40%
-    
+
     **Figure 2** v0.8 of Sequana moved the Snakemake pipelines in indepdendent
     repositories. A `cookie cutter <https://github.com/sequana/sequana_pipeline_template>`_ 
     ease the creation of scuh pipelines
@@ -170,6 +170,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.7.5     * can set a SEQUANA_WRAPPERS env variable to use local wrappers
 0.7.4     * switch biomics to biomicspole for the slurm queue (internal change)
 0.7.3     * add schema pipeline manager directory & fix attrdict error with yaml 
 0.7.2     * allows pipeline and rules to have the same name
