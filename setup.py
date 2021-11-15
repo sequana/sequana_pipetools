@@ -12,9 +12,9 @@ metainfo = {
     "version": version,
     "license": "new BSD",
     "url": "https://github.com/sequana/sequana_pipetools",
-    "description": "A set of utilities to manager sequana pipelines",
+    "description": "A set of tools to help building or using Sequana pipelines",
     "platforms": ["Linux", "Unix", "MacOsX", "Windows"],
-    "keywords": ["snakemake, sequana, RNAseq, differential analysis"],
+    "keywords": ["snakemake, sequana, pipelines"],
     "classifiers": [
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Education",
