@@ -1,5 +1,7 @@
 import os
 
+from easydev import AttrDict
+
 from sequana_pipetools import SequanaManager
 from sequana_pipetools import SequanaConfig
 from sequana_pipetools import Module
@@ -21,10 +23,9 @@ def test_sequana_manager(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
 
     # normal behaviour
-    from easydev import AttrDict
     pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": wkdir,'level':"INFO", 
-                    "jobs":1, "run_mode": None, "force": True}), 
+        AttrDict(**{"version": False, "workdir": wkdir,'level':"INFO",
+                    "jobs":1, "run_mode": None, "force": True}),
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
     pm.config.config.input_pattern = f"Hm2*gz"
@@ -34,7 +35,83 @@ def test_sequana_manager(tmpdir):
     pm.teardown()
     pm.check_fastq_files()
 
+    # check SE data
+    pm.config.config.input_pattern = f"Hm*_R1_*gz"
+    pm.check_fastq_files()
+
+    # We can now try to do it again fro the existing project itself
+    pm = SequanaManager(
+        AttrDict(**{"version": False, "workdir": wkdir,'level':"INFO",
+                    "jobs":1, "run_mode": None, "force": True, 
+                    "from_project": wkdir}),
+        "fastqc")
+
+    pm.setup()
+    pm.options.run_mode = "slurm"
+    pm.options.slurm_queue = "common"
+    pm.options.slurm_memory = "4000"
+    pm.options.slurm_cores_per_job = 4
+    pm.setup()
+    pm.options.slurm_queue = "biomics"
+    pm.setup()
+    pm.teardown()
+
+    # test requirements (even if it is empty)
+    pm.config.config['requirements'] = []
+    pm.teardown()
+
+
+def test_sequana_manager_wrong_input(tmpdir):
+    wkdir = tmpdir.mkdir("wkdir")
+
+    # normal behaviour
+    pm = SequanaManager(
+        AttrDict(**{"version": False, "workdir": wkdir,'level':"INFO",
+                    "jobs":1, "run_mode": None, "force": True}),
+        "fastqc")
+    pm.config.config.input_directory = f"{test_dir}/data/"
+    pm.config.config.input_pattern = f"FFF*gz"
+    pm.config.config.input_readtag = f"_R[12]_"
+
+    try:
+        pm.check_fastq_files()
+        assert False
+    except SystemExit:
+        assert True
+
 
 def test_location():
     get_pipeline_location("fastqc")
+
+
+def test_version(tmpdir):
+    wkdir = tmpdir.mkdir("wkdir")
+    try:
+        pm = SequanaManager(
+            AttrDict(**{"version": True, "workdir": wkdir,'level':"INFO",
+                        "jobs":1, "run_mode": None, "force": True}),
+            "fastqc")
+        assert False
+    except SystemExit:
+        assert True
+
+def test_wrong_pipeline(tmpdir):
+    wkdir = tmpdir.mkdir("wkdir")
+    try:
+        pm = SequanaManager(
+            AttrDict(**{"version": False, "workdir": wkdir,'level':"INFO",
+                        "jobs":1, "run_mode": None, "force": True}),
+            "wrong")
+        assert False
+    except SystemExit:
+        assert True
+
+
+
+
+
+
+
+
+
 

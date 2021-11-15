@@ -54,20 +54,14 @@ class PipelineManagerBase:
 
     def getname(self, rulename, suffix=None):
         """In the basename, include rulename and suffix"""
+        print("DEPRECATED. please replace getname() by a string")
         if suffix is None:
             suffix = ""
         return self.basename % rulename + suffix
 
-    def getreportdir(self, acronym):
-        """Create the report directory."""
-        return "{1}{0}report_{2}_{1}{0}".format(os.sep, self.sample, acronym)
-
     def getwkdir(self, rulename):
+        print("DEPRECATED. please replace getwkdir() by a string")
         return os.path.join(self.sample, rulename)
-
-    def getlogdir(self, rulename):
-        """Create log directory: ``*/sample/logs/sample_rule.logs``"""
-        return "{1}{0}logs{0}{1}.{2}.log".format(os.sep, self.sample, rulename)
 
     def getrawdata(self):
         """Return list of raw data

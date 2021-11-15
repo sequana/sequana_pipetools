@@ -15,6 +15,11 @@ import os
 import shutil
 import subprocess
 import sys
+from shutil import which
+
+from deprecated import deprecated
+
+from easydev import CustomConfig
 
 from .snaketools import Module, SequanaConfig, FastQFactory
 from .misc import Colors, print_version
@@ -86,9 +91,10 @@ class SequanaManager:
                     self.config = SequanaConfig(filename)
                     logger.info(f"Reading existing config file {filename}")
                     break
-                except FileNotFoundError:
+                except FileNotFoundError: #pragma: no cover
                     pass
-            if not self.config:
+
+            if not self.config: #pragma: no cover
                 raise FileNotFoundError(
                     "Could not find config.yaml in the project specified {}".format(options.from_project)
                 )
@@ -103,9 +109,11 @@ class SequanaManager:
 
         # Set wrappers as attribute so that ia may be changed by the
         # user/developer
-        self.sequana_wrappers = "https://raw.githubusercontent.com/sequana/sequana-wrappers/"
+        self.sequana_wrappers = os.environ.get("SEQUANA_WRAPPERS",
+                "https://raw.githubusercontent.com/sequana/sequana-wrappers/")
 
-    def exists(self, filename, exit_on_error=True, warning_only=False):
+    @deprecated(version="1.0", reason="not used in any pipelines. planned to be removed soon")
+    def exists(self, filename, exit_on_error=True, warning_only=False): #pragma: no cover
         if not os.path.exists(filename):
             if warning_only:
                 logger.warning(f"{filename} file does not exists")
@@ -153,9 +161,8 @@ class SequanaManager:
         return ver
 
     def _guess_scheduler(self):
-        from easydev import cmd_exists
 
-        if cmd_exists("sbatch") and cmd_exists("srun"):
+        if which("sbatch") and which("srun"):
             return "slurm"
         else:
             return "local"
@@ -308,7 +315,7 @@ class SequanaManager:
         self.config.save(f"{self.workdir}/.sequana/{config_name}")
         try:
             os.symlink(f".sequana/{config_name}", f"{self.workdir}/{config_name}")
-        except FileExistsError:
+        except FileExistsError: #pragma: no cover
             pass
 
         # the command
@@ -320,7 +327,7 @@ class SequanaManager:
         snakefilename = os.path.basename(self.module.snakefile)
         try:
             os.symlink(f".sequana/{snakefilename}", f"{self.workdir}/{snakefilename}")
-        except FileExistsError:
+        except FileExistsError: #pragma: no cover
             pass
 
         # the cluster config if any
@@ -398,7 +405,6 @@ class SequanaManager:
             logger.debug("Saved your pip environement into pip.txt (conda not found)")
 
         # General information
-        from easydev import CustomConfig
 
         configuration = CustomConfig("sequana", verbose=False)
         sequana_config_path = configuration.user_config_dir
@@ -411,7 +417,7 @@ class SequanaManager:
                     version = version.replace(">=", "").replace(">", "")
                     from distutils.version import StrictVersion
 
-                    if StrictVersion(version) < StrictVersion(self._get_package_version()):
+                    if StrictVersion(version) < StrictVersion(self._get_package_version()):  #pragma: no cover
                         msg = (
                             "The version {} of your completion file for the {} pipeline seems older than the installed"
                             " pipeline itself ({}). Please, consider updating the completion file {}"
@@ -427,7 +433,8 @@ class SequanaManager:
             # FIXME
             logger.info("A completion if possible with sequana_completion --name {}".format(self.name))
 
-    def update_config(self, config, options, section_name):
+    @deprecated(version="1.0", reason="will be removed soon. Not used.")
+    def update_config(self, config, options, section_name): #pragma: no cover
         for option_name in config[section_name]:
             try:
                 config[section_name][option_name] = getattr(options, section_name + "_" + option_name)
