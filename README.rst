@@ -13,7 +13,7 @@
    :target: http://joss.theoj.org/papers/10.21105/joss.00352
    :alt: JOSS (journal of open source software) DOI
 
-:Overview: A set of tools to help building or using sequana pipelines
+:Overview: A set of tools to help building or using Sequana pipelines
 :Status: Production
 :Issues: Please fill a report on `github <https://github.com/sequana/sequana/issues>`__
 :Python version: Python 3.7, 3.8, 3.9
