@@ -54,13 +54,13 @@ class PipelineManagerBase:
 
     def getname(self, rulename, suffix=None):
         """In the basename, include rulename and suffix"""
-        print("DEPRECATED. please replace getname() by a string")
+        print("//DEPRECATED. please replace getname() by a string")
         if suffix is None:
             suffix = ""
         return self.basename % rulename + suffix
 
     def getwkdir(self, rulename):
-        print("DEPRECATED. please replace getwkdir() by a string")
+        print("//DEPRECATED. please replace getwkdir() by a string")
         return os.path.join(self.sample, rulename)
 
     def getrawdata(self):
