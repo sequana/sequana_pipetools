@@ -48,6 +48,8 @@ class PipelineManagerBase:
         self.config = cfg.config
         self.config.pipeline_name = name
 
+        self.setup()
+
     def error(self, msg):
         msg += "\nPlease check the content of your config file. You must have input_directory set, or input_pattern."
         raise PipetoolsException(msg)
@@ -80,31 +82,22 @@ class PipelineManagerBase:
     def message(self, msg):
         message(msg)
 
-    def setup(self, namespace, mode="error", matplotlib="Agg"):
+    def setup(self, namespace=None, mode="error", matplotlib="Agg"):
         """
 
         90% of the errors come from the fact that users did not set a matplotlib
         backend properly. In the setup() function, we set the backend to Agg on
         purpose. One can set this parameter to None to avoid this behaviour
         """
-        if "__snakefile__" in namespace.keys():
-            self._snakefile = namespace["__snakefile__"]
-        else:
-            filename = self.name + ".rules"
-            # This contains the full path of the snakefile
-            namespace["__snakefile__"] = filename
-            self._snakefile = namespace["workflow"].included_stack[-1]
-
-            # FIXME this is used only in quality_control when using sambamba rule
-            # to remove files.
-            namespace["__pipeline_name__"] = os.path.split(filename)[1].replace(".rules", "")
-            namespace["expected_output"] = []
-            namespace["toclean"] = []
+        # The rulegraph wrapper expected manager.snakefile, which is defined here
+        # Note also that the snakefile path when called from the rulegraph directory
+        # has an extra 'rulegraph' in the path that is removed here.
+        self._snakefile = os.path.abspath(self.name + ".rules").replace("rulegraph/","")
 
         try:
             # check requirements if possible. This is the standalone application
             # requirements, not the files possibly provided in the config file
-            Module(self.name).check(mode)
+            Module(self.name).check("warning")
         except ValueError:
             pass
 
