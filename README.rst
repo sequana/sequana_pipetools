@@ -170,6 +170,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.7.6     * simplify the setup() method in pipeline manager
 0.7.5     * can set a SEQUANA_WRAPPERS env variable to use local wrappers
 0.7.4     * switch biomics to biomicspole for the slurm queue (internal change)
 0.7.3     * add schema pipeline manager directory & fix attrdict error with yaml 
