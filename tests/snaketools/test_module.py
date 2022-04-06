@@ -17,6 +17,7 @@ def test_module():
     m.description
     m  # test __repr__
     m.__repr__()
+    print(m)
     m.path
     m.snakefile
     m.overview
@@ -33,6 +34,7 @@ def test_module():
     m.check()
     m.snakefile
     m.name
+    m.overview
     assert m.schema_config.endswith("schema.yaml")
 
 

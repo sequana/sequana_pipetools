@@ -99,44 +99,6 @@ def test_sequana_config(tmpdir):
     assert cfg.config.multiqc.config_file.startswith("/")
 
 
-
-def test_copy_requirements(tmpdir):
-    # We need 4 cases:
-    # 1- http
-    # 2- a sequana file (phix)
-    # 3- an existing file elsewhere (here just a temporary file)
-    # 4- an existing file in the same directory as the target dir
-
-    # Case 3: a temporary file
-    tmp_require = tmpdir.join("requirement.txt")
-
-    # Case 4: a local file (copy of the temp file)
-    # TODO
-    # localfile = temprequire.name.split(os.sep)[-1]
-    # shutil.copy(temprequire.name, targetdir)
-
-    cfg = SequanaConfig()
-    cfg.config.requirements = [
-        "phiX174.fa",
-        str(tmp_require),
-        "__init__.py",
-        "setup.py",
-        "https://raw.githubusercontent.com/sequana/sequana/master/README.rst",
-    ]
-
-    # if not internet connection, catch the URLError
-    try:
-        cfg.copy_requirements(target=str(tmpdir))
-    except URLError:
-        assert True
-    except Exception:
-        assert False
-
-    # error
-    cfg.config.requirements = ["dummy"]
-    cfg.copy_requirements(target=str(tmpdir))
-
-
 def test_check_config_with_schema():
     schema = Module("pipeline:fastqc").schema_config
     SequanaConfig(Module("pipeline:fastqc").config).check_config_with_schema(schema)

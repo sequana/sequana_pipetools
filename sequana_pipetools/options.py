@@ -10,13 +10,13 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
+import argparse
 import os
 import sys
-import argparse
 
 from easydev import cmd_exists
 
-from .misc import print_version, print_newest_version
+from .misc import print_version
 
 __all__ = [
     "GeneralOptions",
@@ -39,8 +39,6 @@ def before_pipeline(NAME):
 
     if "--version" in sys.argv:
         print_version(NAME)
-        if "--any-update" in sys.argv:
-            print_newest_version(["sequana", "sequana-pipetools", "sequana-" + NAME])
         sys.exit(0)
 
     if "--deps" in sys.argv:
@@ -48,8 +46,8 @@ def before_pipeline(NAME):
         # a pipeline. so must be here and not global import
         from .snaketools import Module
 
-        module = Module(NAME)
-        with open(module.requirements, "r") as fin:
+        module = Module("pipeline:" + NAME)
+        with open(str(module.requirements), "r") as fin:
             data = fin.read()
         print("Those software will be required for the pipeline to work correctly:\n{}".format(data))
         sys.exit(0)
@@ -115,7 +113,7 @@ class SnakemakeOptions:
         self.workdir = working_directory
 
     def _default_jobs(self):
-        if guess_scheduler() == "slurm":
+        if guess_scheduler() == "slurm":  # pragma: no cover
             return 40
         else:
             return 4

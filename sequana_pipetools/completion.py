@@ -10,13 +10,13 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import sys
-import os
 import argparse
-import pkgutil
-from pkg_resources import DistributionNotFound
 import importlib
+import os
+import pkgutil
+import sys
 
+from pkg_resources import DistributionNotFound
 
 __all__ = ["Complete"]
 
@@ -58,7 +58,7 @@ class Complete:
     # in --databases, only the first argument could be completed, which was
     # really annoying.
 
-    # KEEP '#version:' on first line as it it since it is used in
+    # KEEP '#version:' on first line since it is used in
     # sequana/pipeline_common.py right now
     setup = """#version: {version}
 function _mycomplete_{pipeline_name}()
@@ -204,7 +204,7 @@ def main(args=None):
             import sequana_pipelines
 
             names = [module_name for ff, module_name, valid in pkgutil.iter_modules(sequana_pipelines.__path__)]
-        except ModuleNotFoundError:
+        except ModuleNotFoundError:  # pragma: no cover
             pass
     else:
         names = [options.name]
@@ -222,7 +222,7 @@ def main(args=None):
                 c = Complete(name)
                 c.save_completion_script()
                 print("source ~/.config/sequana/pipelines/{}.sh".format(name))
-            except DistributionNotFound:
+            except DistributionNotFound:  # pragma: no cover
                 print(f"# Warning {name} could not be imported. Nothing done")
         print("\nto activate the completion")
     else:  # pragma: no cover

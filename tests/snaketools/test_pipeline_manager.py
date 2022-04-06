@@ -4,6 +4,7 @@ import subprocess
 import pytest
 
 from sequana_pipetools import snaketools, SequanaConfig, Module
+from sequana_pipetools.misc import PipetoolsException
 
 from .. import test_dir
 
@@ -11,7 +12,7 @@ from .. import test_dir
 def test_pipeline_manager(tmpdir):
     # test missing input_directory
     cfg = SequanaConfig({})
-    with pytest.raises(KeyError):
+    with pytest.raises(PipetoolsException):
         pm = snaketools.PipelineManager("custom", cfg)
 
     # normal behaviour but no input provided:
@@ -133,3 +134,58 @@ def test_pipeline_manager_generic(tmpdir):
     with open(multiqc, 'w') as fh:
         fh.write("test")
     pm.clean_multiqc(multiqc)
+
+    with pytest.raises(PipetoolsException):
+        pm.error('test')
+
+    # test attribute
+    pm.snakefile
+
+    # test summary
+    pm.get_html_summary()
+
+    # test the sample_func 
+    cfg.config.input_pattern = "Hm*gz"
+    def sample_func(filename):
+        d = filename.replace("_001.fastq.gz", "")
+        d = d.split('/')[-1]
+        return d.split("_")[0]
+    pm = snaketools.pipeline_manager.PipelineManagerGeneric("fastqc", cfg, sample_func=sample_func)
+    assert list(pm.samples.keys()) == ['Hm2']
+
+def test_pipeline_manager_wrong_inputs(tmpdir):
+
+    # test wrong input files
+    cfg = SequanaConfig({})
+    file1 = os.path.join(test_dir, "data", "Hm2_GTGAAA_L005_R1_001.fastq.gz")
+    cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
+    cfg.config.input_pattern = "DUMMY*gz"
+    with pytest.raises(ValueError):
+        pm = snaketools.pipeline_manager.PipelineManagerGeneric("fastqc", cfg)
+        pm.getrawdata()
+
+
+    # test missing input_directory
+    cfg = SequanaConfig({})
+    #cfg.config.input_directory, cfg.config.input_pattern = 
+    cfg.config.input_pattern = "DUMMY*gz"
+    with pytest.raises(PipetoolsException):
+        pm = snaketools.pipeline_manager.PipelineManager("fastqc", cfg)
+
+    # test wrong  input_directory
+    cfg = SequanaConfig({})
+    file1 = os.path.join(test_dir, "data", "Hm2_GTGAAA_L005_R1_001.fastq.gz")
+    cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
+    cfg.config.input_directory =  "DUMMY"
+    with pytest.raises(PipetoolsException):
+        pm = snaketools.pipeline_manager.PipelineManager("fastqc", cfg)
+
+
+def test_directory():
+
+    cfg = SequanaConfig({})
+    file1 = os.path.join(test_dir, "data", "Hm2_GTGAAA_L005_R1_001.fastq.gz")
+    cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
+    cfg.config.input_pattern = "Hm*gz"
+    pm = snaketools.pipeline_manager.PipelineManagerDirectory("test", cfg)
+

@@ -2,30 +2,29 @@ from sequana_pipetools import slurm
 import os
 import sys
 
-#import pkg_resources
-#info = pkg_resources.get_distribution("sequana_pipetools")
-#sharedir = os.sep.join([info.location , "sequana_pipetools", 'data'])
 
-if os.path.exists("tests/data"):
-    sharedir = "tests/data"
-else:
-    sharedir = "data"
+
+from . import test_dir
+
+sharedir = f"{test_dir}/data"
 
 def test():
     try:
         dj = slurm.DebugJob(".")
-        print(dj)   
+        dj
         assert False
     except:
         assert True
     dj = slurm.DebugJob(sharedir)
-    print(dj)    
+    dj
+
 
 def test_command():
     sys.argv = ["test", "--directory", sharedir]
     slurm.main()
- 
 
 
-dj = slurm.DebugJob(sharedir)
-print(dj)
+def test_get_error_message():
+    dj = slurm.DebugJob(sharedir)
+    for x in dj.slurm_out:
+        dj._get_error_message(x)

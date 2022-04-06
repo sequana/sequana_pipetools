@@ -10,15 +10,14 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import os
-import sys
-import re
 import argparse
+import os
+import re
+import sys
 from pathlib import Path
-import parse
-
 
 import colorlog
+import parse
 
 logger = colorlog.getLogger(__name__)
 
