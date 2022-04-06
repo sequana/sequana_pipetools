@@ -12,14 +12,13 @@
 ##############################################################################
 import os
 
+import colorlog
 from sequana_pipetools.misc import PipetoolsException
 
-from .sequana_config import SequanaConfig
-from .file_factory import FileFactory, FastQFactory
+from .file_factory import FastQFactory, FileFactory
 from .module import Module
 from .pipeline_utils import OnSuccessCleaner, message
-
-import colorlog
+from .sequana_config import SequanaConfig
 
 logger = colorlog.getLogger(__name__)
 
@@ -72,14 +71,15 @@ class PipelineManagerBase:
         otherwise, a function compatible with snakemake is returned. This function
         contains a wildcard to each of the samples found by the manager.
         """
-        if self.samples is None:
+        if not self.samples:
             raise ValueError(
                 "Define the samples attribute as a dictionary with"
                 " sample names as keys and the corresponding location as values."
             )
         return lambda wildcards: self.samples[wildcards.sample]
 
-    def message(self, msg):
+    def message(self, msg):  # pragma: no cover
+        print("//DEPRECATED. We'll be removed in version >0.8")
         message(msg)
 
     def setup(self, namespace=None, mode="error", matplotlib="Agg"):
@@ -92,7 +92,7 @@ class PipelineManagerBase:
         # The rulegraph wrapper expected manager.snakefile, which is defined here
         # Note also that the snakefile path when called from the rulegraph directory
         # has an extra 'rulegraph' in the path that is removed here.
-        self._snakefile = os.path.abspath(self.name + ".rules").replace("rulegraph/","")
+        self._snakefile = os.path.abspath(self.name + ".rules").replace("rulegraph/", "")
 
         try:
             # check requirements if possible. This is the standalone application
@@ -139,8 +139,15 @@ class PipelineManagerBase:
         import pkg_resources
 
         vers = pkg_resources.require("sequana_{}".format(self.name))[0].version
+
+        data = {"samples": len(self.samples), "sequana_{}_version".format(self.name): vers}
+        try:
+            data["paired"] = self.paired
+        except AttributeError:
+            pass
+
         df_general = pd.DataFrame(
-            {"samples": len(self.samples), "paired": self.paired, "sequana_{}_version".format(self.name): vers},
+            data,
             index=["summary"],
         )
 
@@ -165,7 +172,7 @@ class PipelineManagerGeneric(PipelineManagerBase):
     FileFactory class.
 
     Each sample name is a unique ID.
-    THis is not very convenient so, one can pass a function
+    This is not very convenient so, one can pass a function
     to extract e.g. the filename as the unique key
 
     def func(filename):
@@ -177,6 +184,13 @@ class PipelineManagerGeneric(PipelineManagerBase):
         super(PipelineManagerGeneric, self).__init__(name, config, schema)
 
         cfg = SequanaConfig(config)
+
+        # Default mode is the input directory .
+        if "input_directory" not in cfg.config.keys():
+            self.error("input_directory must be found in the config.yaml file")
+        if "input_pattern" not in cfg.config.keys():
+            self.error("input_pattern must be found in the config.yaml file")
+
         path = cfg.config["input_directory"]
         pattern = cfg.config["input_pattern"]
 
@@ -194,12 +208,13 @@ class PipelineManagerGeneric(PipelineManagerBase):
         # real filename location.
         self.sample = "{sample}"
         self.basename = "{sample}/%s/{sample}"
+
         self.samples = None
         if sample_func:
             try:
                 self.samples = {sample_func(filename): filename for filename in self.ff.realpaths}
             except Exception:
-                self.samples = None
+                pass
         else:
             self.samples = {str(i + 1): filename for i, filename in enumerate(self.ff.realpaths)}
 
@@ -226,7 +241,7 @@ class PipelineManager(PipelineManagerGeneric):
 
     config file must have these fields::
 
-        - input_directory:  #a_path
+        - input_directory:  # a_path
         - input_readtag: _R[12]_ # default
         - input_pattern:    # a_global_pattern e.g. H*fastq.gz
 
@@ -268,10 +283,6 @@ class PipelineManager(PipelineManagerGeneric):
         cfg = SequanaConfig(config)
         cfg.config.pipeline_name = self.name
         self.pipeline_dir = os.getcwd() + os.sep
-
-        # Default mode is the input directory .
-        if "input_directory" not in cfg.config.keys():
-            self.error("input_directory must be found in the config.yaml file")
 
         # First, one may provide the input_directory field
         if cfg.config.input_directory:

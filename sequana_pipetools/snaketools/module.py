@@ -13,11 +13,10 @@
 import glob
 import os
 
+import colorlog
 import easydev
 
 from .module_finder import ModuleFinder
-
-import colorlog
 
 logger = colorlog.getLogger(__name__)
 
@@ -159,6 +158,7 @@ or open a Python shell and type::
             return self.name.split("/")[1]
         elif self.is_pipeline():
             import pkg_resources
+
             name = self.name.replace("pipeline:", "")
             ver = pkg_resources.require(f"sequana_{name}")[0].version
             return ver
@@ -233,11 +233,14 @@ or open a Python shell and type::
             return self._snakefile
 
         # tuple of all possible snakefiles
-        possible_snakefiles = ("Snakefile", f"Snakefile.{self.name}", f"{self.name}.rules", 
-            f"{self.name}.smk", 
+        possible_snakefiles = (
+            "Snakefile",
+            f"Snakefile.{self.name}",
+            f"{self.name}.rules",
+            f"{self.name}.smk",
             f"{self.name.replace('pipeline:', '')}.rules",
-            f"{self.name.replace('pipeline:', '')}.smk"
-            )
+            f"{self.name.replace('pipeline:', '')}.smk",
+        )
 
         # find the good one
         for snakefile in possible_snakefiles:
@@ -272,19 +275,6 @@ or open a Python shell and type::
             return self._requirements
 
     requirements = property(_get_requirements, doc="list of requirements")
-
-    def _get_required_binaries(self):
-        # extension could be .smk or .rules
-        snakefile = next(glob.iglob(f"{self.path}/{self.name}*"))
-        with open(snakefile, "r") as fout:
-            for line in fout.readlines():
-                if line.startswith("binaries"):
-                    line = line.split("=")[1].strip()
-                    binaries = line[1:-1].split(",")
-                    return binaries
-        return []
-
-    required_binaries = property(_get_required_binaries)
 
     def is_executable(self):
         """Is the module executable
@@ -351,7 +341,7 @@ or open a Python shell and type::
         executable, missing = self.is_executable()
 
         if executable is False:
-            #_ = self.is_executable()
+            # _ = self.is_executable()
             missing = " ".join(missing)
             txt = f"""Some executable or Python packages are not available: {missing}
 Some functionalities may not work. Consider adding them with  conda or damona (singularity based): 
@@ -364,8 +354,8 @@ Some functionalities may not work. Consider adding them with  conda or damona (s
 
             if mode == "warning":
                 logger.critical(txt)
-            elif mode == "error":
-                txt += "Use \n conda install {missing};"
+            elif mode == "error":  # pragma: no cover
+                txt += "you may want to use \n conda install {missing};"
                 for this in missing:
                     txt += "- %s\n" % this
                 raise ValueError(txt)

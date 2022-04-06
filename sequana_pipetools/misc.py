@@ -10,10 +10,10 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import sys
-import pkg_resources
 import subprocess
+import sys
 
+import pkg_resources
 
 __all__ = ["Colors", "print_version", "error"]
 
@@ -106,44 +106,6 @@ def print_version(name):
     print(Colors().purple("- Fill issues on https://github.com/sequana/sequana/issues/new/choose"))
     print(Colors().purple("- Star us https://github.com/sequana/sequana/stargazers"))
 
-
-def print_newest_version(name=None):
-    # the previous version usig pip list --outdated is far too slow.
-    raise NotImplementedError
-
-    
-    """DEPRECATED will be replace by a check on the websites of the pipelines
-    once we have a proper integration with pypi on github itself.
-
-    ret = subprocess.run(["pip", "list", "--outdated"], stdout=subprocess.PIPE)
-
-    try:
-        names = name.split()
-    except AttributeError:
-        names = name
-
-    for line in ret.stdout.strip().decode().split("\n"):
-
-        if names:
-            if line.split()[0].strip() in names:
-                pkg = line.split()[0]
-                local_version = line.split()[1]
-                new_version = line.split()[2]
-                print(
-                    color.warning(
-                        "A newest version ({}) is available for {}. You have {}".format(new_version, pkg, local_version)
-                    )
-                )
-        elif line.split()[0].startswith("sequana"):
-            pkg = line.split()[0]
-            local_version = line.split()[1]
-            new_version = line.split()[2]
-            print(
-                color.warning(
-                    "A newest version ({}) is available for {}. You have {}".format(new_version, pkg, local_version)
-                )
-            )
-        """
 
 class PipetoolsException(Exception):
     pass

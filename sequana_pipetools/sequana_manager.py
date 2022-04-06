@@ -16,15 +16,14 @@ import shutil
 import subprocess
 import sys
 from shutil import which
-
-from deprecated import deprecated
-
-from easydev import CustomConfig
-
-from .snaketools import Module, SequanaConfig, FastQFactory
-from .misc import Colors, print_version
+from urllib.request import urlretrieve
 
 import colorlog
+from deprecated import deprecated
+from easydev import CustomConfig
+
+from .misc import Colors, print_version
+from .snaketools import FastQFactory, Module, SequanaConfig
 
 logger = colorlog.getLogger(__name__)
 
@@ -73,7 +72,7 @@ class SequanaManager:
             logger.error(f"{self.name} does not seem to be installed or is not a valid pipeline")
             sys.exit(1)
         self.module.check()
-        #self.module.is_executable()
+        # self.module.is_executable()
 
         # If this is a pipeline, let us load its config file
         # Do we start from an existing project with a valid config file
@@ -82,7 +81,7 @@ class SequanaManager:
         if "from_project" in dir(options) and options.from_project:
             possible_filenames = (
                 # from project tries to find a valid config.yaml
-                #options.from_project,  # exact config file path
+                # options.from_project,  # exact config file path
                 f"{options.from_project}/{config_name}",  # config file in project path
                 f"{options.from_project}/.sequana/{config_name}",  # config file in .sequana dir
             )
@@ -91,10 +90,10 @@ class SequanaManager:
                     self.config = SequanaConfig(filename)
                     logger.info(f"Reading existing config file {filename}")
                     break
-                except FileNotFoundError: #pragma: no cover
+                except FileNotFoundError:  # pragma: no cover
                     pass
 
-            if not self.config: #pragma: no cover
+            if not self.config:  # pragma: no cover
                 raise FileNotFoundError(
                     "Could not find config.yaml in the project specified {}".format(options.from_project)
                 )
@@ -109,11 +108,12 @@ class SequanaManager:
 
         # Set wrappers as attribute so that ia may be changed by the
         # user/developer
-        self.sequana_wrappers = os.environ.get("SEQUANA_WRAPPERS",
-                "https://raw.githubusercontent.com/sequana/sequana-wrappers/")
+        self.sequana_wrappers = os.environ.get(
+            "SEQUANA_WRAPPERS", "https://raw.githubusercontent.com/sequana/sequana-wrappers/"
+        )
 
     @deprecated(version="1.0", reason="not used in any pipelines. planned to be removed soon")
-    def exists(self, filename, exit_on_error=True, warning_only=False): #pragma: no cover
+    def exists(self, filename, exit_on_error=True, warning_only=False):  # pragma: no cover
         if not os.path.exists(filename):
             if warning_only:
                 logger.warning(f"{filename} file does not exists")
@@ -125,22 +125,23 @@ class SequanaManager:
         return True
 
     def copy_requirements(self):
-        # FIXME
-        # code redundant with snaketools.config.copy_requirements
+        # Copy is done by the sequana manager once at the creation of the
+        # working directory. Should not be done after otherwise, if snakemake reads
+        # the snakefile several times, copy_requirements may be called several times
         if "requirements" not in self.config.config:
             return
 
         for requirement in self.config.config.requirements:
-            if not requirement.startswith("http"):
+            logger.info(f"Copying {requirement} file into {self.workdir}")
+            if os.path.exists(requirement):
                 try:
-                    logger.info(f"Copying {requirement} from sequana pipeline {self.name}")
-                    path = os.sep.join((self.datapath, requirement))
-                    shutil.copy(path, self.workdir)
-                except Exception as err:
-                    print(err)
-                    msg = f"This requirement {requirement} was not found in sequana."
-                    logger.error(msg)
-                    sys.exit(1)
+                    shutil.copy(requirement, self.workdir)
+                except shutil.SameFileError:  # pragma: no cover
+                    pass  # the target and input may be the same
+            elif requirement.startswith("http"):
+                logger.info(f"This file {requirement} will be needed. Downloading")
+                output = requirement.split("/")[-1]
+                urlretrieve(requirement, filename=os.sep.join((self.workdir, output)))
 
     def _get_package_location(self):
         fullname = f"sequana_{self.name}"
@@ -149,9 +150,11 @@ class SequanaManager:
 
             info = pkg_resources.get_distribution(fullname)
             sharedir = os.sep.join([info.location, "sequana_pipelines", self.name, "data"])
-        except pkg_resources.DistributionNotFound:
+        except pkg_resources.DistributionNotFound:  # pragma: no cover
+            # appears that we should never enter here because already checked in the constructor
             logger.error(f"package provided ({fullname}) not installed.")
-            raise
+            raise PipetoolsException
+
         return sharedir
 
     def _get_package_version(self):
@@ -162,7 +165,7 @@ class SequanaManager:
 
     def _guess_scheduler(self):
 
-        if which("sbatch") and which("srun"):
+        if which("sbatch") and which("srun"):  # pragma: no cover
             return "slurm"
         else:
             return "local"
@@ -188,7 +191,9 @@ class SequanaManager:
         """
         # First we create the beginning of the command with the optional
         # parameters for a run on a SLURM scheduler
-        logger.info("Welcome to Sequana pipelines suite (sequana.readthedocs.io)")
+        logger.info("Welcome to Sequana pipelines suite (https://sequana.readthedocs.io)")
+        logger.info(" - Found an issue, have a question: https://tinyurl.com/2bh6frp2 ")
+        logger.info(f" - more about this pipeline on https://github.com/sequana/{self.name} ")
 
         snakefilename = os.path.basename(self.module.snakefile)
         self.command = f"#!/bin/bash\nsnakemake -s {snakefilename} "
@@ -196,7 +201,6 @@ class SequanaManager:
         if self.sequana_wrappers:
             self.command += f" --wrapper-prefix {self.sequana_wrappers} "
             logger.info(f"Using sequana-wrappers from {self.sequana_wrappers}")
-
 
         # FIXME a job is not a core. Ideally, we should add a core option
         if self._guess_scheduler() == "local":
@@ -212,9 +216,7 @@ class SequanaManager:
             if self.options.slurm_queue == "common":
                 slurm_queue = ""
             else:
-                slurm_queue = " --qos {} -p {}".format(
-                    self.options.slurm_queue, self.options.slurm_queue
-                )
+                slurm_queue = " --qos {} -p {}".format(self.options.slurm_queue, self.options.slurm_queue)
 
             if self.module.cluster_config:
                 self.command += ' --cluster "sbatch --mem={cluster.ram} --cpus-per-task={threads}"'
@@ -315,7 +317,7 @@ class SequanaManager:
         self.config.save(f"{self.workdir}/.sequana/{config_name}")
         try:
             os.symlink(f".sequana/{config_name}", f"{self.workdir}/{config_name}")
-        except FileExistsError: #pragma: no cover
+        except FileExistsError:  # pragma: no cover
             pass
 
         # the command
@@ -327,7 +329,7 @@ class SequanaManager:
         snakefilename = os.path.basename(self.module.snakefile)
         try:
             os.symlink(f".sequana/{snakefilename}", f"{self.workdir}/{snakefilename}")
-        except FileExistsError: #pragma: no cover
+        except FileExistsError:  # pragma: no cover
             pass
 
         # the cluster config if any
@@ -415,9 +417,9 @@ class SequanaManager:
                 if line.startswith("#version:"):
                     version = line.split("#version:")[1].strip()
                     version = version.replace(">=", "").replace(">", "")
-                    from distutils.version import StrictVersion
+                    from packaging.version import Version
 
-                    if StrictVersion(version) < StrictVersion(self._get_package_version()):  #pragma: no cover
+                    if Version(version) < Version(self._get_package_version()):  # pragma: no cover
                         msg = (
                             "The version {} of your completion file for the {} pipeline seems older than the installed"
                             " pipeline itself ({}). Please, consider updating the completion file {}"
@@ -434,7 +436,7 @@ class SequanaManager:
             logger.info("A completion if possible with sequana_completion --name {}".format(self.name))
 
     @deprecated(version="1.0", reason="will be removed soon. Not used.")
-    def update_config(self, config, options, section_name): #pragma: no cover
+    def update_config(self, config, options, section_name):  # pragma: no cover
         for option_name in config[section_name]:
             try:
                 config[section_name][option_name] = getattr(options, section_name + "_" + option_name)

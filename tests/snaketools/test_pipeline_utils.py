@@ -12,6 +12,8 @@ def test_onsuccess(tmpdir):
     onsuc = snaketools.OnSuccess()
     onsuc.makefile_filename = p1
     onsuc.makefile_cleanup = p2
+    # same as makefile + create_recursive_cleanup
+    onsuc()
 
 
 def test_onsuccess_cleaner(tmpdir):

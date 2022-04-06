@@ -10,16 +10,14 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import os
 import json
+import os
 import shutil
 import warnings
 
-from easydev import AttrDict, TempFile
-from urllib.request import urlretrieve
-from pykwalify.core import Core, CoreError, SchemaError
 import ruamel.yaml
-
+from easydev import AttrDict, TempFile
+from pykwalify.core import Core, CoreError, SchemaError
 
 try:
     import importlib.resources as pkg_resources
@@ -146,9 +144,7 @@ class SequanaConfig:
                     value = data[key]
                     target.update({key: value})
                 else:
-                    logger.warning(
-                        "This %s key was not in the original config" " but added" % key
-                    )
+                    logger.warning("This %s key was not in the original config" " but added" % key)
                     value = data[key]
                     target.update({key: value})
             else:  # pragma: no cover
@@ -180,26 +176,6 @@ class SequanaConfig:
                         d[key] = os.path.expanduser(value)
 
         self._update_yaml()
-
-    def copy_requirements(self, target):
-        """Copy files to run the pipeline
-
-        If a requirement file exists, it is copied in the target directory.
-        If not, it can be either an http resources or a sequana resources.
-        """
-        # make sure that if the config changed, the yaml is up-to-date
-        self._update_yaml()
-        if "requirements" in self._yaml_code.keys():
-            for requirement in self._yaml_code["requirements"]:
-                if os.path.exists(requirement):
-                    try:
-                        shutil.copy(requirement, target)
-                    except shutil.SameFileError: #pragma: no cover
-                        pass  # the target and input may be the same
-                elif requirement.startswith("http"):
-                    logger.info(f"This file {requirement} will be needed. Downloading")
-                    output = requirement.split("/")[-1]
-                    urlretrieve(requirement, filename=os.sep.join((target, output)))
 
     def check_config_with_schema(self, schemafile):
         """Check the config file with respect to a schema file

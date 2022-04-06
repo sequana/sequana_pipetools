@@ -170,6 +170,11 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.8.0     * removed 'required_binaries' attribute in module.py (not used)
+          * removed 'copy_requirements' in sequana_config and fixed the one
+            in the sequana_manager
+          * switch from distutils to packaging
+          * More tests reaching >90%
 0.7.6     * simplify the setup() method in pipeline manager
 0.7.5     * can set a SEQUANA_WRAPPERS env variable to use local wrappers
 0.7.4     * switch biomics to biomicspole for the slurm queue (internal change)

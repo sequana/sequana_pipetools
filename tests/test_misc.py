@@ -1,4 +1,4 @@
-from sequana_pipetools.misc import Colors, print_version, print_newest_version, error
+from sequana_pipetools.misc import Colors, print_version, error
 
 
 
@@ -35,10 +35,3 @@ def test_print_version():
     except:
         pass
 
-
-def test_new_version():
-    try:
-        print_newest_version("fastqc")
-        assert False
-    except NotImplementedError:
-        assert True

@@ -15,7 +15,6 @@ import os
 import re
 import sys
 
-
 import colorlog
 
 logger = colorlog.getLogger(__name__)
@@ -133,13 +132,13 @@ class FastQFactory(FileFactory):
         FastQFactory("*fastq.gz")
 
     This behaviour can be changed if data have another read tags. (e.g. "[12].fastq.gz")
-        
+
         FastQFactory("*fastq.gz", read_tag="_[12].")
 
     Sometimes, e.g. in long reads experiments (for instance), naming convention is
     different and may nor be single/paired end convention. If so, set the
     readtag to None.
-        
+
         FastQFactory("*ccs.fastq.gz", read_tag=None)
 
     In a directory (recursively or not), there could be lots of samples. This

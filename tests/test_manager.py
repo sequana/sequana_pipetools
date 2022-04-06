@@ -1,10 +1,13 @@
 import os
 
+import pytest
+
 from easydev import AttrDict
 
 from sequana_pipetools import SequanaManager
 from sequana_pipetools import SequanaConfig
 from sequana_pipetools import Module
+from sequana_pipetools.misc import PipetoolsException
 from sequana_pipetools.sequana_manager import get_pipeline_location
 
 from . import test_dir
@@ -82,6 +85,8 @@ def test_sequana_manager_wrong_input(tmpdir):
 
 def test_location():
     get_pipeline_location("fastqc")
+    with pytest.raises(SystemExit):
+        get_pipeline_location("dummy")
 
 
 def test_version(tmpdir):
@@ -94,6 +99,7 @@ def test_version(tmpdir):
         assert False
     except SystemExit:
         assert True
+
 
 def test_wrong_pipeline(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
@@ -108,10 +114,33 @@ def test_wrong_pipeline(tmpdir):
 
 
 
+def test_copy_requirements(tmpdir):
+    # We need several cases:
+    # 1- http
+    # 3- an existing file elsewhere (here just a temporary file)
+    # 4- an existing file in the same directory as the target dir
 
+    # Case 3: a temporary file
+    tmp_require = tmpdir.join("requirement.txt")
 
+    requirements = [
+        #"phiX174.fa",
+        str(tmp_require),
+        "https://raw.githubusercontent.com/sequana/sequana/master/README.rst",
+        "__init__.py", "setup.py"
+    ]
 
+    wkdir = tmpdir.mkdir("wkdir")
 
-
-
+    # normal behaviour
+    pm = SequanaManager(
+        AttrDict(**{"version": False, "workdir": str(wkdir),'level':"INFO",
+                    "jobs":1, "run_mode": None, "force": True}),
+        "fastqc")
+    pm.config.config.input_directory = f"{test_dir}/data/"
+    pm.config.config.input_pattern = f"Hm2*gz"
+    pm.config.config.input_readtag = f"_R[12]_"
+    pm.config.config.requirements = requirements
+    pm.setup()
+    pm.teardown()
 

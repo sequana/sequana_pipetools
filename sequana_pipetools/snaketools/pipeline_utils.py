@@ -12,11 +12,10 @@
 ##############################################################################
 import os
 
+import colorlog
 import easydev
 
 from .module import Module, modules
-
-import colorlog
 
 logger = colorlog.getLogger(__name__)
 
@@ -180,8 +179,8 @@ def get_pipeline_statistics():
     pipelines = [m for m in modules if Module(m).is_pipeline()]
     rules = [rule for rule in modules if not Module(rule).is_pipeline()]
 
-    import pandas as pd
     import numpy as np
+    import pandas as pd
 
     L, C = len(rules), len(pipelines)
     df = pd.DataFrame(np.zeros((L, C)), dtype=int, index=rules, columns=pipelines)
