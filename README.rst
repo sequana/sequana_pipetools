@@ -170,6 +170,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.8.1     * Better schema validation
 0.8.0     * removed 'required_binaries' attribute in module.py (not used)
           * removed 'copy_requirements' in sequana_config and fixed the one
             in the sequana_manager
