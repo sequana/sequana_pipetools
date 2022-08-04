@@ -12,8 +12,8 @@ from sequana_pipetools.sequana_manager import get_pipeline_location
 
 from . import test_dir
 
-def test_pipeline_manager():
 
+def test_pipeline_manager():
     # test missing input_directory
     cfg = SequanaConfig({"version": "1.0.0"})
     try:
@@ -22,30 +22,31 @@ def test_pipeline_manager():
     except:
         assert True
 
+
 def test_sequana_manager(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
 
     # normal behaviour
     pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": wkdir,'level':"INFO",
-                    "jobs":1, "run_mode": None, "force": True}),
+        AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
+                    "jobs": 1, "run_mode": None, "force": True, "use_profile": False}),
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
-    pm.config.config.input_pattern = f"Hm2*gz"
-    pm.config.config.input_readtag = f"_R[12]_"
+    pm.config.config.input_pattern = "Hm2*gz"
+    pm.config.config.input_readtag = "_R[12]_"
 
     pm.setup()
     pm.teardown()
     pm.check_fastq_files()
 
     # check SE data
-    pm.config.config.input_pattern = f"Hm*_R1_*gz"
+    pm.config.config.input_pattern = "Hm*_R1_*gz"
     pm.check_fastq_files()
 
     # We can now try to do it again fro the existing project itself
     pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": wkdir,'level':"INFO",
-                    "jobs":1, "run_mode": None, "force": True, 
+        AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
+                    "jobs": 1, "run_mode": None, "force": True,
                     "from_project": wkdir}),
         "fastqc")
 
@@ -104,14 +105,13 @@ def test_version(tmpdir):
 def test_wrong_pipeline(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
     try:
-        pm = SequanaManager(
-            AttrDict(**{"version": False, "workdir": wkdir,'level':"INFO",
-                        "jobs":1, "run_mode": None, "force": True}),
+        SequanaManager(
+            AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
+                        "jobs": 1, "run_mode": None, "force": True}),
             "wrong")
         assert False
     except SystemExit:
         assert True
-
 
 
 def test_copy_requirements(tmpdir):
@@ -134,13 +134,12 @@ def test_copy_requirements(tmpdir):
 
     # normal behaviour
     pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": str(wkdir),'level':"INFO",
-                    "jobs":1, "run_mode": None, "force": True}),
+        AttrDict(**{"version": False, "workdir": str(wkdir), 'level': "INFO",
+                    "jobs": 1, "run_mode": None, "force": True}),
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
-    pm.config.config.input_pattern = f"Hm2*gz"
-    pm.config.config.input_readtag = f"_R[12]_"
+    pm.config.config.input_pattern = "Hm2*gz"
+    pm.config.config.input_readtag = "_R[12]_"
     pm.config.config.requirements = requirements
     pm.setup()
     pm.teardown()
-

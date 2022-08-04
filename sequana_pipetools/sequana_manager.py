@@ -17,12 +17,15 @@ import subprocess
 import sys
 from shutil import which
 from urllib.request import urlretrieve
+from pathlib import Path
 
 import colorlog
 from deprecated import deprecated
 from easydev import CustomConfig
 
-from .misc import Colors, print_version
+from sequana_pipetools.snaketools.profile import create_slurm_profile
+
+from .misc import Colors, PipetoolsException, print_version
 from .snaketools import FastQFactory, Module, SequanaConfig
 
 logger = colorlog.getLogger(__name__)
@@ -101,7 +104,7 @@ class SequanaManager:
             self.config = SequanaConfig(self.module.config)
 
         # the working directory
-        self.workdir = options.workdir
+        self.workdir = Path(options.workdir)
 
         # define the data path of the pipeline
         self.datapath = self._get_package_location()
@@ -141,7 +144,7 @@ class SequanaManager:
             elif requirement.startswith("http"):
                 logger.info(f"This file {requirement} will be needed. Downloading")
                 output = requirement.split("/")[-1]
-                urlretrieve(requirement, filename=os.sep.join((self.workdir, output)))
+                urlretrieve(requirement, filename=self.workdir / output)
 
     def _get_package_location(self):
         fullname = f"sequana_{self.name}"
@@ -235,20 +238,20 @@ class SequanaManager:
 
     def _create_directories(self):
         # Now we create the directory to store the config/pipeline
-        if os.path.exists(self.workdir):
+        if self.workdir.exists():
             if self.options.force:
                 logger.warning(f"Path {self.workdir} exists already but you set --force to overwrite it")
             else:
                 logger.error(f"Output path {self.workdir} exists already. Use --force to overwrite")
                 sys.exit()
         else:
-            os.mkdir(self.workdir)
+            self.workdir.mkdir()
 
         # Now we create the directory to store some info in
         # working_directory/.sequana for book-keeping and reproducibility
-        hidden_dir = self.workdir + "/.sequana"
-        if os.path.exists(hidden_dir) is False:
-            os.mkdir(self.workdir + "/.sequana")
+        hidden_dir = self.workdir / ".sequana"
+        if not hidden_dir.exists():
+            hidden_dir.mkdir()
 
     def check_input_files(self, stop_on_error=True):
         # Sanity checks
@@ -314,50 +317,63 @@ class SequanaManager:
         # the config file
         self.config._update_yaml()
         config_name = os.path.basename(self.module.config)
-        self.config.save(f"{self.workdir}/.sequana/{config_name}")
+        self.config.save(self.workdir / f".sequana/{config_name}")
         try:
             os.symlink(f".sequana/{config_name}", f"{self.workdir}/{config_name}")
         except FileExistsError:  # pragma: no cover
             pass
 
         # the command
-        with open(f"{self.workdir}/{self.name}.sh", "w") as fout:
-            fout.write(self.command)
+        command_file = self.workdir / f"{self.name}.sh"
+        snakefilename = os.path.basename(self.module.snakefile)
+        if self._guess_scheduler() == "slurm" and self.options.use_profile:
+            # use profile command
+            options = {
+                "memory": self.options.slurm_memory,
+                "jobs": self.options.jobs,
+                "wrappers": self.sequana_wrappers,
+            }
+            if self.options.slurm_queue != "common":
+                options.update({"partition": self.options.slurm_queue, "qos": self.options.slurm_queue})
+            create_slurm_profile(self.workdir, **options)
+            command = f"#!/bin/bash\nsnakemake -s {snakefilename} --profile slurm"
+            command_file.write_text(command)
+        else:
+            command_file.write_text(self.command)
 
         # the snakefile
-        shutil.copy(self.module.snakefile, f"{self.workdir}/.sequana")
-        snakefilename = os.path.basename(self.module.snakefile)
+        shutil.copy(self.module.snakefile, self.workdir / ".sequana")
         try:
-            os.symlink(f".sequana/{snakefilename}", f"{self.workdir}/{snakefilename}")
+            os.symlink(f".sequana/{snakefilename}", self.workdir / f"{snakefilename}")
         except FileExistsError:  # pragma: no cover
             pass
 
         # the cluster config if any
         if self.module.logo:
-            shutil.copy(self.module.logo, "{}/{}".format(self.workdir, ".sequana"))
+            shutil.copy(self.module.logo, self.workdir / ".sequana")
 
         # the cluster config if any
         if self.module.cluster_config:
-            shutil.copy(self.module.cluster_config, "{}".format(self.workdir))
+            shutil.copy(self.module.cluster_config, self.workdir)
 
         # the multiqc if any
         if self.module.multiqc_config:
-            shutil.copy(self.module.multiqc_config, "{}".format(self.workdir))
+            shutil.copy(self.module.multiqc_config, self.workdir)
 
         # the rules if any
         if self.module.rules:
             try:
-                shutil.copytree(self.module.rules, f"{self.workdir}/rules")
+                shutil.copytree(self.module.rules, self.workdir / "rules")
             except FileExistsError:
                 if self.options.force:
-                    shutil.rmtree(f"{self.workdir}/rules")
-                    shutil.copytree(self.module.rules, f"{self.workdir}/rules")
+                    shutil.rmtree(self.workdir / "rules")
+                    shutil.copytree(self.module.rules, self.workdir / "rules")
                 pass
 
         # the schema if any
         if self.module.schema_config:
             schema_name = os.path.basename(self.module.schema_config)
-            shutil.copy(self.module.schema_config, "{}".format(self.workdir))
+            shutil.copy(self.module.schema_config, self.workdir)
 
             # This is the place where we can check the entire validity of the
             # inputs based on the schema
@@ -382,7 +398,7 @@ class SequanaManager:
         print(self.colors.purple(msg))
 
         # Save an info.txt with the command used
-        with open(self.workdir + "/.sequana/info.txt", "w") as fout:
+        with open(self.workdir / ".sequana" / "info.txt", "w") as fout:
             from . import version
 
             fout.write(f"# sequana_pipetools version: {version}\n")
@@ -391,7 +407,7 @@ class SequanaManager:
             fout.write(" ".join([cmd1] + sys.argv[1:]))
 
         # Save unlock.sh
-        with open(self.workdir + "/unlock.sh", "w") as fout:
+        with open(self.workdir / "unlock.sh", "w") as fout:
             fout.write(f"#!/bin/sh\nsnakemake -s {snakefilename} --unlock -j 1")
 
         # save environement
