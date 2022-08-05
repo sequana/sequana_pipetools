@@ -1,13 +1,9 @@
-import os
-
 import pytest
 
 from easydev import AttrDict
 
 from sequana_pipetools import SequanaManager
 from sequana_pipetools import SequanaConfig
-from sequana_pipetools import Module
-from sequana_pipetools.misc import PipetoolsException
 from sequana_pipetools.sequana_manager import get_pipeline_location
 
 from . import test_dir
@@ -29,7 +25,7 @@ def test_sequana_manager(tmpdir):
     # normal behaviour
     pm = SequanaManager(
         AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
-                    "jobs": 1, "run_mode": None, "force": True, "use_profile": False}),
+                    "jobs": 1, "run_mode": None, "force": True, "profile": None}),
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
     pm.config.config.input_pattern = "Hm2*gz"
@@ -47,7 +43,7 @@ def test_sequana_manager(tmpdir):
     pm = SequanaManager(
         AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
                     "jobs": 1, "run_mode": None, "force": True,
-                    "from_project": wkdir}),
+                    "from_project": wkdir, "profile": None}),
         "fastqc")
 
     pm.setup()
@@ -70,7 +66,7 @@ def test_sequana_manager_wrong_input(tmpdir):
 
     # normal behaviour
     pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": wkdir,'level':"INFO",
+        AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
                     "jobs":1, "run_mode": None, "force": True}),
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
@@ -135,7 +131,7 @@ def test_copy_requirements(tmpdir):
     # normal behaviour
     pm = SequanaManager(
         AttrDict(**{"version": False, "workdir": str(wkdir), 'level': "INFO",
-                    "jobs": 1, "run_mode": None, "force": True}),
+                    "jobs": 1, "run_mode": None, "force": True, "profile": None}),
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
     pm.config.config.input_pattern = "Hm2*gz"

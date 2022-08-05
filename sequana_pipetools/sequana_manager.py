@@ -23,7 +23,7 @@ import colorlog
 from deprecated import deprecated
 from easydev import CustomConfig
 
-from sequana_pipetools.snaketools.profile import create_slurm_profile
+from sequana_pipetools.snaketools.profile import create_profile
 
 from .misc import Colors, PipetoolsException, print_version
 from .snaketools import FastQFactory, Module, SequanaConfig
@@ -326,17 +326,21 @@ class SequanaManager:
         # the command
         command_file = self.workdir / f"{self.name}.sh"
         snakefilename = os.path.basename(self.module.snakefile)
-        if self._guess_scheduler() == "slurm" and self.options.use_profile:
+        if self.options.run_mode == self.options.profile:
             # use profile command
-            options = {
-                "memory": self.options.slurm_memory,
-                "jobs": self.options.jobs,
-                "wrappers": self.sequana_wrappers,
-            }
-            if self.options.slurm_queue != "common":
-                options.update({"partition": self.options.slurm_queue, "qos": self.options.slurm_queue})
-            create_slurm_profile(self.workdir, **options)
-            command = f"#!/bin/bash\nsnakemake -s {snakefilename} --profile slurm"
+            options = {"wrappers": self.sequana_wrappers, "jobs": self.options.jobs}
+            if self.options.profile == "slurm":
+                # add slurm options
+                options.update({
+                    "partition": "common",
+                    "qos": "normal",
+                    "memory": self.options.slurm_memory,
+                })
+                if self.options.slurm_queue != "common":
+                    options.update({"partition": self.options.slurm_queue, "qos": self.options.slurm_queue})
+
+            profile_dir = create_profile(self.workdir, self.options.profile, **options)
+            command = f"#!/bin/bash\nsnakemake -s {snakefilename} --profile {profile_dir}"
             command_file.write_text(command)
         else:
             command_file.write_text(self.command)

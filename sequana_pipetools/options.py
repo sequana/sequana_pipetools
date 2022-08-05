@@ -471,7 +471,7 @@ commas""",
 
 
 class SlurmOptions:
-    def __init__(self, group_name="slurm", memory=4000, queue="common", cores=4, use_profile=False):
+    def __init__(self, group_name="slurm", memory=4000, queue="common", cores=4, profile=None):
         """
 
         ::
@@ -489,7 +489,7 @@ class SlurmOptions:
         self.memory = memory
         self.cores = cores
         self.queue = queue
-        self.use_profile = use_profile
+        self.profile = profile
 
     def add_options(self, parser):
         group = parser.add_argument_group(self.group_name)
@@ -516,10 +516,9 @@ class SlurmOptions:
             of your pipeline (e.g. rnaseq)""",
         )
         group.add_argument(
-            "--use-profile",
-            dest="use_profile",
-            default=self.use_profile,
-            action="store_true",
-            help="Create slurm profile directory and use it in bash file."
-                 " It fills default resources with slurm options."
+            "--profile",
+            dest="profile",
+            default=self.profile,
+            choices=["local", "slurm"],
+            help="Create cluster (HPC) profile directory. By default, it use local profile"
         )
