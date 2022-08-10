@@ -110,7 +110,7 @@ class FileFactory:
         def func(filename):
             res = filename[:]
             for prefix in self.prefixes_to_strip:
-                res = res.lstrip(prefix)
+                res = res[res.startswith(prefix) and len(prefix):]
             return res.split(".")[0]
 
         return [func(basename) for basename in self.basenames]
