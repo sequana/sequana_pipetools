@@ -1,6 +1,6 @@
 import os
 import subprocess
-
+from pathlib import Path
 import pytest
 
 from sequana_pipetools import snaketools, SequanaConfig, Module
@@ -18,7 +18,7 @@ def test_pipeline_manager(tmpdir):
     # normal behaviour but no input provided:
     config = Module("pipeline:fastqc")._get_config()
     cfg = SequanaConfig(config)
-    with pytest.raises(ValueError):
+    with pytest.raises(PipetoolsException):
         pm = snaketools.PipelineManager("custom", cfg)
 
     # normal behaviour
@@ -28,11 +28,14 @@ def test_pipeline_manager(tmpdir):
     pm = snaketools.PipelineManager("custom", cfg)
     assert not pm.paired
 
+
+    # here not readtag provided, so data is considered to be non-fastq related
+    # or at least not paired
     cfg = SequanaConfig(config)
     cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
     cfg.config.input_pattern = "Hm*gz"
     pm = snaketools.PipelineManager("custom", cfg)
-    assert pm.paired
+    assert not pm.paired
 
     pm.getwkdir("pipeline:fastqc")
     pm.getrawdata()
@@ -103,55 +106,59 @@ def test_pipeline_manager(tmpdir):
         assert True
 
 
-def test_pipeline_manager_generic(tmpdir):
+def test_pipeline_manager_mixed_of_files(tmpdir):
+    # Test a mix of bam and fastq files (with no tags)
     cfg = SequanaConfig({})
-    file1 = os.path.join(test_dir, "data", "Hm2_GTGAAA_L005_R1_001.fastq.gz")
-    cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
-    cfg.config.input_pattern = "Hm*gz"
-    pm = snaketools.pipeline_manager.PipelineManagerGeneric("fastqc", cfg)
-    pm.getwkdir("fastqc")
-    pm.getrawdata()
-    pm.getname("fastqc")
-    gg = globals()
-    gg["__snakefile__"] = "dummy"
-    pm.setup(gg)
-    del gg["__snakefile__"]
+    cfg.config.input_directory = test_dir +os.sep + "data"
+    cfg.config.input_pattern = "*notag*"
+    pm = snaketools.PipelineManager("test", cfg)
+    assert len(pm.samples) == 2
+    assert not pm.paired
 
-    class WF:
-        included_stack = ["dummy", "dummy"]
-
-    wf = WF()
-    gg["workflow"] = wf
-    pm.setup(gg)
-    try:
-        pm.teardown()
-    except Exception:
-        assert False
-    finally:
-        os.remove("Makefile")
-
-    multiqc = tmpdir.join('multiqc.html')
-    with open(multiqc, 'w') as fh:
-        fh.write("test")
-    pm.clean_multiqc(multiqc)
-
-    with pytest.raises(PipetoolsException):
-        pm.error('test')
-
-    # test attribute
+    # just test the attribute
     pm.snakefile
 
-    # test summary
+    pm.name = "fastqc"
     pm.get_html_summary()
 
-    # test the sample_func 
-    cfg.config.input_pattern = "Hm*gz"
-    def sample_func(filename):
-        d = filename.replace("_001.fastq.gz", "")
-        d = d.split('/')[-1]
-        return d.split("_")[0]
-    pm = snaketools.pipeline_manager.PipelineManagerGeneric("fastqc", cfg, sample_func=sample_func)
-    assert list(pm.samples.keys()) == ['Hm2']
+
+def test_pipeline_manager_sample_func(tmpdir):
+    cfg = SequanaConfig({})
+    cfg.config.input_directory = test_dir +os.sep + "data"
+    cfg.config.input_pattern = "*.gz"
+
+    def func(filename):
+        return filename.split("/")[-1].split('.', 1)[0]
+
+    pm = snaketools.PipelineManager("test", cfg, sample_func=func)
+
+    # here, note that the sample_func is too simple and will extract the first part of the filename
+    # so demultiplex.bc1010.fsatq.gz returns 'demultiplex'
+    assert 'demultiplex' in pm.samples
+    assert 'fastq_notag' in pm.samples
+    assert 'Hm2_GTGAAA_L005_R1_001' in pm.samples
+    assert 'Hm2_GTGAAA_L005_R2_001' in pm.samples
+
+
+def test_pipeline_manager_common_prefix():
+    cfg = SequanaConfig({})
+    cfg.config.input_directory = str(Path(test_dir) / "data")
+    cfg.config.input_pattern = "*gz"
+    pm = snaketools.PipelineManager("custom", cfg)
+    assert "bc1010" in pm.samples
+
+
+def test_multiqc_clean(tmpdir):
+    working_dir = tmpdir.mkdir('multiqc')
+    cfg = SequanaConfig({})
+    cfg.config.input_directory = str(Path(test_dir) / "data")
+    cfg.config.input_pattern = "*notag*"
+    pm = snaketools.PipelineManager("test", cfg)
+
+    with open(working_dir / "multiqc.html", "w") as fout:
+        fout.write('<a href="http://multiqc.info" target="_blank">"\ntest\ntest\ncode')
+    pm.clean_multiqc(working_dir / "multiqc.html")
+    pm.teardown(outdir=working_dir)
 
 def test_pipeline_manager_wrong_inputs(tmpdir):
 
@@ -160,8 +167,8 @@ def test_pipeline_manager_wrong_inputs(tmpdir):
     file1 = os.path.join(test_dir, "data", "Hm2_GTGAAA_L005_R1_001.fastq.gz")
     cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
     cfg.config.input_pattern = "DUMMY*gz"
-    with pytest.raises(ValueError):
-        pm = snaketools.pipeline_manager.PipelineManagerGeneric("fastqc", cfg)
+    with pytest.raises(PipetoolsException):
+        pm = snaketools.pipeline_manager.PipelineManager("fastqc", cfg)
         pm.getrawdata()
 
 

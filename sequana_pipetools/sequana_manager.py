@@ -115,8 +115,11 @@ class SequanaManager:
             "SEQUANA_WRAPPERS", "https://raw.githubusercontent.com/sequana/sequana-wrappers/"
         )
 
-    @deprecated(version="1.0", reason="not used in any pipelines. planned to be removed soon")
     def exists(self, filename, exit_on_error=True, warning_only=False):  # pragma: no cover
+        """This is a convenient function to check if a directory/file exists
+
+        Used in the main.py of all pipelines when setting the working directory
+        """
         if not os.path.exists(filename):
             if warning_only:
                 logger.warning(f"{filename} file does not exists")
@@ -450,9 +453,6 @@ class SequanaManager:
                         logger.info(msg)
 
         else:
-            # we could print a message to use the sequana_completion tools
-            # be maybe boring on the long term
-            # FIXME
             logger.info("A completion if possible with sequana_completion --name {}".format(self.name))
 
     @deprecated(version="1.0", reason="will be removed soon. Not used.")

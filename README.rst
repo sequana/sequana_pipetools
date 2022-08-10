@@ -3,11 +3,11 @@
 .. image:: https://badge.fury.io/py/sequana-pipetools.svg
     :target: https://pypi.python.org/pypi/sequana_pipetools
 
-.. image:: https://github.com/sequana/sequana_pipetools/actions/workflows/main.yml/badge.svg?branch=master
+.. image:: https://github.com/sequana/sequana_pipetools/actions/workflows/main.yml/badge.svg?branch=main
     :target: https://github.com/sequana/sequana_pipetools/actions/workflows/main.yml
 
-.. image:: https://coveralls.io/repos/github/sequana/sequana_pipetools/badge.svg?branch=master
-    :target: https://coveralls.io/github/sequana/sequana_pipetools?branch=master
+.. image:: https://coveralls.io/repos/github/sequana/sequana_pipetools/badge.svg?branch=main
+    :target: https://coveralls.io/github/sequana/sequana_pipetools?branch=main
 
 .. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
    :target: http://joss.theoj.org/papers/10.21105/joss.00352
@@ -34,7 +34,7 @@ The Sequana framework used to have all bioinformatics, snakemake rules,
 pipelines, tools to manage pipelines in a single library (Sequana) as described
 in **Fig 1** here below.
 
-.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/veryold.png
+.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/veryold.png
     :scale: 40%
 
     **Figure 1** Old Sequana framework will all pipelines and Sequana library in the same
@@ -45,7 +45,7 @@ Each time we changed anything, the entire library needed to be checked carefully
 dependencies woule be needed, and so on. So, we first decided to make all
 pipelines independent as shown in **Fig 2**:
 
-.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/old.png
+.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/old.png
     :scale: 40%
 
     **Figure 2** v0.8 of Sequana moved the Snakemake pipelines in indepdendent
@@ -62,7 +62,7 @@ pipelines even more independent as shown in **Fig3**. We called it
 **sequana_pipetools**.
 
 
-.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/master/doc/new.png
+.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/new.png
     :scale: 40%
 
     **Figure 3** New Sequana framework. The library itself with the core, the
@@ -170,6 +170,13 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.9.0     Major update with:
+          * new mechanism to handle  profile for Snakemake that will replace the
+            cluster_config.yaml files
+          * Major cleanup of PipelineManager (PipelineManagerGeneric was 
+            removed). The way input files are handled was also cleanup. 
+            Fixes https://github.com/sequana/sequana_pipetools/issues/37
+            and also files starting with common prefixes
 0.8.1     * Better schema validation
 0.8.0     * removed 'required_binaries' attribute in module.py (not used)
           * removed 'copy_requirements' in sequana_config and fixed the one

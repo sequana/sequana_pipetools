@@ -43,7 +43,6 @@ class FileFactory:
         >>> extensions
         ".gz"
 
-    FIXME: pathname to be checked.
 
     A **basename** is the name of a directory in a Unix pathname that occurs
     after the last slash.
@@ -63,18 +62,25 @@ class FileFactory:
 
     """
 
-    def __init__(self, pattern):
+    def __init__(self, pattern, prefixes_to_strip=['demultiplex.'], **kwargs):
         """.. rubric:: Constructor
 
         :param pattern: can be a filename, list of filenames, or a global
             pattern (a unix regular expression with wildcards). For instance,
             ``*/*fastq.gz``
+        :param prefixes_to_strip: some files such as PacBio have a prefix such as demultiplex.
+            in front of all filenames (e.g. demultiplex.A.bam). This is not standard in NGS where most files start
+            with sample names followed by annotation such as .sorted (e.g. A.sorted.bam).
+            Since, we split on the dot and keep the first element, prefix names such as demultiplex.
+            must be strip before identifying the sample name.
 
         .. warning:: Only in Python 3.X supports the recursive global pattern
             for now.
 
         """
         self.pattern = pattern
+        self.prefixes_to_strip = prefixes_to_strip
+
         try:
             if os.path.exists(pattern):
                 self._glob = [pattern]
@@ -87,12 +93,41 @@ class FileFactory:
                     raise FileNotFoundError(f"This file {filename} does not exist")
             self._glob = pattern[:]
 
-        self.realpaths = [os.path.realpath(filename) for filename in self._glob]
-        self.basenames = [os.path.split(filename)[1] for filename in self._glob]
-        self.filenames = [basename.split(".")[0] for basename in self.basenames]
-        self.pathnames = [os.path.split(filename)[0] for filename in self.realpaths]
-        self.extensions = [os.path.splitext(filename)[1] for filename in self._glob]
-        self.all_extensions = [basename.split(".", 1)[1] if "." in basename else "" for basename in self.basenames]
+        # remove directories if they exist
+        self._glob = [x for x in self._glob if not os.path.isdir(x)]
+        
+    def _get_realpaths(self):
+        return [os.path.realpath(filename) for filename in self._glob]
+
+    realpaths = property(_get_realpaths, doc="the full path (e.g., /home/user/readme.txt)")
+
+    def _get_basenames(self):
+        return [os.path.split(filename)[1] for filename in self._glob]
+
+    basenames = property(_get_basenames, doc="the basename without the path (e.g. readme.txt)")
+
+    def _get_filenames(self):
+        def func(filename):
+            res = filename[:]
+            for prefix in self.prefixes_to_strip:
+                res = res.lstrip(prefix)
+            return res.split(".")[0]
+
+        return [func(basename) for basename in self.basenames]
+
+    filenames = property(_get_filenames, doc="get basename without extension (e.g., readme)")
+
+    def _get_pathnames(self):
+        return [os.path.split(filename)[0] for filename in self.realpaths]
+    pathnames = property(_get_pathnames, doc="path and filename (e.g., /home/user/readme")
+
+    def _get_extensions(self):
+        return [os.path.splitext(filename)[1] for filename in self._glob]
+    extensions = property(_get_extensions, doc="get final extension    ")
+
+    def _get_all_extensions(self):
+        return [basename.split(".", 1)[1] if "." in basename else "" for basename in self.basenames]
+    all_extensions = property(_get_all_extensions, doc=" get all trailing extensions")
 
     def _pathname(self):
         pathname = set(self.pathnames)
@@ -136,10 +171,12 @@ class FastQFactory(FileFactory):
         FastQFactory("*fastq.gz", read_tag="_[12].")
 
     Sometimes, e.g. in long reads experiments (for instance), naming convention is
-    different and may nor be single/paired end convention. If so, set the
+    different and may not be single/paired end convention. If so, set the
     readtag to None.
 
         FastQFactory("*ccs.fastq.gz", read_tag=None)
+
+    In such case, the :attr:`paired` is set to False. 
 
     In a directory (recursively or not), there could be lots of samples. This
     class can be used to get all the sample prefix in the :attr:`tags`
@@ -154,7 +191,8 @@ class FastQFactory(FileFactory):
 
     """
 
-    def __init__(self, pattern, extension=["fq.gz", "fastq.gz"], read_tag="_R[12]_", verbose=False, paired=True):
+    def __init__(self, pattern, extension=["fq.gz", "fastq.gz"], read_tag="_R[12]_", verbose=False, paired=True, 
+                prefixes_to_strip=['demultiplex.'], **kwargs):
         r""".. rubric:: Constructor
 
         :param str pattern: a global pattern (e.g., ``H*fastq.gz``)
@@ -164,7 +202,7 @@ class FastQFactory(FileFactory):
             character. (e.g. '_R[12]_\.fastq\.gz')
         :param bool verbose:
         """
-        super(FastQFactory, self).__init__(pattern)
+        super(FastQFactory, self).__init__(pattern, prefixes_to_strip=prefixes_to_strip)
 
         self.read_tag = read_tag
         # Filter out reads that do not have the read_tag
@@ -173,19 +211,13 @@ class FastQFactory(FileFactory):
             self.read_tag = ""
 
         if self.read_tag:
-            logger.info(f"readtag: {self.read_tag}")
-        else:
-            logger.info("No readtag provided.")
-
-        if self.read_tag:
             remaining = [filename for filename in self._glob if re.search(self.read_tag, os.path.basename(filename))]
             if len(remaining) < len(self._glob):
                 diff = len(self._glob) - len(remaining)
                 logger.warning(
-                    "Filtered out {} files that match the pattern but do not contain the read_tag ({})".format(
-                        diff, self.read_tag
+                    f"Filtered out {diff} files that do not contain the read_tag ({self.read_tag})"
                     )
-                )
+                
             self._glob = remaining
 
         # check if tag is informative
@@ -216,7 +248,6 @@ class FastQFactory(FileFactory):
         else:
             self.tags = list({f.split(".")[0] for f in self.basenames})
 
-        self.short_tags = [x.split("_")[0] for x in self.tags]
         if len(self.tags) == 0:
             msg = "No sample found. Tag '{0}' is not relevant".format(self.read_tag)
             logger.error(msg)
