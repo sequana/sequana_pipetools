@@ -125,7 +125,7 @@ def test_pipeline_manager_mixed_of_files(tmpdir):
 def test_pipeline_manager_sample_func(tmpdir):
     cfg = SequanaConfig({})
     cfg.config.input_directory = test_dir +os.sep + "data"
-    cfg.config.input_pattern = "*.gz"
+    cfg.config.input_pattern = "Hm*.gz"
 
     def func(filename):
         return filename.split("/")[-1].split('.', 1)[0]
@@ -134,8 +134,6 @@ def test_pipeline_manager_sample_func(tmpdir):
 
     # here, note that the sample_func is too simple and will extract the first part of the filename
     # so demultiplex.bc1010.fsatq.gz returns 'demultiplex'
-    assert 'demultiplex' in pm.samples
-    assert 'fastq_notag' in pm.samples
     assert 'Hm2_GTGAAA_L005_R1_001' in pm.samples
     assert 'Hm2_GTGAAA_L005_R2_001' in pm.samples
 
@@ -143,9 +141,12 @@ def test_pipeline_manager_sample_func(tmpdir):
 def test_pipeline_manager_common_prefix():
     cfg = SequanaConfig({})
     cfg.config.input_directory = str(Path(test_dir) / "data")
-    cfg.config.input_pattern = "*gz"
+    cfg.config.input_pattern = "prefix2*gz"
     pm = snaketools.PipelineManager("custom", cfg)
-    assert "bc1010" in pm.samples
+    assert "A" in pm.samples
+    assert "B" in pm.samples
+    assert "mess" in pm.samples
+    pm = snaketools.PipelineManager("custom", cfg, prefixes_to_strip=['mess.'])
 
 
 def test_multiqc_clean(tmpdir):

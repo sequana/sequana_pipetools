@@ -49,6 +49,10 @@ class PipelineManagerBase:
         self.config = cfg.config
         self.config.pipeline_name = name
         self.matplotlib_backend = matplotlib_backend
+            
+        # some common choices     
+        self.sample = "{sample}"
+        self.basename = "{sample}/%s/{sample}"
 
         self.setup()
 
@@ -251,7 +255,9 @@ class PipelineManager(PipelineManagerBase):
 
     """
 
-    def __init__(self, name:str, config:str, schema=None, sample_func=None, prefixes_to_strip:str=['demultiplex.'], **kwargs):
+    def __init__(self, name:str, config:str, schema=None, 
+            sample_func=None, extra_prefixes_to_strip=[], 
+            sample_pattern=None, **kwargs):
         """.. rubric:: Constructor
 
         :param name: name of the pipeline
@@ -265,7 +271,10 @@ class PipelineManager(PipelineManagerBase):
 
         cfg = SequanaConfig(config)
         cfg.config.pipeline_name = self.name
-        self.prefixes_to_strip = prefixes_to_strip
+
+        # can be provided in the config file or arguments
+        self.sample_pattern = cfg.config.get("sample_pattern", sample_pattern)
+        self.extra_prefixes_to_strip = cfg.config.get("extra_prefixes_to_strip", extra_prefixes_to_strip)
 
         # if input_directory is not filled, the input_pattern, if valid, will be used instead and must
         # be provided anyway.
@@ -333,7 +342,10 @@ class PipelineManager(PipelineManagerBase):
 
     def _get_fastq_files(self, glob_dir, read_tag):
         """ """
-        self.ff = FastQFactory(glob_dir, read_tag=read_tag, prefixes_to_strip=self.prefixes_to_strip)
+        self.ff = FastQFactory(glob_dir, read_tag=read_tag, 
+            extra_prefixes_to_strip=self.extra_prefixes_to_strip,
+            sample_pattern=self.sample_pattern
+            )
 
         # check whether it is paired or not. This is just to raise an error when
         # there is inconsistent mix of R1 and R2
@@ -351,18 +363,15 @@ class PipelineManager(PipelineManagerBase):
                 "(NAME_R1_<SUFFIX>.fastq.gz where <SUFFIX> is "
                 "optional"
             )
-        else:
-            self.sample = "{sample}"
-            self.basename = "{sample}/%s/{sample}"
 
     def _get_any_files(self, pattern):
-        self.ff = FileFactory(pattern, prefixes_to_strip=self.prefixes_to_strip)
+        self.ff = FileFactory(pattern,
+            extra_prefixes_to_strip=self.extra_prefixes_to_strip,
+            sample_pattern=self.sample_pattern)
 
         # samples contains a correspondance between the sample name and the
         # real filename location.
         self.samples = {tag: fl for tag, fl in zip(self.ff.filenames, self.ff.realpaths)}
-        self.sample = "{sample}"
-        self.basename = "{sample}/%s/{sample}"
 
     def getrawdata(self):
         """Return list of raw data

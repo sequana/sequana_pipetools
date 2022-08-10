@@ -17,6 +17,8 @@ import sys
 
 import colorlog
 
+from sequana_pipetools.misc import PipetoolsException
+
 logger = colorlog.getLogger(__name__)
 
 
@@ -62,24 +64,31 @@ class FileFactory:
 
     """
 
-    def __init__(self, pattern, prefixes_to_strip=['demultiplex.'], **kwargs):
+    def __init__(self, pattern, extra_prefixes_to_strip=[], 
+        sample_pattern=None, **kwargs):
         """.. rubric:: Constructor
 
         :param pattern: can be a filename, list of filenames, or a global
             pattern (a unix regular expression with wildcards). For instance,
             ``*/*fastq.gz``
-        :param prefixes_to_strip: some files such as PacBio have a prefix such as demultiplex.
-            in front of all filenames (e.g. demultiplex.A.bam). This is not standard in NGS where most files start
-            with sample names followed by annotation such as .sorted (e.g. A.sorted.bam).
-            Since, we split on the dot and keep the first element, prefix names such as demultiplex.
-            must be strip before identifying the sample name.
+        :param extra_prefixes_to_strip: we automatically remove common prefixes.
+            However, you may have extra prefixes not common to all samples 
+            that needs to be removed. Provide a list with extra_prefixes_to_strip 
+            including trailing dot or not.
+        :param sample_pattern: if a sample pattern is provided, prefix are
+            not removed automatically. The sample_pattern must include the string
+            {sample} to define the expected sample name. For instance given 
+            a filename A_sorted.fastq.gz where sorted appears in all sample
+            buy is not wished, use sample_pattern='{sample}_sorted.fastq.gz' 
+            and your sample will be only 'A'.
 
         .. warning:: Only in Python 3.X supports the recursive global pattern
             for now.
 
         """
         self.pattern = pattern
-        self.prefixes_to_strip = prefixes_to_strip
+        self.extra_prefixes_to_strip = extra_prefixes_to_strip
+        self.sample_pattern = sample_pattern
 
         try:
             if os.path.exists(pattern):
@@ -107,13 +116,61 @@ class FileFactory:
     basenames = property(_get_basenames, doc="the basename without the path (e.g. readme.txt)")
 
     def _get_filenames(self):
-        def func(filename):
-            res = filename[:]
-            for prefix in self.prefixes_to_strip:
-                res = res[res.startswith(prefix) and len(prefix):]
-            return res.split(".")[0]
 
-        return [func(basename) for basename in self.basenames]
+        # make sure there is a '.' at the end
+        prefixes_to_strip = []
+
+        # if only one sample, we do not alter the sample name.
+        # we just take the first word.
+        if len(self._glob) > 1 and not self.sample_pattern:
+            splitted = [x.split('.') for x in self.basenames]
+            min_split = min([len(x) for x in splitted]) 
+            for i in range(min_split):
+                names = [x[i] for x in splitted]
+                S = set(names)
+                if len(S) == 1:
+                    # a redundant prefix to remove
+                    prefixes_to_strip.append(S.pop() + ".")
+                elif len(S) == len(self._glob):
+                    # we found a valid unique sample name; we can stop here
+                    break
+                else:
+                    # if a mix of names with duplicated names, this will be
+                    # a problem but users may provide a solution by providing 
+                    # other prefixes to remove so not exception here. Will
+                    # be raised later
+                    pass
+
+        # at the end on purpose because it may be used as a complement
+        # to the automatic stripping of common prefixes. Here, we remove the
+        # . if it exists and add it back to make sure it exists, in case the
+        # user did not provide it.
+        prefixes_to_strip += [x.strip('.') + '.' for x in self.extra_prefixes_to_strip]
+
+        def func(filename):
+
+            # if sample pattern is provided, use it in place of the prefixes
+            if self.sample_pattern:
+                prefix, suffix =self.sample_pattern.split("{sample}")
+                res = filename[:]
+
+                if filename.startswith(prefix) and filename.endswith(suffix):
+                    res = res[len(prefix):]
+                    res = res[0:len(res)-len(suffix)]
+                else:
+                    raise PipetoolsException(f"Your sample pattern does not match the filename {filename}")
+            else:
+                res = filename[:]
+                for prefix in prefixes_to_strip:
+                    res = res[res.startswith(prefix) and len(prefix):]
+            return res.split(".")[0]
+                    
+                    
+        filenames = [func(basename) for basename in self.basenames]
+        if len(set(filenames)) != len(self._glob):
+            raise PipetoolsException(f"Your sample names do not seem to be unique. After removing some common prefixes ({prefixes_to_strip}), we end up with {filenames}")
+
+        return filenames
 
     filenames = property(_get_filenames, doc="get basename without extension (e.g., readme)")
 
