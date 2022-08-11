@@ -62,6 +62,16 @@ class FileFactory:
         does not happen, so we can write the basenames and other attributes in variables
         once for all
 
+
+    Some files may be prefixed with a common name separated by a dot. For example, 
+    with pacbio data you may have::
+
+        demultiplex.A.fastq.gz
+        demultiplex.B.fastq.gz
+
+    We remove the common prefixes automatically so that you end up with A and B as sample names.
+
+
     """
 
     def __init__(self, pattern, extra_prefixes_to_strip=[], 
@@ -81,9 +91,6 @@ class FileFactory:
             a filename A_sorted.fastq.gz where sorted appears in all sample
             buy is not wished, use sample_pattern='{sample}_sorted.fastq.gz' 
             and your sample will be only 'A'.
-
-        .. warning:: Only in Python 3.X supports the recursive global pattern
-            for now.
 
         """
         self.pattern = pattern
@@ -126,25 +133,24 @@ class FileFactory:
             splitted = [x.split('.') for x in self.basenames]
             min_split = min([len(x) for x in splitted]) 
             for i in range(min_split):
-                names = [x[i] for x in splitted]
-                S = set(names)
+                S = set([x[i] for x in splitted])                
                 if len(S) == 1:
                     # a redundant prefix to remove
                     prefixes_to_strip.append(S.pop() + ".")
                 elif len(S) == len(self._glob):
-                    # we found a valid unique sample name; we can stop here
+                    # we found different sample name; we can stop here
                     break
                 else:
-                    # if a mix of names with duplicated names, this will be
-                    # a problem but users may provide a solution by providing 
-                    # other prefixes to remove so not exception here. Will
-                    # be raised later
+                    # if we have a mix of names with duplicated names, this 
+                    # will be problem but users may provide a solution by 
+                    # providing other prefixes to remove so not exception here. 
+                    # Will be raised later if needed
                     pass
 
-        # at the end on purpose because it may be used as a complement
-        # to the automatic stripping of common prefixes. Here, we remove the
-        # . if it exists and add it back to make sure it exists, in case the
-        # user did not provide it.
+        # Even though we now have unique samples names, some prefixes
+        # from the users can still be stripped from the left hand side
+        # we remove the dot (if it exists) and add one to be sure it is
+        # there.        
         prefixes_to_strip += [x.strip('.') + '.' for x in self.extra_prefixes_to_strip]
 
         def func(filename):
@@ -155,8 +161,7 @@ class FileFactory:
                 res = filename[:]
 
                 if filename.startswith(prefix) and filename.endswith(suffix):
-                    res = res[len(prefix):]
-                    res = res[0:len(res)-len(suffix)]
+                    res = res[len(prefix):len(res)-len(suffix)]
                 else:
                     raise PipetoolsException(f"Your sample pattern does not match the filename {filename}")
             else:
@@ -223,13 +228,13 @@ class FastQFactory(FileFactory):
 
         FastQFactory("*fastq.gz")
 
-    This behaviour can be changed if data have another read tags. (e.g. "[12].fastq.gz")
+    This behaviour can be changed if data have another read tags. (e.g. "[12].fastq.gz")::
 
         FastQFactory("*fastq.gz", read_tag="_[12].")
 
     Sometimes, e.g. in long reads experiments (for instance), naming convention is
     different and may not be single/paired end convention. If so, set the
-    readtag to None.
+    readtag to None.::
 
         FastQFactory("*ccs.fastq.gz", read_tag=None)
 
@@ -246,10 +251,15 @@ class FastQFactory(FileFactory):
         ff.get_file1(ff.tags[0])
         len(ff)
 
+
+
     """
 
-    def __init__(self, pattern, extension=["fq.gz", "fastq.gz"], read_tag="_R[12]_", verbose=False, paired=True, 
-                prefixes_to_strip=['demultiplex.'], **kwargs):
+    def __init__(self, pattern, extension=["fq.gz", "fastq.gz"], 
+                read_tag="_R[12]_", 
+                #verbose=False, paired=True, 
+                extra_prefixes_to_strip=[], 
+                sample_pattern=None, **kwargs):
         r""".. rubric:: Constructor
 
         :param str pattern: a global pattern (e.g., ``H*fastq.gz``)
@@ -257,9 +267,20 @@ class FastQFactory(FileFactory):
         :param str read_tag: regex tag used to join paired end files. Some
             characters need to be escaped with a \ character to be interpreted as
             character. (e.g. '_R[12]_\.fastq\.gz')
-        :param bool verbose:
+        :param extra_prefixes_to_strip: we automatically remove common prefixes.
+            However, you may have extra prefixes not common to all samples 
+            that needs to be removed. Provide a list with extra_prefixes_to_strip 
+            including trailing dot or not.
+        :param sample_pattern: if a sample pattern is provided, prefix are
+            not removed automatically. The sample_pattern must include the string
+            {sample} to define the expected sample name. For instance given 
+            a filename A_sorted.fastq.gz where sorted appears in all sample
+            buy is not wished, use sample_pattern='{sample}_sorted.fastq.gz' 
+            and your sample will be only 'A'.
         """
-        super(FastQFactory, self).__init__(pattern, prefixes_to_strip=prefixes_to_strip)
+        super(FastQFactory, self).__init__(pattern, 
+            extra_prefixes_to_strip=extra_prefixes_to_strip,
+            sample_pattern=sample_pattern)
 
         self.read_tag = read_tag
         # Filter out reads that do not have the read_tag

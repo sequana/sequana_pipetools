@@ -218,17 +218,58 @@ class PipelineManager(PipelineManagerBase):
     
     You may omit the input_directory but then the input_pattern must match files to be found locally. 
     
-    If you set the fastq parameter to True, an error is raised if input_readtag is not provided. 
-    This is an extra sanity check for pipelines that handles solely Illumina-like data files.
+    Behind the scene, the :class:`~sequana_pipetools.snaketools.file_factory.FileFactory`
+    or :class:`~sequana_pipetools.snaketools.file_factory.FastQFactory` will provide the sample
+    names and their tags in :attr:`samples` where tag are extracted from the sample names 
+    where read tags are removed (if required).
 
-    In any case, the FileFactory or FastqFactory will provide the samples and their tags in 
-    :attr:`samples` where tag are extracted from the sample names where read tags are removed.
+    The manager tells you if the samples are paired or not assuming all
+    samples are homogeneous (either all paired or all single-ended) and a user 
+    read_tag that can discrimate the sample name unambigously.
+
+    In Sequencing data, the sequences are stored in one file (single-ended) data
+    or in two files (paired-data). In both cases, most common sequencers will append
+    a so-called read-tag to identify the first and second file. Traditionnally, e.g., 
+    with illumina sequencers the read tag are _R1_ and _R2_ or a trailing _1 and _2
+    Note that samples names have sometimes this tag included. Consider e.g. 
+    sample_replicate_1_R1_.fastq.gz or sample_replicate_1_1.fastq.gz then you can imagine that
+    it is tricky to handle.
+
+    The sample names are extracted by cutting filenames on the first dot that is encoutered 
+    (before extension presumably). For instance the sample name for the file::
+
+        A.fastq.gz
+
+    will be **A**. sometimes, you may have ambiguous names. For instance, they may start with 
+    a common prefix. Considere these two files::
+
+        demultiplex.A.fastq.gz
+        demultiplex.B.fastq.gz
+
+    They would both have the same sample name. So, we remove all trailing prefixes 
+    that are common to all files. Therefore, our sample names are as expected::
+
+        A
+        B
+
+    If extra prefixes not common to all samples are present and you want to remove them, it is still possible
+    using a field in the config file called extra_prefixes_to_strip. For instance with    :: 
+
+        demultiplex.A.fastq.gz
+        demultiplex.mess.B.fastq.gz
+
+    your sample names will be A and mess. You can set this pair key:value in the config file::
+
+        extra_prefixes_to_strip: ["mess"]
+
+    and get *A* and *B* as sample names. 
 
     If you have specific wishes to create sample names from the filenames, you may provide a function
     with the :attr:`sample_func` parameter. If so, you must provide the input_directory and input_pattern
     to identify the files to process. For instance, in the sequana_fastqc pipeline, you set the input_directory
     and input_pattern and use this function to extract the sample names
-    
+    ::
+
         from sequana_pipetools import SequanaManager
         def func(filename):
             return filename.split("/")[-1].split('.', 1)[0]
@@ -239,19 +280,14 @@ class PipelineManager(PipelineManagerBase):
 
         manager.ff.filenames
 
-    This can be further used to get a wildcards with the proper directory.
+    Finally, you can also define a sample pattern using a simple syntax such as **demultiplex.{sample}.fastq.gz** and you 
+    can define this in your config file using::
 
-    In Sequencing data, the sequences are stored in one file (single-ended) data
-    or in two files (paired-data). In both cases, most common sequencers will append
-    a so-called read-tag to identify the first and second file. Traditionnally, e.g., 
-    with illumina sequencers the read tag are _R1_ and _R2_ or a trailing _1 and _2
-    Note that samples names have sometimes this tag included. Consider e.g. 
-    sample_replicate_1_R1_.fastq.gz or sample_replicate_1_1.fastq.gz then you can imagine that
-    it is tricky to handle.
+        sample_pattern: "demultiplex.{sample}.fastq.gz"
 
-    The manager tells you if the samples are paired or not assuming all
-    samples are homogeneous (either all paired or all single-ended) and a user 
-    read_tag that can discrimate the sample name unambigously.
+    in which case, no prefixes are removed. 
+
+
 
     """
 
@@ -264,8 +300,18 @@ class PipelineManager(PipelineManagerBase):
         :param config:  name of a configuration file
         :param str schema: YAML file to validate the config file
         :param sample_func: a user-defined function that extract sample names from filenames
-        :param list prefixes_to_strip: list of common prefixes that should be stripped from filenames
-            to identify sample names
+        :param extra_prefixes_to_strip: we automatically remove common prefixes.
+            However, you may have extra prefixes not common to all samples 
+            that needs to be removed. Provide a list with extra_prefixes_to_strip 
+            including trailing dot or not.
+        :param sample_pattern: if a sample pattern is provided, prefix are
+            not removed automatically. The sample_pattern must include the string
+            {sample} to define the expected sample name. For instance given 
+            a filename A_sorted.fastq.gz where sorted appears in all sample
+            buy is not wished, use sample_pattern='{sample}_sorted.fastq.gz' 
+            and your sample will be only 'A'.
+
+
         """
         super().__init__(name, config, schema)
 
