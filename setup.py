@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 
 
 _MAJOR = 0
-_MINOR = 8
-_MICRO = 1
+_MINOR = 9
+_MICRO = 0
 version = f"{_MAJOR}.{_MINOR}.{_MICRO}"
 release = f"{_MAJOR}.{_MINOR}"
 
@@ -51,7 +51,7 @@ setup(
     # package installation
     packages=find_packages(exclude=["tests*"]),
     install_requires=open("requirements.txt").read(),
-    tests_require=["pytest", "coverage", "pytest-cov"],
+    tests_require=["pytest", "coverage", "pytest-cov", "sequana_fastqc"],
     # This is recursive include of data files
     exclude_package_data={"": ["__pycache__"]},
     package_data={

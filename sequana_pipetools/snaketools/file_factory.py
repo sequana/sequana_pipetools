@@ -17,6 +17,8 @@ import sys
 
 import colorlog
 
+from sequana_pipetools.misc import PipetoolsException
+
 logger = colorlog.getLogger(__name__)
 
 
@@ -43,7 +45,6 @@ class FileFactory:
         >>> extensions
         ".gz"
 
-    FIXME: pathname to be checked.
 
     A **basename** is the name of a directory in a Unix pathname that occurs
     after the last slash.
@@ -61,20 +62,41 @@ class FileFactory:
         does not happen, so we can write the basenames and other attributes in variables
         once for all
 
+
+    Some files may be prefixed with a common name separated by a dot. For example, 
+    with pacbio data you may have::
+
+        demultiplex.A.fastq.gz
+        demultiplex.B.fastq.gz
+
+    We remove the common prefixes automatically so that you end up with A and B as sample names.
+
+
     """
 
-    def __init__(self, pattern):
+    def __init__(self, pattern, extra_prefixes_to_strip=[], 
+        sample_pattern=None, **kwargs):
         """.. rubric:: Constructor
 
         :param pattern: can be a filename, list of filenames, or a global
             pattern (a unix regular expression with wildcards). For instance,
             ``*/*fastq.gz``
-
-        .. warning:: Only in Python 3.X supports the recursive global pattern
-            for now.
+        :param extra_prefixes_to_strip: we automatically remove common prefixes.
+            However, you may have extra prefixes not common to all samples 
+            that needs to be removed. Provide a list with extra_prefixes_to_strip 
+            including trailing dot or not.
+        :param sample_pattern: if a sample pattern is provided, prefix are
+            not removed automatically. The sample_pattern must include the string
+            {sample} to define the expected sample name. For instance given 
+            a filename A_sorted.fastq.gz where sorted appears in all sample
+            buy is not wished, use sample_pattern='{sample}_sorted.fastq.gz' 
+            and your sample will be only 'A'.
 
         """
         self.pattern = pattern
+        self.extra_prefixes_to_strip = extra_prefixes_to_strip
+        self.sample_pattern = sample_pattern
+
         try:
             if os.path.exists(pattern):
                 self._glob = [pattern]
@@ -87,12 +109,87 @@ class FileFactory:
                     raise FileNotFoundError(f"This file {filename} does not exist")
             self._glob = pattern[:]
 
-        self.realpaths = [os.path.realpath(filename) for filename in self._glob]
-        self.basenames = [os.path.split(filename)[1] for filename in self._glob]
-        self.filenames = [basename.split(".")[0] for basename in self.basenames]
-        self.pathnames = [os.path.split(filename)[0] for filename in self.realpaths]
-        self.extensions = [os.path.splitext(filename)[1] for filename in self._glob]
-        self.all_extensions = [basename.split(".", 1)[1] if "." in basename else "" for basename in self.basenames]
+        # remove directories if they exist
+        self._glob = [x for x in self._glob if not os.path.isdir(x)]
+        
+    def _get_realpaths(self):
+        return [os.path.realpath(filename) for filename in self._glob]
+
+    realpaths = property(_get_realpaths, doc="the full path (e.g., /home/user/readme.txt)")
+
+    def _get_basenames(self):
+        return [os.path.split(filename)[1] for filename in self._glob]
+
+    basenames = property(_get_basenames, doc="the basename without the path (e.g. readme.txt)")
+
+    def _get_filenames(self):
+
+        # make sure there is a '.' at the end
+        prefixes_to_strip = []
+
+        # if only one sample, we do not alter the sample name.
+        # we just take the first word.
+        if len(self._glob) > 1 and not self.sample_pattern:
+            splitted = [x.split('.') for x in self.basenames]
+            min_split = min([len(x) for x in splitted]) 
+            for i in range(min_split):
+                S = set([x[i] for x in splitted])                
+                if len(S) == 1:
+                    # a redundant prefix to remove
+                    prefixes_to_strip.append(S.pop() + ".")
+                elif len(S) == len(self._glob):
+                    # we found different sample name; we can stop here
+                    break
+                else:
+                    # if we have a mix of names with duplicated names, this 
+                    # will be problem but users may provide a solution by 
+                    # providing other prefixes to remove so not exception here. 
+                    # Will be raised later if needed
+                    pass
+
+        # Even though we now have unique samples names, some prefixes
+        # from the users can still be stripped from the left hand side
+        # we remove the dot (if it exists) and add one to be sure it is
+        # there.        
+        prefixes_to_strip += [x.strip('.') + '.' for x in self.extra_prefixes_to_strip]
+
+        def func(filename):
+
+            # if sample pattern is provided, use it in place of the prefixes
+            if self.sample_pattern:
+                prefix, suffix =self.sample_pattern.split("{sample}")
+                res = filename[:]
+
+                if filename.startswith(prefix) and filename.endswith(suffix):
+                    res = res[len(prefix):len(res)-len(suffix)]
+                else:
+                    raise PipetoolsException(f"Your sample pattern does not match the filename {filename}")
+            else:
+                res = filename[:]
+                for prefix in prefixes_to_strip:
+                    res = res[res.startswith(prefix) and len(prefix):]
+            return res.split(".")[0]
+                    
+                    
+        filenames = [func(basename) for basename in self.basenames]
+        if len(set(filenames)) != len(self._glob):
+            raise PipetoolsException(f"Your sample names do not seem to be unique. After removing some common prefixes ({prefixes_to_strip}), we end up with {filenames}")
+
+        return filenames
+
+    filenames = property(_get_filenames, doc="get basename without extension (e.g., readme)")
+
+    def _get_pathnames(self):
+        return [os.path.split(filename)[0] for filename in self.realpaths]
+    pathnames = property(_get_pathnames, doc="path and filename (e.g., /home/user/readme")
+
+    def _get_extensions(self):
+        return [os.path.splitext(filename)[1] for filename in self._glob]
+    extensions = property(_get_extensions, doc="get final extension    ")
+
+    def _get_all_extensions(self):
+        return [basename.split(".", 1)[1] if "." in basename else "" for basename in self.basenames]
+    all_extensions = property(_get_all_extensions, doc=" get all trailing extensions")
 
     def _pathname(self):
         pathname = set(self.pathnames)
@@ -131,15 +228,17 @@ class FastQFactory(FileFactory):
 
         FastQFactory("*fastq.gz")
 
-    This behaviour can be changed if data have another read tags. (e.g. "[12].fastq.gz")
+    This behaviour can be changed if data have another read tags. (e.g. "[12].fastq.gz")::
 
         FastQFactory("*fastq.gz", read_tag="_[12].")
 
     Sometimes, e.g. in long reads experiments (for instance), naming convention is
-    different and may nor be single/paired end convention. If so, set the
-    readtag to None.
+    different and may not be single/paired end convention. If so, set the
+    readtag to None.::
 
         FastQFactory("*ccs.fastq.gz", read_tag=None)
+
+    In such case, the :attr:`paired` is set to False. 
 
     In a directory (recursively or not), there could be lots of samples. This
     class can be used to get all the sample prefix in the :attr:`tags`
@@ -152,9 +251,15 @@ class FastQFactory(FileFactory):
         ff.get_file1(ff.tags[0])
         len(ff)
 
+
+
     """
 
-    def __init__(self, pattern, extension=["fq.gz", "fastq.gz"], read_tag="_R[12]_", verbose=False, paired=True):
+    def __init__(self, pattern, extension=["fq.gz", "fastq.gz"], 
+                read_tag="_R[12]_", 
+                #verbose=False, paired=True, 
+                extra_prefixes_to_strip=[], 
+                sample_pattern=None, **kwargs):
         r""".. rubric:: Constructor
 
         :param str pattern: a global pattern (e.g., ``H*fastq.gz``)
@@ -162,9 +267,20 @@ class FastQFactory(FileFactory):
         :param str read_tag: regex tag used to join paired end files. Some
             characters need to be escaped with a \ character to be interpreted as
             character. (e.g. '_R[12]_\.fastq\.gz')
-        :param bool verbose:
+        :param extra_prefixes_to_strip: we automatically remove common prefixes.
+            However, you may have extra prefixes not common to all samples 
+            that needs to be removed. Provide a list with extra_prefixes_to_strip 
+            including trailing dot or not.
+        :param sample_pattern: if a sample pattern is provided, prefix are
+            not removed automatically. The sample_pattern must include the string
+            {sample} to define the expected sample name. For instance given 
+            a filename A_sorted.fastq.gz where sorted appears in all sample
+            buy is not wished, use sample_pattern='{sample}_sorted.fastq.gz' 
+            and your sample will be only 'A'.
         """
-        super(FastQFactory, self).__init__(pattern)
+        super(FastQFactory, self).__init__(pattern, 
+            extra_prefixes_to_strip=extra_prefixes_to_strip,
+            sample_pattern=sample_pattern)
 
         self.read_tag = read_tag
         # Filter out reads that do not have the read_tag
@@ -173,19 +289,13 @@ class FastQFactory(FileFactory):
             self.read_tag = ""
 
         if self.read_tag:
-            logger.info(f"readtag: {self.read_tag}")
-        else:
-            logger.info("No readtag provided.")
-
-        if self.read_tag:
             remaining = [filename for filename in self._glob if re.search(self.read_tag, os.path.basename(filename))]
             if len(remaining) < len(self._glob):
                 diff = len(self._glob) - len(remaining)
                 logger.warning(
-                    "Filtered out {} files that match the pattern but do not contain the read_tag ({})".format(
-                        diff, self.read_tag
+                    f"Filtered out {diff} files that do not contain the read_tag ({self.read_tag})"
                     )
-                )
+                
             self._glob = remaining
 
         # check if tag is informative
@@ -216,7 +326,6 @@ class FastQFactory(FileFactory):
         else:
             self.tags = list({f.split(".")[0] for f in self.basenames})
 
-        self.short_tags = [x.split("_")[0] for x in self.tags]
         if len(self.tags) == 0:
             msg = "No sample found. Tag '{0}' is not relevant".format(self.read_tag)
             logger.error(msg)

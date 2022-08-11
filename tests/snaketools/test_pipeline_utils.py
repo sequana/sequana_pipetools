@@ -5,17 +5,6 @@ def test_message():
     snaketools.message("test")
 
 
-def test_onsuccess(tmpdir):
-    directory = tmpdir.mkdir("onsuccess")
-    p1 = directory.join("Makefile")
-    p2 = directory.join("cleanup.py")
-    onsuc = snaketools.OnSuccess()
-    onsuc.makefile_filename = p1
-    onsuc.makefile_cleanup = p2
-    # same as makefile + create_recursive_cleanup
-    onsuc()
-
-
 def test_onsuccess_cleaner(tmpdir):
     directory = tmpdir.mkdir("onsuccess")
     p1 = directory.join("Makefile")
@@ -49,8 +38,7 @@ def test_makefile(tmpdir):
 
 
 def test_bundle(tmpdir):
-    on_success = snaketools.OnSuccess()
-    on_success.makefile_filename = tmpdir.join("Makefile")
-    on_success.cleanup_filename = tmpdir.join("sequana_cleanup.py")
+    on_success = snaketools.OnSuccessCleaner(outdir=str(tmpdir))
+    on_success.makefile_filename = str(tmpdir.join("Makefile"))
+    on_success.cleanup_filename = str(tmpdir.join("sequana_cleanup.py"))
     on_success.add_makefile()
-    on_success.create_recursive_cleanup()

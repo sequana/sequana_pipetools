@@ -14,6 +14,7 @@ import os
 
 import colorlog
 import easydev
+from deprecated import deprecated
 
 from .module import Module, modules
 
@@ -53,70 +54,11 @@ class Makefile:
             fh.write(self.text)
 
 
-class OnSuccess:
-    def __init__(self, toclean=["fastq_sampling", "logs", "common_logs", "images", "rulegraph"]):
-        print("Deprecated. Use OnSuccessCleaner instead")
-        self.makefile_filename = "Makefile"
-        self.cleanup_filename = "sequana_cleanup.py"
-        self.toclean = toclean
-
-    def __call__(self):
-        self.add_makefile()
-        self.create_recursive_cleanup(self.toclean)
-
-    def add_makefile(self, sections=["bundle", "clean"]):
-        makefile = Makefile(sections=sections)
-        makefile.makefile_filename = self.makefile_filename
-        makefile.save()
-
-    def create_recursive_cleanup(self, additional_dir=[".snakemake"]):
-        """Create general cleanup
-
-        :param additional_dir: extra directories to remove
-
-        """
-        with open(self.cleanup_filename, "w") as fh:
-            fh.write(
-                """
-import subprocess, glob, os
-from easydev import shellcmd
-
-for this in glob.glob("*"):
-    if os.path.isdir(this):
-        print(" --- Cleaning up %s directory" % this)
-        if os.path.exists(this + os.sep + "sequana_cleanup.py"):
-            pid = subprocess.Popen(["python", "sequana_cleanup.py"], cwd=this)
-            pid.wait()  # we do not want to run e.g. 48 cleanup at the same time
-
-# Remove some files
-for this in ["README", "requirements.txt", 'runme.sh', 'config.yaml', 'stats.txt',
-             "dag.svg", "rulegraph.svg", "*rules", "*.fa"]:
-    try:
-        shellcmd("rm %s" % this)
-    except:
-        print("%s not found (not deleted)" % this)
-
-# Remove some directories
-for this in {1}:
-    try:
-        shellcmd("rm -rf %s" % this)
-    except:
-        print("%s not found (not deleted)" % this)
-
-shellcmd("rm -rf tmp/")
-shellcmd("rm -f {0}")
-print("done")
-    """.format(
-                    self.cleanup_filename, additional_dir
-                )
-            )
-
-
 class OnSuccessCleaner:
     """Used in various sequana pipelines to cleanup final results"""
 
-    def __init__(self, pipeline_name=None, bundle=False):
-        self.makefile_filename = "Makefile"
+    def __init__(self, pipeline_name=None, bundle=False, outdir="."):
+        self.makefile_filename = f"{outdir}/Makefile"
         self.files_to_remove = [
             "config.yaml",
             "multiqc_config.yaml",
@@ -232,7 +174,7 @@ def build_dynamic_rule(code, directory):
     fh.close()
     return filename
 
-
+@deprecated(version="v1", reason="hsa been replaced by the usage of a Makefile")
 def create_cleanup(targetdir, exclude=["logs"]):
     """A script to include in directory created by the different pipelines to
     cleanup the directory"""
