@@ -9,6 +9,10 @@
 .. image:: https://coveralls.io/repos/github/sequana/sequana_pipetools/badge.svg?branch=main
     :target: https://coveralls.io/github/sequana/sequana_pipetools?branch=main
 
+.. image:: https://readthedocs.org/projects/sequana-pipetools/badge/?version=latest
+    :target: https://sequana-pipetools.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 .. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
    :target: http://joss.theoj.org/papers/10.21105/joss.00352
    :alt: JOSS (journal of open source software) DOI
