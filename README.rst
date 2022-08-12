@@ -174,7 +174,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
-0.9.0     Major update with:
+0.9.0     * **MAJOR update/Aug 2022**
           * new mechanism to handle  profile for Snakemake that will replace the
             cluster_config.yaml files
           * Major cleanup of PipelineManager (PipelineManagerGeneric was 
