@@ -112,8 +112,8 @@ Check the source code at:
 
 or open a Python shell and type::
 
-    import sequana
-    sequana.modules.keys()""".format(
+    from sequana_pipetools.snaketools.module import modules
+    modules.keys()""".format(
                     name
                 )
             )

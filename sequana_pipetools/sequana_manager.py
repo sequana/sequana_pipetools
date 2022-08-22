@@ -14,7 +14,10 @@ import glob
 import os
 import shutil
 import subprocess
+import pkg_resources
+import hashlib
 import sys
+import requests
 from shutil import which
 from urllib.request import urlretrieve
 from pathlib import Path
@@ -37,12 +40,14 @@ class SequanaManager:
         :param options: an instance of :class:`Options`
         :param name: name of the pipeline. Must be a Sequana pipeline already installed.
 
-        options must be an object with at least the following attributes:
+        options must be an object Options with at least the following attributes:
 
         - version to True or False
         - working_directory
         - force set to True for testing
         - job set to 1
+        - level set to INFO
+        - use_singularity to False
 
         The working_directory is uesd to copy the pipeline in it.
 
@@ -58,6 +63,7 @@ class SequanaManager:
             options.level = "INFO"
 
         self.options = options
+
 
         if self.options.version:
             print_version(name)
@@ -109,10 +115,13 @@ class SequanaManager:
         # define the data path of the pipeline
         self.datapath = self._get_package_location()
 
-        # Set wrappers as attribute so that ia may be changed by the
+        # Set wrappers as attribute so that it may be changed by the
         # user/developer
         self.sequana_wrappers = os.environ.get(
             "SEQUANA_WRAPPERS", "https://raw.githubusercontent.com/sequana/sequana-wrappers/"
+        )
+        self.singularity_prefix = os.environ.get(
+            "SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/images"
         )
 
     def exists(self, filename, exit_on_error=True, warning_only=False):  # pragma: no cover
@@ -164,10 +173,15 @@ class SequanaManager:
         return sharedir
 
     def _get_package_version(self):
-        import pkg_resources
-
         ver = pkg_resources.require("sequana_{}".format(self.name))[0].version
         return ver
+
+    def _get_sequana_version(self):
+        try:
+            ver = pkg_resources.require("sequana".format(self.name))[0].version
+            return ver
+        except DistributionNotFound: #pragma: no cover
+            return "not installed"
 
     def _guess_scheduler(self):
 
@@ -207,6 +221,14 @@ class SequanaManager:
         if self.sequana_wrappers:
             self.command += f" --wrapper-prefix {self.sequana_wrappers} "
             logger.info(f"Using sequana-wrappers from {self.sequana_wrappers}")
+
+        if self.options.use_singularity: #pragma: no cover
+            home = str(Path.home())
+            if os.path.exists("/pasteur"):
+                self.command += f" --use-singularity --singularity-args ' -B {home}:{home} -B /pasteur:/pasteur'"
+            else:
+                self.command += f" --use-singularity --singularity-args ' -B {home}:{home} '"
+            self.command += f" --singularity-prefix {self.singularity_prefix} "
 
         # FIXME a job is not a core. Ideally, we should add a core option
         if self._guess_scheduler() == "local":
@@ -355,7 +377,7 @@ class SequanaManager:
         except FileExistsError:  # pragma: no cover
             pass
 
-        # the cluster config if any
+        # the logo if any
         if self.module.logo:
             shutil.copy(self.module.logo, self.workdir / ".sequana")
 
@@ -388,6 +410,14 @@ class SequanaManager:
                 cfg = SequanaConfig(f"{self.workdir}/{config_name}")
                 cfg.check_config_with_schema(f"{self.workdir}/{schema_name}")
 
+        # if --use-singularity is set, we need to download images for the users
+        # Sequana pipelines will store images in Zenodo website (via damona).
+        # introspecting sections written as:
+        # container:
+        #     "https://...image.img"
+        if self.options.use_singularity:
+            self._download_zenodo_images()
+
         # finally, we copy the files be found in the requirements section of the
         # config file.
         self.copy_requirements()
@@ -410,6 +440,7 @@ class SequanaManager:
 
             fout.write(f"# sequana_pipetools version: {version}\n")
             fout.write(f"# sequana_{self.name} version: {self._get_package_version()}\n")
+            fout.write(f"# sequana version: {self._get_sequana_version()}\n")
             cmd1 = os.path.basename(sys.argv[0])
             fout.write(" ".join([cmd1] + sys.argv[1:]))
 
@@ -462,6 +493,51 @@ class SequanaManager:
                 config[section_name][option_name] = getattr(options, section_name + "_" + option_name)
             except AttributeError:
                 logger.debug("update_config. Could not find {}".format(option_name))
+
+    def _download_zenodo_images(self): #pragma: no cover
+
+        with open(self.module.snakefile, "r") as fin:
+            previous = ""
+            urls = []
+            for line in fin.readlines():
+                if line.strip().startswith("#"):
+                    pass
+                # case
+                # container:
+                #     "image/test.img"
+                elif previous in ["container:", "containerized:"]:
+                    url = line.strip().replace("container:", "").strip()
+                    url = line.strip().replace("containerized:", "").strip()
+                    urls.append(url.strip('"').strip("'"))
+                # case
+                # container: "image/test.img"
+                elif "container:" in line or "containerized" in line:
+                    url = line.strip().replace("container:", "").strip()
+                    url = line.strip().replace("containerized:", "").strip()
+                    if line in ["container:", "containerized:"]:
+                        pass
+                    #images.append(image)
+                previous = line.strip()
+            urls = set([x for x in urls if x.startswith('http')])
+
+        def _hash(url):
+            md5hash = hashlib.md5()
+            md5hash.update(url.encode())
+            return md5hash.hexdigest()
+
+        os.makedirs(self.singularity_prefix, exist_ok=True)
+
+        for url in urls:
+            name = _hash(url)
+
+            outfile = f"{self.singularity_prefix}/{name}.simg"
+            if os.path.exists(outfile):
+                logger.info(f"Found corresponding image of {url} in {outfile}")
+            else:
+                logger.info(f"Downloading {url}")
+                response = requests.get(url)
+                with open(outfile, "wb") as fout:
+                    fout.write(response.content)
 
 
 def get_pipeline_location(pipeline_name):

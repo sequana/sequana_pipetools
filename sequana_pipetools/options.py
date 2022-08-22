@@ -37,7 +37,7 @@ def init_pipeline(NAME):
 def before_pipeline(NAME):
     """A function to provide --version and --deps for all pipelines"""
 
-    if "--version" in sys.argv:
+    if "--version" in sys.argv or "-v" in sys.argv:
         print_version(NAME)
         sys.exit(0)
 
@@ -76,7 +76,7 @@ class GeneralOptions:
         parser.add_argument("--version", action="store_true", help="Print the version and quit")
         parser.add_argument("--deps", action="store_true", help="Show the known dependencies of the pipeline")
         parser.add_argument(
-            "--level",
+            "-l", "--level",
             dest="level",
             default="INFO",
             choices=["INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"],
@@ -130,18 +130,25 @@ class SnakemakeOptions:
                 of Snakemake""",
         )
         group.add_argument(
-            "--working-directory",
+            "-w", "--working-directory",
             dest="workdir",
             default=self.workdir,
             help="""where to save the pipeline and its configuration file and
             where the analyse can be run""",
         )
         group.add_argument(
-            "--force",
+            "-f","--force",
             dest="force",
             action="store_true",
             default=False,
             help="""If the working directory exists, proceed anyway.""",
+        )
+        group.add_argument(
+            "--use-singularity",
+            dest="use_singularity",
+            action="store_true",
+            default=False,
+            help="""If set, pipelines will download singularity files for all external tools.""",
         )
 
 
@@ -160,7 +167,7 @@ class InputOptions:
     def add_options(self, parser):
         self.group = parser.add_argument_group(self.group_name)
         self.group.add_argument(
-            "--input-directory",
+            "-i" ,"--input-directory",
             dest="input_directory",
             default=self.input_directory,
             # required=True,

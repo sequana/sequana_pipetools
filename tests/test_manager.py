@@ -24,7 +24,7 @@ def test_sequana_manager(tmpdir):
 
     # normal behaviour
     pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
+        AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO", "use_singularity": False,
                     "jobs": 1, "run_mode": None, "force": True, "profile": None}),
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
@@ -42,7 +42,7 @@ def test_sequana_manager(tmpdir):
     # We can now try to do it again fro the existing project itself
     pm = SequanaManager(
         AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
-                    "jobs": 1, "run_mode": None, "force": True,
+                    "jobs": 1, "run_mode": None, "force": True, "use_singularity": False,
                     "from_project": wkdir, "profile": None}),
         "fastqc")
 
@@ -66,7 +66,8 @@ def test_sequana_manager_wrong_input(tmpdir):
 
     # normal behaviour
     pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
+        AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO", 
+                    "use_singularity": False,
                     "jobs":1, "run_mode": None, "force": True}),
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
@@ -130,7 +131,7 @@ def test_copy_requirements(tmpdir):
 
     # normal behaviour
     pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": str(wkdir), 'level': "INFO",
+        AttrDict(**{"version": False, "workdir": str(wkdir), 'level': "INFO", "use_singularity": False,
                     "jobs": 1, "run_mode": None, "force": True, "profile": None}),
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"

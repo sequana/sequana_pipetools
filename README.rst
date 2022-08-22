@@ -174,11 +174,14 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.9.1     * Ability to download automatically singularity images (as URLs) if 
+            set in the  pipelines (container field). add the --use-singularity
+            option in all pipelines (and --singualrity-prefix)
 0.9.0     * **MAJOR update/Aug 2022**
           * new mechanism to handle  profile for Snakemake that will replace the
             cluster_config.yaml files
-          * Major cleanup of PipelineManager (PipelineManagerGeneric was 
-            removed). The way input files are handled was also cleanup. 
+          * Major cleanup of PipelineManager (PipelineManagerGeneric was
+            removed). The way input files are handled was also cleanup.
             Fixes https://github.com/sequana/sequana_pipetools/issues/37
             and also files starting with common prefixes
 0.8.1     * Better schema validation
