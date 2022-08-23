@@ -105,13 +105,13 @@ class FileFactory:
         except TypeError:
             # Error if pattern is a list of file
             for filename in pattern:
-                if not os.path.exists(filename):
+                if not os.path.exists(filename): #pragma: no cover
                     raise FileNotFoundError(f"This file {filename} does not exist")
             self._glob = pattern[:]
 
         # remove directories if they exist
         self._glob = [x for x in self._glob if not os.path.isdir(x)]
-        
+
     def _get_realpaths(self):
         return [os.path.realpath(filename) for filename in self._glob]
 
@@ -140,7 +140,7 @@ class FileFactory:
                 elif len(S) == len(self._glob):
                     # we found different sample name; we can stop here
                     break
-                else:
+                else: #pragma: no cover
                     # if we have a mix of names with duplicated names, this 
                     # will be problem but users may provide a solution by 
                     # providing other prefixes to remove so not exception here. 

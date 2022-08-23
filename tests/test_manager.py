@@ -22,10 +22,10 @@ def test_pipeline_manager():
 def test_sequana_manager(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
 
-    # normal behaviour
+    # normal behaviour. also to test profile
     pm = SequanaManager(
         AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO", "use_singularity": False,
-                    "jobs": 1, "run_mode": None, "force": True, "profile": None}),
+                    "jobs": 1, "run_mode": "local", "profle":"local", "force": True, "profile": None}),
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
     pm.config.config.input_pattern = "Hm2*gz"
@@ -33,11 +33,8 @@ def test_sequana_manager(tmpdir):
 
     pm.setup()
     pm.teardown()
-    pm.check_fastq_files()
+    
 
-    # check SE data
-    pm.config.config.input_pattern = "Hm*_R1_*gz"
-    pm.check_fastq_files()
 
     # We can now try to do it again fro the existing project itself
     pm = SequanaManager(
@@ -47,11 +44,12 @@ def test_sequana_manager(tmpdir):
         "fastqc")
 
     pm.setup()
+
+    # set slurm options manually
     pm.options.run_mode = "slurm"
     pm.options.slurm_queue = "common"
     pm.options.slurm_memory = "4000"
     pm.options.slurm_cores_per_job = 4
-    pm.setup()
     pm.options.slurm_queue = "biomics"
     pm.setup()
     pm.teardown()
@@ -71,14 +69,43 @@ def test_sequana_manager_wrong_input(tmpdir):
                     "jobs":1, "run_mode": None, "force": True}),
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
+    # no files will be found but by default 
     pm.config.config.input_pattern = f"FFF*gz"
     pm.config.config.input_readtag = f"_R[12]_"
 
     try:
-        pm.check_fastq_files()
+        pm.check_input_files()
         assert False
     except SystemExit:
         assert True
+
+
+
+def test_scheduler(tmpdir):
+    wkdir = tmpdir.mkdir("wkdir")
+
+    pm = SequanaManager(
+        AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
+                    "jobs": 1, "run_mode": "slurm", "profile": "slurm", "force": True, "use_singularity": False,
+                     "profile": None}),
+        "fastqc")
+
+    def mock_scheduler(*args, **kwargs):
+        return "slurm"
+    pm._guess_scheduler = mock_scheduler
+
+    pm.options.profile = "slurm"
+    pm.options.slurm_memory = "4000"
+    pm.options.slurm_cores_per_job = 4
+    pm.options.slurm_queue = "biomics"
+    pm.config.config.input_directory = f"{test_dir}/data/"
+    pm.config.config.input_pattern = "Hm2*gz"
+    pm.config.config.input_readtag = "_R[12]_"
+    
+
+    pm.setup()
+    pm.teardown()
+
 
 
 def test_location():

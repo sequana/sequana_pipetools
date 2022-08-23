@@ -104,7 +104,7 @@ class OnSuccessCleaner:
         logger.info("Once done, please clean up the directory using: 'make clean'")
 
 
-def get_pipeline_statistics(use_rule=True):
+def get_pipeline_statistics():
     """Get basic statistics about the pipelines
 
     Count rule used per pipeline and returns a dataframe with rules as index
@@ -123,46 +123,30 @@ def get_pipeline_statistics(use_rule=True):
     import numpy as np
     import pandas as pd
 
-    if use_rule:
-        rules = [rule for rule in modules if not Module(rule).is_pipeline()]
-
-
-        L, C = len(rules), len(pipelines)
-        df = pd.DataFrame(np.zeros((L, C)), dtype=int, index=rules, columns=pipelines)
-
-        for pipeline in pipelines:
-            snakefile = Module(pipeline).snakefile
-            with open(snakefile) as fh:
-                data = fh.readlines()
-                data = [x for x in data if x.strip().startswith("include:")]
-                for line in data:
-                    for rule in rules:
-                        if '"' + rule + '"' in line or "'" + rule + "'" in line or rule + "(" in line:
-                            df.loc[rule, pipeline] += 1
-    else:
-        def get_wrapper_names(filename):
-            wrappers = set()
-            with open(snakefile) as fh:
-                data = fh.readlines()
-                data = [x.strip('\n"').split('/')[-1] for x in data if '/wrappers/' in x]
-                wrappers.update(data)
-            return wrappers
-
-        # first pass to identify the wrappers
+    def get_wrapper_names(filename):
         wrappers = set()
-        for pipeline in pipelines:
-            snakefile = Module(pipeline).snakefile
-            wrappers.update(get_wrapper_names(snakefile))
+        with open(snakefile) as fh:
+            data = fh.readlines()
+            data = [x.strip('\n"').split('/')[-1] for x in data if '/wrappers/' in x]
+            wrappers.update(data)
+        return wrappers
 
-        # second pass to populate the matrix
-        wrappers = sorted(list(wrappers))
-        L, C = len(wrappers), len(pipelines)
-        df = pd.DataFrame(np.zeros((L, C)), dtype=int, index=wrappers, columns=pipelines)
-        for pipeline in pipelines:
-            snakefile = Module(pipeline).snakefile
-            wrappers = get_wrapper_names(snakefile)
-            for wrapper in wrappers:
-                df.loc[wrapper, pipeline] += 1
+    # first pass to identify the wrappers
+    wrappers = set()
+    for pipeline in pipelines:
+        snakefile = Module(pipeline).snakefile
+        wrappers.update(get_wrapper_names(snakefile))
+
+    # second pass to populate the matrix
+    wrappers = sorted(list(wrappers))
+    L, C = len(wrappers), len(pipelines)
+    df = pd.DataFrame(np.zeros((L, C)), dtype=int, index=wrappers, columns=pipelines)
+    for pipeline in pipelines:
+        snakefile = Module(pipeline).snakefile
+        wrappers = get_wrapper_names(snakefile)
+        for wrapper in wrappers:
+            df.loc[wrapper, pipeline] += 1
+
     df.columns = [x.replace('pipeline:','') for x in df.columns]
     return df
 
@@ -177,30 +161,6 @@ def message(mes):
     logger.info("// -- " + mes)
 
 
-@deprecated(version="v1", reason="will be removed asap. do not use")
-def build_dynamic_rule(code, directory):
-    """Create a rule in a unique file in .snakameke/sequana
-
-    The filenames must be unique, and stored in .snakemake to not
-    pollute /tmp
-
-    """
-    import uuid
-
-    # Create directory if it does not exist
-    from easydev import mkdirs
-
-    mkdirs(directory + ".snakemake/sequana")
-    # a unique identifier
-    filename = directory
-    filename += os.sep.join([".snakemake", "sequana", str(uuid.uuid4())])
-    filename += ".rules"
-    # Create the file and return its name so that it can be used inside a
-    # pipeline
-    fh = open(filename, "w")
-    fh.write(code)
-    fh.close()
-    return filename
 
 @deprecated(version="v1", reason="hsa been replaced by the usage of a Makefile")
 def create_cleanup(targetdir, exclude=["logs"]):

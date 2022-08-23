@@ -43,7 +43,7 @@ class PipelineManagerBase:
 
         # Used by the dynamic rules to defined the location where to copy
         # dynamic rules.
-        self.pipeline_dir = os.getcwd() + os.sep
+        #self.pipeline_dir = os.getcwd() + os.sep
 
         # Populate the config with additional information
         self.config = cfg.config

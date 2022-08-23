@@ -4,6 +4,6 @@ from .module import Module, modules, pipeline_names
 from .module_finder import ModuleFinder
 from .pipeline_manager import (PipelineManager, PipelineManagerDirectory)
 from .pipeline_utils import (Makefile, OnSuccessCleaner,
-                             build_dynamic_rule, create_cleanup,
+                             create_cleanup,
                              get_pipeline_statistics, message)
 from .sequana_config import SequanaConfig

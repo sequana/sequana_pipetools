@@ -266,7 +266,7 @@ class SequanaManager:
         if self.workdir.exists():
             if self.options.force:
                 logger.warning(f"Path {self.workdir} exists already but you set --force to overwrite it")
-            else:
+            else: #pragma: no cover
                 logger.error(f"Output path {self.workdir} exists already. Use --force to overwrite")
                 sys.exit()
         else:
@@ -292,26 +292,7 @@ class SequanaManager:
             if stop_on_error:
                 sys.exit(1)
 
-    def check_fastq_files(self):
-        cfg = self.config.config
-        try:
-            ff = FastQFactory(cfg.input_directory + os.sep + cfg.input_pattern, read_tag=cfg.input_readtag)
-
-            # This tells whether the data is paired or not
-            if ff.paired:
-                paired = "paired reads"
-            else:
-                paired = "single-end reads"
-            logger.info(f"Your input data seems to be made of {paired}")
-
-        except Exception:
-            logger.error(
-                "Input data is not fastq-compatible with sequana pipelines. You may want to set the read_tag"
-                " to empty string or None if you wish to analyse non-fastQ files (e.g. BAM)"
-            )
-            sys.exit(1)
-
-    def teardown(self, check_schema=True, check_input_files=True, check_fastq_files=True):
+    def teardown(self, check_schema=True, check_input_files=True):
         """Save all files required to run the pipeline and perform sanity checks
 
 
