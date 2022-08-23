@@ -25,7 +25,7 @@ def test_sequana_manager(tmpdir):
     # normal behaviour. also to test profile
     pm = SequanaManager(
         AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO", "use_singularity": False,
-                    "jobs": 1, "run_mode": "local", "profle":"local", "force": True, "profile": None}),
+                    "jobs": 1, "run_mode": "local", "profile":"local", "force": True, "profile": None}),
         "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
     pm.config.config.input_pattern = "Hm2*gz"

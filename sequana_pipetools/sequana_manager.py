@@ -42,12 +42,21 @@ class SequanaManager:
 
         options must be an object Options with at least the following attributes:
 
-        - version to True or False
-        - working_directory
-        - force set to True for testing
-        - job set to 1
-        - level set to INFO
-        - use_singularity to False
+        ::
+
+            class Options:
+                level = 'INFO'
+                version = False
+                workdir = "fastqc"
+                job=1
+                force = True
+                use_singularity = False
+                def __init__(self):
+                    pass
+            from sequana_pipetools import SequanaManager
+            o = Options()
+            pm = SequanaManager(o, "fastqc")
+
 
         The working_directory is uesd to copy the pipeline in it.
 
@@ -475,32 +484,77 @@ class SequanaManager:
             except AttributeError:
                 logger.debug("update_config. Could not find {}".format(option_name))
 
-    def _download_zenodo_images(self): #pragma: no cover
 
-        with open(self.module.snakefile, "r") as fin:
+    def _get_section_content(self, filename, section_name):
+        """searching for a given section (e.g. container)
+
+        and extrct its content. This is for simple cases where
+        content is made of one line. Two cases are supported
+
+        case 1 (two lines)::
+
+            container:
+                "https:...."
+
+        case 2 (one line)
+
+            container: "https...."
+
+        comments starting with # are allowed.
+        """
+        assert section_name.endswith(":")
+
+        contents = []
+        with open(filename, "r") as fin:
             previous = ""
-            urls = []
             for line in fin.readlines():
-                if line.strip().startswith("#"):
+                if line.strip().startswith("#") or not line.strip():
                     pass
-                # case
-                # container:
-                #     "image/test.img"
-                elif previous in ["container:", "containerized:"]:
-                    url = line.strip().replace("container:", "").strip()
-                    url = line.strip().replace("containerized:", "").strip()
-                    urls.append(url.strip('"').strip("'"))
-                # case
-                # container: "image/test.img"
-                elif "container:" in line or "containerized" in line:
-                    url = line.strip().replace("container:", "").strip()
-                    url = line.strip().replace("containerized:", "").strip()
-                    if line in ["container:", "containerized:"]:
-                        pass
-                    #images.append(image)
-                previous = line.strip()
-            urls = set([x for x in urls if x.startswith('http')])
+                # case 1
+                elif section_name in line:
+                    content = line.replace(section_name, "").strip()
+                    content = content.strip('"').strip("'")
+                    if content: # case 2
+                        contents.append(content)
+                elif previous == section_name:
+                    # case 1
+                    content = line.replace(section_name, "").strip()
+                    content = content.strip('"').strip("'")
+                    contents.append(content)
 
+                # this is for case 1
+                previous = line.strip() 
+        return contents
+
+        included = self._get_section_content(self.module.snakefile, "include:")
+
+    def _download_zenodo_images(self): #pragma: no cover
+        """
+        Looking for container: section, this downloads all container that are
+        online (starting with https). Recursive function that also looks into the
+        ./rules directories based on the include: section found in the main
+        Snakefile.
+
+        """
+
+        # first get the urls in the main snakefile
+        urls = self._get_section_content(self.module.snakefile, "container:")
+        urls = [x for x in urls if x.startswith('http')]
+
+        # second get the urls from sub-rules if any
+        # do we have sub modules / includes ?
+        included_files = self._get_section_content(self.module.snakefile, "include:")
+
+        for included_file in included_files:
+            suburls = self._get_section_content(Path(self.module.snakefile).parent / included_file, "container:")
+            suburls = [x for x in suburls if x.startswith('http')]
+            urls.extend(suburls)
+
+        # make sure there are unique URLs
+        urls = set(urls)
+
+        # guarantess that output filename to be saved have the same
+        # unique ID as those expected by snakemake
         def _hash(url):
             md5hash = hashlib.md5()
             md5hash.update(url.encode())
@@ -516,9 +570,14 @@ class SequanaManager:
                 logger.info(f"Found corresponding image of {url} in {outfile}")
             else:
                 logger.info(f"Downloading {url}")
-                response = requests.get(url)
-                with open(outfile, "wb") as fout:
-                    fout.write(response.content)
+                try:
+                    response = requests.get(url)
+                    with open(outfile, "wb") as fout:
+                        fout.write(response.content)
+                except requests.ConnectionError:
+                    logger.critical(f"{url} could not be downloaded. Your pipeline will probably won't work if you use --use-singularity. Continue with other images")
+                    pass
+
 
 
 def get_pipeline_location(pipeline_name):
