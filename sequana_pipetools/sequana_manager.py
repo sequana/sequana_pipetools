@@ -73,7 +73,6 @@ class SequanaManager:
 
         self.options = options
 
-
         if self.options.version:
             print_version(name)
             sys.exit(0)
@@ -129,9 +128,11 @@ class SequanaManager:
         self.sequana_wrappers = os.environ.get(
             "SEQUANA_WRAPPERS", "https://raw.githubusercontent.com/sequana/sequana-wrappers/"
         )
-        self.singularity_prefix = os.environ.get(
-            "SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/images"
-        )
+
+        if self.options.singularity_prefix: #pragma: no cover
+            self.singularity_prefix = self.options.singularity_prefix
+        else: #pragma: no cover
+            self.singularity_prefix = os.environ.get("SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/.sequana/apptainers")
 
     def exists(self, filename, exit_on_error=True, warning_only=False):  # pragma: no cover
         """This is a convenient function to check if a directory/file exists
@@ -189,7 +190,7 @@ class SequanaManager:
         try:
             ver = pkg_resources.require("sequana".format(self.name))[0].version
             return ver
-        except DistributionNotFound: #pragma: no cover
+        except DistributionNotFound:  # pragma: no cover
             return "not installed"
 
     def _guess_scheduler(self):
@@ -231,7 +232,7 @@ class SequanaManager:
             self.command += f" --wrapper-prefix {self.sequana_wrappers} "
             logger.info(f"Using sequana-wrappers from {self.sequana_wrappers}")
 
-        if self.options.use_singularity: #pragma: no cover
+        if self.options.use_singularity:  # pragma: no cover
             home = str(Path.home())
             if os.path.exists("/pasteur"):
                 self.command += f" --use-singularity --singularity-args ' -B {home}:{home} -B /pasteur:/pasteur'"
@@ -275,7 +276,7 @@ class SequanaManager:
         if self.workdir.exists():
             if self.options.force:
                 logger.warning(f"Path {self.workdir} exists already but you set --force to overwrite it")
-            else: #pragma: no cover
+            else:  # pragma: no cover
                 logger.error(f"Output path {self.workdir} exists already. Use --force to overwrite")
                 sys.exit()
         else:
@@ -338,23 +339,43 @@ class SequanaManager:
         except FileExistsError:  # pragma: no cover
             pass
 
-        # the command
+        # the final command
         command_file = self.workdir / f"{self.name}.sh"
         snakefilename = os.path.basename(self.module.snakefile)
         if self.options.run_mode == self.options.profile:
             # use profile command
-            options = {"wrappers": self.sequana_wrappers, "jobs": self.options.jobs}
+            options = {
+                "wrappers": self.sequana_wrappers,
+                "jobs": self.options.jobs,
+                "forceall": False,
+                "use_singularity": self.options.use_singularity
+            }
+
+            if self.options.use_singularity: #pragma: no cover
+                options["singularity_prefix"] = self.singularity_prefix
+                home = str(Path.home())
+                if os.path.exists("/pasteur"):
+                    options["singularity_args"] = f" -B {home}:{home} -B /pasteur:/pasteur"
+                else:
+                    options["singularity_args"] = f" --singularity-args ' -B {home}:{home} "
+            else:
+                options["singularity_prefix"] = ""
+                options["singularity_args"] = ""
+
+
             if self.options.profile == "slurm":
                 # add slurm options
-                options.update({
-                    "partition": "common",
-                    "qos": "normal",
-                    "memory": self.options.slurm_memory,
-                })
+                options.update(
+                    {
+                        "partition": "common",
+                        "qos": "normal",
+                        "memory": self.options.slurm_memory,
+                    }
+                )
                 if self.options.slurm_queue != "common":
                     options.update({"partition": self.options.slurm_queue, "qos": self.options.slurm_queue})
 
-            profile_dir = create_profile(self.workdir, self.options.profile, **options)
+            profile_dir = create_profile(self.workdir , self.options.profile, **options)
             command = f"#!/bin/bash\nsnakemake -s {snakefilename} --profile {profile_dir}"
             command_file.write_text(command)
         else:
@@ -405,7 +426,7 @@ class SequanaManager:
         # introspecting sections written as:
         # container:
         #     "https://...image.img"
-        if self.options.use_singularity:
+        if self.options.use_singularity: #pragma: no cover
             self._download_zenodo_images()
 
         # finally, we copy the files be found in the requirements section of the
@@ -484,7 +505,6 @@ class SequanaManager:
             except AttributeError:
                 logger.debug("update_config. Could not find {}".format(option_name))
 
-
     def _get_section_content(self, filename, section_name):
         """searching for a given section (e.g. container)
 
@@ -514,7 +534,7 @@ class SequanaManager:
                 elif section_name in line:
                     content = line.replace(section_name, "").strip()
                     content = content.strip('"').strip("'")
-                    if content: # case 2
+                    if content:  # case 2
                         contents.append(content)
                 elif previous == section_name:
                     # case 1
@@ -523,12 +543,10 @@ class SequanaManager:
                     contents.append(content)
 
                 # this is for case 1
-                previous = line.strip() 
+                previous = line.strip()
         return contents
 
-        included = self._get_section_content(self.module.snakefile, "include:")
-
-    def _download_zenodo_images(self): #pragma: no cover
+    def _download_zenodo_images(self):  # pragma: no cover
         """
         Looking for container: section, this downloads all container that are
         online (starting with https). Recursive function that also looks into the
@@ -536,18 +554,23 @@ class SequanaManager:
         Snakefile.
 
         """
-
+        logger.info(f"You set --use-singularity. Downloading containers into {self.singularity_prefix}")
         # first get the urls in the main snakefile
         urls = self._get_section_content(self.module.snakefile, "container:")
-        urls = [x for x in urls if x.startswith('http')]
+        urls = [x for x in urls if x.startswith("http")]
 
         # second get the urls from sub-rules if any
         # do we have sub modules / includes ?
         included_files = self._get_section_content(self.module.snakefile, "include:")
 
+        # included_files may include former modules from sequana. Need to keep only
+        # actual files ending in .rules and .smk
+        included_files = [x for x in included_files if x.endswith(('.smk','.rules'))]
+
+
         for included_file in included_files:
             suburls = self._get_section_content(Path(self.module.snakefile).parent / included_file, "container:")
-            suburls = [x for x in suburls if x.startswith('http')]
+            suburls = [x for x in suburls if x.startswith("http")]
             urls.extend(suburls)
 
         # make sure there are unique URLs
@@ -575,9 +598,10 @@ class SequanaManager:
                     with open(outfile, "wb") as fout:
                         fout.write(response.content)
                 except requests.ConnectionError:
-                    logger.critical(f"{url} could not be downloaded. Your pipeline will probably won't work if you use --use-singularity. Continue with other images")
+                    logger.critical(
+                        f"{url} could not be downloaded. Your pipeline will probably won't work if you use --use-singularity. Continue with other images"
+                    )
                     pass
-
 
 
 def get_pipeline_location(pipeline_name):
@@ -587,5 +611,6 @@ def get_pipeline_location(pipeline_name):
     options = Opt()
     options.workdir = "."
     options.version = False
+    options.singularity_prefix = ""
     p = SequanaManager(options, pipeline_name)
     return p._get_package_location()

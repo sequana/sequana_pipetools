@@ -127,7 +127,7 @@ def get_pipeline_statistics():
         wrappers = set()
         with open(snakefile) as fh:
             data = fh.readlines()
-            data = [x.strip('\n"').split('/')[-1] for x in data if '/wrappers/' in x]
+            data = [x.strip('\n"').split("/")[-1] for x in data if "/wrappers/" in x]
             wrappers.update(data)
         return wrappers
 
@@ -147,8 +147,9 @@ def get_pipeline_statistics():
         for wrapper in wrappers:
             df.loc[wrapper, pipeline] += 1
 
-    df.columns = [x.replace('pipeline:','') for x in df.columns]
+    df.columns = [x.replace("pipeline:", "") for x in df.columns]
     return df
+
 
 def message(mes):
     """Dedicated print function to include in Snakefiles
@@ -159,7 +160,6 @@ def message(mes):
 
     This adds the // -- characters in front of the prin statements."""
     logger.info("// -- " + mes)
-
 
 
 @deprecated(version="v1", reason="hsa been replaced by the usage of a Makefile")

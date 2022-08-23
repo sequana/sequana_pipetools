@@ -76,7 +76,7 @@ class GeneralOptions:
         parser.add_argument("--version", action="store_true", help="Print the version and quit")
         parser.add_argument("--deps", action="store_true", help="Show the known dependencies of the pipeline")
         parser.add_argument(
-            "-l", "--level",
+            "--level",
             dest="level",
             default="INFO",
             choices=["INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"],
@@ -130,14 +130,14 @@ class SnakemakeOptions:
                 of Snakemake""",
         )
         group.add_argument(
-            "-w", "--working-directory",
+            "--working-directory",
             dest="workdir",
             default=self.workdir,
             help="""where to save the pipeline and its configuration file and
             where the analyse can be run""",
         )
         group.add_argument(
-            "-f","--force",
+            "--force",
             dest="force",
             action="store_true",
             default=False,
@@ -149,6 +149,12 @@ class SnakemakeOptions:
             action="store_true",
             default=False,
             help="""If set, pipelines will download singularity files for all external tools.""",
+        )
+        group.add_argument(
+            "--singularity-prefix",
+            dest="singularity_prefix",
+            default=False,
+            help="""If set, pipelines will download singularity files in this directory otherwise they will be downloaded in the working directory of the pipeline (.""",
         )
 
 
@@ -167,7 +173,7 @@ class InputOptions:
     def add_options(self, parser):
         self.group = parser.add_argument_group(self.group_name)
         self.group.add_argument(
-            "-i" ,"--input-directory",
+            "--input-directory",
             dest="input_directory",
             default=self.input_directory,
             # required=True,
@@ -527,5 +533,5 @@ class SlurmOptions:
             dest="profile",
             default=self.profile,
             choices=["local", "slurm"],
-            help="Create cluster (HPC) profile directory. By default, it use local profile"
+            help="Create cluster (HPC) profile directory. By default, it use local profile",
         )

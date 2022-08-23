@@ -2,3 +2,6 @@ keep-going: True
 printshellcmds: True
 cores: {jobs}
 wrapper-prefix: {wrappers}
+use-singularity: {use_singularity}
+singularity-args: {singularity_args}
+singularity-prefix: {singularity_prefix}
