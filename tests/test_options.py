@@ -20,7 +20,6 @@ def test_misc():
         pass
 
 
-
 def test_feature_counts():
     p = argparse.ArgumentParser()
     so = FeatureCountsOptions()
@@ -32,6 +31,11 @@ def test_trimming_options():
     p = argparse.ArgumentParser()
     so = TrimmingOptions()
     so.add_options(p)
+    p.parse_args(["--trimming-quality", "40"])
+    try:
+        p.parse_args(["--trimming-quality", "-40"])
+    except:
+        argparse.ArgumentTypeError
 
 
 

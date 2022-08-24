@@ -33,7 +33,7 @@ class PipelineManagerBase:
 
     """
 
-    def __init__(self, name, config, schema=None, matplotlib_backend='Agg'):
+    def __init__(self, name, config, schema=None, matplotlib_backend="Agg"):
         # Make sure the config is valid
         self.name = name
         cfg = SequanaConfig(config)
@@ -43,31 +43,33 @@ class PipelineManagerBase:
 
         # Used by the dynamic rules to defined the location where to copy
         # dynamic rules.
-        self.pipeline_dir = os.getcwd() + os.sep
+        # self.pipeline_dir = os.getcwd() + os.sep
 
         # Populate the config with additional information
         self.config = cfg.config
         self.config.pipeline_name = name
         self.matplotlib_backend = matplotlib_backend
-            
-        # some common choices     
+
+        # some common choices
         self.sample = "{sample}"
         self.basename = "{sample}/%s/{sample}"
 
         self.setup()
 
     def error(self, msg):
-        msg = (f"{msg}\nPlease check the content of your config file. "
+        msg = (
+            f"{msg}\nPlease check the content of your config file. "
             "It should have those 3 key/value pairs in config.yaml (adapt to your needs):"
             "\n"
             "- input_directory: path_to_find_input_files\n"
             '- input_readtag: "_R[12]_"\n'
             '- input_pattern: "*.fastq.gz"\n'
-            '\n'
+            "\n"
             "You must set an input_directory key and an input_pattern key so that files can be found. \n"
             "You may omit input_directory but input_pattern must then correspond to a valid file pattern.\n"
             "You must also set input_readtag to a valid read tag for Illumina data (typically _R[12]_ or _[12]. ; not the trailing dot).\n"
-            "If you are not analysing Illumina paired data (e.g., nanopore), let the input_readtag field empty.")
+            "If you are not analysing Illumina paired data (e.g., nanopore), let the input_readtag field empty."
+        )
         raise PipetoolsException(msg)
 
     @deprecated(version="1.0", reason="will be removed in v1.0. Update your pipelines.")
@@ -120,6 +122,7 @@ class PipelineManagerBase:
 
         if self.matplotlib_backend:
             import matplotlib as mpl
+
             mpl.use(self.matplotlib_backend)
 
     def _get_snakefile(self):
@@ -213,47 +216,47 @@ class PipelineManager(PipelineManagerBase):
 
     You may omit the input_readtag, which is not required for non-paired data. For instance for
     pacbio and nanopore files, there are not paired and the read tag is not required. Instead, if
-    you are dealing with Illumina/MGI data sets, you must provide this field IF AND ONLY IF you want 
+    you are dealing with Illumina/MGI data sets, you must provide this field IF AND ONLY IF you want
     your data to be processed as paired data (or single end). See later for more details.
-    
-    You may omit the input_directory but then the input_pattern must match files to be found locally. 
-    
+
+    You may omit the input_directory but then the input_pattern must match files to be found locally.
+
     Behind the scene, the :class:`~sequana_pipetools.snaketools.file_factory.FileFactory`
     or :class:`~sequana_pipetools.snaketools.file_factory.FastQFactory` will provide the sample
-    names and their tags in :attr:`samples` where tag are extracted from the sample names 
+    names and their tags in :attr:`samples` where tag are extracted from the sample names
     where read tags are removed (if required).
 
     The manager tells you if the samples are paired or not assuming all
-    samples are homogeneous (either all paired or all single-ended) and a user 
+    samples are homogeneous (either all paired or all single-ended) and a user
     read_tag that can discrimate the sample name unambigously.
 
     In Sequencing data, the sequences are stored in one file (single-ended) data
     or in two files (paired-data). In both cases, most common sequencers will append
-    a so-called read-tag to identify the first and second file. Traditionnally, e.g., 
+    a so-called read-tag to identify the first and second file. Traditionnally, e.g.,
     with illumina sequencers the read tag are _R1_ and _R2_ or a trailing _1 and _2
-    Note that samples names have sometimes this tag included. Consider e.g. 
+    Note that samples names have sometimes this tag included. Consider e.g.
     sample_replicate_1_R1_.fastq.gz or sample_replicate_1_1.fastq.gz then you can imagine that
     it is tricky to handle.
 
-    The sample names are extracted by cutting filenames on the first dot that is encoutered 
+    The sample names are extracted by cutting filenames on the first dot that is encoutered
     (before extension presumably). For instance the sample name for the file::
 
         A.fastq.gz
 
-    will be **A**. sometimes, you may have ambiguous names. For instance, they may start with 
+    will be **A**. sometimes, you may have ambiguous names. For instance, they may start with
     a common prefix. Considere these two files::
 
         demultiplex.A.fastq.gz
         demultiplex.B.fastq.gz
 
-    They would both have the same sample name. So, we remove all trailing prefixes 
+    They would both have the same sample name. So, we remove all trailing prefixes
     that are common to all files. Therefore, our sample names are as expected::
 
         A
         B
 
     If extra prefixes not common to all samples are present and you want to remove them, it is still possible
-    using a field in the config file called extra_prefixes_to_strip. For instance with    :: 
+    using a field in the config file called extra_prefixes_to_strip. For instance with    ::
 
         demultiplex.A.fastq.gz
         demultiplex.mess.B.fastq.gz
@@ -262,7 +265,7 @@ class PipelineManager(PipelineManagerBase):
 
         extra_prefixes_to_strip: ["mess"]
 
-    and get *A* and *B* as sample names. 
+    and get *A* and *B* as sample names.
 
     If you have specific wishes to create sample names from the filenames, you may provide a function
     with the :attr:`sample_func` parameter. If so, you must provide the input_directory and input_pattern
@@ -280,20 +283,27 @@ class PipelineManager(PipelineManagerBase):
 
         manager.ff.filenames
 
-    Finally, you can also define a sample pattern using a simple syntax such as **demultiplex.{sample}.fastq.gz** and you 
+    Finally, you can also define a sample pattern using a simple syntax such as **demultiplex.{sample}.fastq.gz** and you
     can define this in your config file using::
 
         sample_pattern: "demultiplex.{sample}.fastq.gz"
 
-    in which case, no prefixes are removed. 
+    in which case, no prefixes are removed.
 
 
 
     """
 
-    def __init__(self, name:str, config:str, schema=None, 
-            sample_func=None, extra_prefixes_to_strip=[], 
-            sample_pattern=None, **kwargs):
+    def __init__(
+        self,
+        name: str,
+        config: str,
+        schema=None,
+        sample_func=None,
+        extra_prefixes_to_strip=[],
+        sample_pattern=None,
+        **kwargs,
+    ):
         """.. rubric:: Constructor
 
         :param name: name of the pipeline
@@ -301,14 +311,14 @@ class PipelineManager(PipelineManagerBase):
         :param str schema: YAML file to validate the config file
         :param sample_func: a user-defined function that extract sample names from filenames
         :param extra_prefixes_to_strip: we automatically remove common prefixes.
-            However, you may have extra prefixes not common to all samples 
-            that needs to be removed. Provide a list with extra_prefixes_to_strip 
+            However, you may have extra prefixes not common to all samples
+            that needs to be removed. Provide a list with extra_prefixes_to_strip
             including trailing dot or not.
         :param sample_pattern: if a sample pattern is provided, prefix are
             not removed automatically. The sample_pattern must include the string
-            {sample} to define the expected sample name. For instance given 
+            {sample} to define the expected sample name. For instance given
             a filename A_sorted.fastq.gz where sorted appears in all sample
-            buy is not wished, use sample_pattern='{sample}_sorted.fastq.gz' 
+            buy is not wished, use sample_pattern='{sample}_sorted.fastq.gz'
             and your sample will be only 'A'.
 
 
@@ -342,9 +352,8 @@ class PipelineManager(PipelineManagerBase):
         elif cfg.config.input_pattern:
             glob_dir = cfg.config.input_pattern
 
-
         # if user set the sample func, no need for fileFactory
-        # The config uses the input_directory and input_pattern (compulsary). 
+        # The config uses the input_directory and input_pattern (compulsary).
         if sample_func:
             logger.info("Using sample_func function to get sample names as provided by the pipeline/user")
             path = cfg.config["input_directory"]
@@ -357,11 +366,11 @@ class PipelineManager(PipelineManagerBase):
             # function provided by the user.
             self.samples = {sample_func(filename): filename for filename in self.ff.realpaths}
             logger.info(f"Found {len(self.samples)} samples")
-        
+
         elif use_fastq_factory:
             logger.info(f"Using FastQFactory (readtag {readtag})")
 
-            #if not cfg.config.get('input_readtag', ""):
+            # if not cfg.config.get('input_readtag', ""):
             #    logger.warning("No input_readtag option found in the config file. Since you specify fastq=True, the PipelineManager set it to _R[12]_ for you but we strongly recommend to set it in your config file using input_readtag='_R[12]_'.")
             #    cfg.config.input_readtag = "_R[12]_"
             self._get_fastq_files(glob_dir, cfg.config.input_readtag)
@@ -371,7 +380,7 @@ class PipelineManager(PipelineManagerBase):
             logger.info(f"Using FileFactory (no readtag)")
             self._get_any_files(glob_dir)
             logger.info(f"Found {len(self.samples)} samples")
-            
+
         if not self.ff.filenames:
             self.error(f"No files were found with pattern {glob_dir} and read tag {readtag}.")
 
@@ -388,10 +397,12 @@ class PipelineManager(PipelineManagerBase):
 
     def _get_fastq_files(self, glob_dir, read_tag):
         """ """
-        self.ff = FastQFactory(glob_dir, read_tag=read_tag, 
+        self.ff = FastQFactory(
+            glob_dir,
+            read_tag=read_tag,
             extra_prefixes_to_strip=self.extra_prefixes_to_strip,
-            sample_pattern=self.sample_pattern
-            )
+            sample_pattern=self.sample_pattern,
+        )
 
         # check whether it is paired or not. This is just to raise an error when
         # there is inconsistent mix of R1 and R2
@@ -400,7 +411,10 @@ class PipelineManager(PipelineManagerBase):
         # samples contains a correspondance between the sample name and the
         # real filename location.
         self.samples = {
-            tag: [self.ff.get_file1(tag), self.ff.get_file2(tag)] if self.ff.get_file2(tag) else [self.ff.get_file1(tag)] for tag in self.ff.tags
+            tag: [self.ff.get_file1(tag), self.ff.get_file2(tag)]
+            if self.ff.get_file2(tag)
+            else [self.ff.get_file1(tag)]
+            for tag in self.ff.tags
         }
 
         if len(self.ff.tags) == 0:
@@ -411,9 +425,9 @@ class PipelineManager(PipelineManagerBase):
             )
 
     def _get_any_files(self, pattern):
-        self.ff = FileFactory(pattern,
-            extra_prefixes_to_strip=self.extra_prefixes_to_strip,
-            sample_pattern=self.sample_pattern)
+        self.ff = FileFactory(
+            pattern, extra_prefixes_to_strip=self.extra_prefixes_to_strip, sample_pattern=self.sample_pattern
+        )
 
         # samples contains a correspondance between the sample name and the
         # real filename location.

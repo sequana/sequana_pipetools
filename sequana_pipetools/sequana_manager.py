@@ -14,10 +14,16 @@ import glob
 import os
 import shutil
 import subprocess
+import pkg_resources
+import hashlib
 import sys
+import requests
+import asyncio
 from shutil import which
 from urllib.request import urlretrieve
 from pathlib import Path
+
+from tqdm.asyncio import tqdm
 
 import colorlog
 from deprecated import deprecated
@@ -37,12 +43,23 @@ class SequanaManager:
         :param options: an instance of :class:`Options`
         :param name: name of the pipeline. Must be a Sequana pipeline already installed.
 
-        options must be an object with at least the following attributes:
+        options must be an object Options with at least the following attributes:
 
-        - version to True or False
-        - working_directory
-        - force set to True for testing
-        - job set to 1
+        ::
+
+            class Options:
+                level = 'INFO'
+                version = False
+                workdir = "fastqc"
+                job=1
+                force = True
+                use_singularity = False
+                def __init__(self):
+                    pass
+            from sequana_pipetools import SequanaManager
+            o = Options()
+            pm = SequanaManager(o, "fastqc")
+
 
         The working_directory is uesd to copy the pipeline in it.
 
@@ -109,11 +126,16 @@ class SequanaManager:
         # define the data path of the pipeline
         self.datapath = self._get_package_location()
 
-        # Set wrappers as attribute so that ia may be changed by the
+        # Set wrappers as attribute so that it may be changed by the
         # user/developer
         self.sequana_wrappers = os.environ.get(
             "SEQUANA_WRAPPERS", "https://raw.githubusercontent.com/sequana/sequana-wrappers/"
         )
+
+        if self.options.singularity_prefix: #pragma: no cover
+            self.singularity_prefix = self.options.singularity_prefix
+        else: #pragma: no cover
+            self.singularity_prefix = os.environ.get("SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/.sequana/apptainers")
 
     def exists(self, filename, exit_on_error=True, warning_only=False):  # pragma: no cover
         """This is a convenient function to check if a directory/file exists
@@ -164,10 +186,15 @@ class SequanaManager:
         return sharedir
 
     def _get_package_version(self):
-        import pkg_resources
-
         ver = pkg_resources.require("sequana_{}".format(self.name))[0].version
         return ver
+
+    def _get_sequana_version(self):
+        try:
+            ver = pkg_resources.require("sequana".format(self.name))[0].version
+            return ver
+        except DistributionNotFound:  # pragma: no cover
+            return "not installed"
 
     def _guess_scheduler(self):
 
@@ -208,6 +235,20 @@ class SequanaManager:
             self.command += f" --wrapper-prefix {self.sequana_wrappers} "
             logger.info(f"Using sequana-wrappers from {self.sequana_wrappers}")
 
+        if self.options.use_singularity:  # pragma: no cover
+
+            # to which, we always add the binding to home directory
+            home = str(Path.home())
+            if os.path.exists("/pasteur"):
+                singularity_args = f"--singularity-args=' -B {home}:{home} -B /pasteur:/pasteur {self.options.singularity_args}'"
+                self.command += f" --use-singularity {singularity_args}"
+            else:
+                singularity_args = f"--singularity-args=' -B {home}:{home}{self.options.singularity_args}'"
+                self.command += f" --use-singularity {singularity_args}"
+
+            # finally, the prefix where images are stored
+            self.command += f" --singularity-prefix {self.singularity_prefix} "
+
         # FIXME a job is not a core. Ideally, we should add a core option
         if self._guess_scheduler() == "local":
             self.command += " -p --cores {} ".format(self.options.jobs)
@@ -244,7 +285,7 @@ class SequanaManager:
         if self.workdir.exists():
             if self.options.force:
                 logger.warning(f"Path {self.workdir} exists already but you set --force to overwrite it")
-            else:
+            else:  # pragma: no cover
                 logger.error(f"Output path {self.workdir} exists already. Use --force to overwrite")
                 sys.exit()
         else:
@@ -270,26 +311,7 @@ class SequanaManager:
             if stop_on_error:
                 sys.exit(1)
 
-    def check_fastq_files(self):
-        cfg = self.config.config
-        try:
-            ff = FastQFactory(cfg.input_directory + os.sep + cfg.input_pattern, read_tag=cfg.input_readtag)
-
-            # This tells whether the data is paired or not
-            if ff.paired:
-                paired = "paired reads"
-            else:
-                paired = "single-end reads"
-            logger.info(f"Your input data seems to be made of {paired}")
-
-        except Exception:
-            logger.error(
-                "Input data is not fastq-compatible with sequana pipelines. You may want to set the read_tag"
-                " to empty string or None if you wish to analyse non-fastQ files (e.g. BAM)"
-            )
-            sys.exit(1)
-
-    def teardown(self, check_schema=True, check_input_files=True, check_fastq_files=True):
+    def teardown(self, check_schema=True, check_input_files=True):
         """Save all files required to run the pipeline and perform sanity checks
 
 
@@ -326,23 +348,47 @@ class SequanaManager:
         except FileExistsError:  # pragma: no cover
             pass
 
-        # the command
+        # the final command
         command_file = self.workdir / f"{self.name}.sh"
         snakefilename = os.path.basename(self.module.snakefile)
         if self.options.run_mode == self.options.profile:
             # use profile command
-            options = {"wrappers": self.sequana_wrappers, "jobs": self.options.jobs}
+            options = {
+                "wrappers": self.sequana_wrappers,
+                "jobs": self.options.jobs,
+                "forceall": False,
+                "use_singularity": self.options.use_singularity
+            }
+
+            if self.options.use_singularity: #pragma: no cover
+                options["singularity_prefix"] = self.singularity_prefix
+                home = str(Path.home())
+                options["singularity_args"] = self.options.singularity_args
+
+                # specific to Institut Pasteur cluster.
+                # FIXME could be a the sequana config file to make it generic
+                if os.path.exists("/pasteur"):
+                    options["singularity_args"] += f" -B {home}:{home} -B /pasteur:/pasteur"
+                else:
+                    options["singularity_args"] += f" --singularity-args ' -B {home}:{home} "
+            else:
+                options["singularity_prefix"] = ""
+                options["singularity_args"] = ""
+
+
             if self.options.profile == "slurm":
                 # add slurm options
-                options.update({
-                    "partition": "common",
-                    "qos": "normal",
-                    "memory": self.options.slurm_memory,
-                })
+                options.update(
+                    {
+                        "partition": "common",
+                        "qos": "normal",
+                        "memory": self.options.slurm_memory,
+                    }
+                )
                 if self.options.slurm_queue != "common":
                     options.update({"partition": self.options.slurm_queue, "qos": self.options.slurm_queue})
 
-            profile_dir = create_profile(self.workdir, self.options.profile, **options)
+            profile_dir = create_profile(self.workdir , self.options.profile, **options)
             command = f"#!/bin/bash\nsnakemake -s {snakefilename} --profile {profile_dir}"
             command_file.write_text(command)
         else:
@@ -355,7 +401,7 @@ class SequanaManager:
         except FileExistsError:  # pragma: no cover
             pass
 
-        # the cluster config if any
+        # the logo if any
         if self.module.logo:
             shutil.copy(self.module.logo, self.workdir / ".sequana")
 
@@ -388,6 +434,14 @@ class SequanaManager:
                 cfg = SequanaConfig(f"{self.workdir}/{config_name}")
                 cfg.check_config_with_schema(f"{self.workdir}/{schema_name}")
 
+        # if --use-singularity is set, we need to download images for the users
+        # Sequana pipelines will store images in Zenodo website (via damona).
+        # introspecting sections written as:
+        # container:
+        #     "https://...image.img"
+        if self.options.use_singularity: #pragma: no cover
+            self._download_zenodo_images()
+
         # finally, we copy the files be found in the requirements section of the
         # config file.
         self.copy_requirements()
@@ -410,6 +464,7 @@ class SequanaManager:
 
             fout.write(f"# sequana_pipetools version: {version}\n")
             fout.write(f"# sequana_{self.name} version: {self._get_package_version()}\n")
+            fout.write(f"# sequana version: {self._get_sequana_version()}\n")
             cmd1 = os.path.basename(sys.argv[0])
             fout.write(" ".join([cmd1] + sys.argv[1:]))
 
@@ -463,6 +518,133 @@ class SequanaManager:
             except AttributeError:
                 logger.debug("update_config. Could not find {}".format(option_name))
 
+    def _get_section_content(self, filename, section_name):
+        """searching for a given section (e.g. container)
+
+        and extrct its content. This is for simple cases where
+        content is made of one line. Two cases are supported
+
+        case 1 (two lines)::
+
+            container:
+                "https:...."
+
+        case 2 (one line)
+
+            container: "https...."
+
+        comments starting with # are allowed.
+        """
+        assert section_name.endswith(":")
+
+        contents = []
+        with open(filename, "r") as fin:
+            previous = ""
+            for line in fin.readlines():
+                if line.strip().startswith("#") or not line.strip():
+                    pass
+                # case 1
+                elif section_name in line:
+                    content = line.replace(section_name, "").strip()
+                    content = content.strip('"').strip("'")
+                    if content:  # case 2
+                        contents.append(content)
+                elif previous == section_name:
+                    # case 1
+                    content = line.replace(section_name, "").strip()
+                    content = content.strip('"').strip("'")
+                    contents.append(content)
+
+                # this is for case 1
+                previous = line.strip()
+        return contents
+
+    def _download_zenodo_images(self):  # pragma: no cover
+        """
+        Looking for container: section, this downloads all container that are
+        online (starting with https). Recursive function that also looks into the
+        ./rules directories based on the include: section found in the main
+        Snakefile.
+
+        """
+        logger.info(f"You set --use-singularity. Downloading containers into {self.singularity_prefix}")
+        # first get the urls in the main snakefile
+        urls = self._get_section_content(self.module.snakefile, "container:")
+        urls = [x for x in urls if x.startswith("http")]
+
+        # second get the urls from sub-rules if any
+        # do we have sub modules / includes ?
+        included_files = self._get_section_content(self.module.snakefile, "include:")
+
+        # included_files may include former modules from sequana. Need to keep only
+        # actual files ending in .rules and .smk
+        included_files = [x for x in included_files if x.endswith(('.smk','.rules'))]
+
+        for included_file in included_files:
+            suburls = self._get_section_content(Path(self.module.snakefile).parent / included_file, "container:")
+            suburls = [x for x in suburls if x.startswith("http")]
+            urls.extend(suburls)
+
+        # make sure there are unique URLs
+        urls = set(urls)
+
+        # guarantess that output filename to be saved have the same
+        # unique ID as those expected by snakemake
+        def _hash(url):
+            md5hash = hashlib.md5()
+            md5hash.update(url.encode())
+            return md5hash.hexdigest()
+
+        os.makedirs(self.singularity_prefix, exist_ok=True)
+
+        count = 0
+        files_to_download = []
+
+        # define the URLs and the output filename. Also, remove urls that
+        # have already been downloaded. 
+        for url in urls:
+            name = _hash(url)
+            outfile = f"{self.singularity_prefix}/{name}.simg"
+            if os.path.exists(outfile):
+                logger.info(f"Found corresponding image of {url} in {outfile}")
+            else:
+                files_to_download.append((url, outfile, count))
+                count += 1
+                logger.info(f"Preparing {url} for download")
+
+        try:    # try an asynchrone downloads
+            multiple_downloads(files_to_download)
+        except KeyboardInterrupt:
+            logger.info("The download was interruped, removing partially downloaded files")
+            for values in files_to_download:
+                filename = values[1]
+                Path(filename).unlink()
+            logger.critical("You requested singularity but some URL could not be downloaded. Your pipeline will probably not be fully executabl"
+                )
+
+
+def multiple_downloads(files_to_download):
+
+    @asyncio.coroutine
+    def download(url, name, position):
+        response = requests.get(url, stream=True)
+
+        with tqdm.wrapattr(open(name, "wb"), "write",
+                  miniters=1, desc=url.split('/')[-1],
+                  total=int(response.headers.get('content-length', 0)), position=position) as fout:
+            for chunk in response.iter_content(chunk_size=4096):
+                fout.write(chunk)
+                yield
+
+    async def download_all(files_to_download):
+        """data_to_download is a list of tuples
+        each tuple contain the url to download, its output name, and a unique 
+        position for the progress bar."""
+        await asyncio.gather(*(download(*data) for data in files_to_download))
+
+    asyncio.run(
+     download_all(files_to_download)
+    )
 
 def get_pipeline_location(pipeline_name):
     class Opt:
@@ -471,5 +653,6 @@ def get_pipeline_location(pipeline_name):
     options = Opt()
     options.workdir = "."
     options.version = False
+    options.singularity_prefix = ""
     p = SequanaManager(options, pipeline_name)
     return p._get_package_location()

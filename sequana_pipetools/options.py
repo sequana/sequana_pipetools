@@ -37,7 +37,7 @@ def init_pipeline(NAME):
 def before_pipeline(NAME):
     """A function to provide --version and --deps for all pipelines"""
 
-    if "--version" in sys.argv:
+    if "--version" in sys.argv or "-v" in sys.argv:
         print_version(NAME)
         sys.exit(0)
 
@@ -142,6 +142,25 @@ class SnakemakeOptions:
             action="store_true",
             default=False,
             help="""If the working directory exists, proceed anyway.""",
+        )
+        group.add_argument(
+            "--use-singularity",
+            dest="use_singularity",
+            action="store_true",
+            default=False,
+            help="""If set, pipelines will download singularity files for all external tools.""",
+        )
+        group.add_argument(
+            "--singularity-prefix",
+            dest="singularity_prefix",
+            default=False,
+            help="""If set, pipelines will download singularity files in this directory otherwise they will be downloaded in the working directory of the pipeline .""",
+        )
+        group.add_argument(
+            "--singularity-args",
+            dest="singularity_args",
+            default="",
+            help="""provide any arguments accepted by singularity. By default, we set -B $HOME:$HOME """,
         )
 
 
@@ -520,5 +539,5 @@ class SlurmOptions:
             dest="profile",
             default=self.profile,
             choices=["local", "slurm"],
-            help="Create cluster (HPC) profile directory. By default, it use local profile"
+            help="Create cluster (HPC) profile directory. By default, it use local profile",
         )

@@ -9,6 +9,17 @@ from sequana_pipetools.sequana_manager import get_pipeline_location
 from . import test_dir
 
 
+default_dict = {
+    "version": False, 
+    'level': "INFO", 
+    "use_singularity": False,
+    "singularity_prefix": "",
+    "jobs": 1, 
+    "run_mode": "local", 
+    "profile":"local", 
+    "force": True}
+
+
 def test_pipeline_manager():
     # test missing input_directory
     cfg = SequanaConfig({"version": "1.0.0"})
@@ -22,36 +33,32 @@ def test_pipeline_manager():
 def test_sequana_manager(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
 
-    # normal behaviour
-    pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
-                    "jobs": 1, "run_mode": None, "force": True, "profile": None}),
-        "fastqc")
+    # normal behaviour. also to test profile
+    dd = default_dict.copy()
+    dd["workdir"] = wkdir
+    pm = SequanaManager(AttrDict(**dd), "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
     pm.config.config.input_pattern = "Hm2*gz"
     pm.config.config.input_readtag = "_R[12]_"
 
     pm.setup()
     pm.teardown()
-    pm.check_fastq_files()
+    
 
-    # check SE data
-    pm.config.config.input_pattern = "Hm*_R1_*gz"
-    pm.check_fastq_files()
 
     # We can now try to do it again fro the existing project itself
-    pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
-                    "jobs": 1, "run_mode": None, "force": True,
-                    "from_project": wkdir, "profile": None}),
-        "fastqc")
+    dd = default_dict.copy()
+    dd['from_project'] = wkdir 
+    dd["workdir"] = wkdir
+    pm = SequanaManager(AttrDict(**dd), "fastqc")
 
     pm.setup()
+
+    # set slurm options manually
     pm.options.run_mode = "slurm"
     pm.options.slurm_queue = "common"
     pm.options.slurm_memory = "4000"
     pm.options.slurm_cores_per_job = 4
-    pm.setup()
     pm.options.slurm_queue = "biomics"
     pm.setup()
     pm.teardown()
@@ -65,19 +72,49 @@ def test_sequana_manager_wrong_input(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
 
     # normal behaviour
-    pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
-                    "jobs":1, "run_mode": None, "force": True}),
-        "fastqc")
+    dd = default_dict.copy()
+    dd["workdir"] = wkdir
+    pm = SequanaManager(AttrDict(**dd), "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
+    # no files will be found but by default 
     pm.config.config.input_pattern = f"FFF*gz"
     pm.config.config.input_readtag = f"_R[12]_"
 
     try:
-        pm.check_fastq_files()
+        pm.check_input_files()
         assert False
     except SystemExit:
         assert True
+
+
+
+def test_scheduler(tmpdir):
+    wkdir = tmpdir.mkdir("wkdir")
+
+    dd = default_dict.copy()
+    dd['run_mode'] = 'slurm'
+    dd['profile'] = 'slurm'
+    dd['workdir'] = wkdir
+
+
+    pm = SequanaManager(AttrDict(**dd), "fastqc")
+
+    def mock_scheduler(*args, **kwargs):
+        return "slurm"
+    pm._guess_scheduler = mock_scheduler
+
+    pm.options.profile = "slurm"
+    pm.options.slurm_memory = "4000"
+    pm.options.slurm_cores_per_job = 4
+    pm.options.slurm_queue = "biomics"
+    pm.config.config.input_directory = f"{test_dir}/data/"
+    pm.config.config.input_pattern = "Hm2*gz"
+    pm.config.config.input_readtag = "_R[12]_"
+    
+
+    pm.setup()
+    pm.teardown()
+
 
 
 def test_location():
@@ -88,23 +125,19 @@ def test_location():
 
 def test_version(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
-    try:
-        pm = SequanaManager(
-            AttrDict(**{"version": True, "workdir": wkdir,'level':"INFO",
-                        "jobs":1, "run_mode": None, "force": True}),
-            "fastqc")
-        assert False
-    except SystemExit:
-        assert True
+    with pytest.raises(SystemExit):
+        dd = default_dict.copy()
+        dd['version'] = True
+        dd['workdir'] = wkdir
+        pm = SequanaManager(AttrDict(**dd),"fastqc")
 
 
 def test_wrong_pipeline(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
     try:
-        SequanaManager(
-            AttrDict(**{"version": False, "workdir": wkdir, 'level': "INFO",
-                        "jobs": 1, "run_mode": None, "force": True}),
-            "wrong")
+        dd = default_dict.copy()
+        dd['workdir'] = wkdir
+        SequanaManager(AttrDict(**dd), "wrong")
         assert False
     except SystemExit:
         assert True
@@ -129,13 +162,42 @@ def test_copy_requirements(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
 
     # normal behaviour
-    pm = SequanaManager(
-        AttrDict(**{"version": False, "workdir": str(wkdir), 'level': "INFO",
-                    "jobs": 1, "run_mode": None, "force": True, "profile": None}),
-        "fastqc")
+    dd = default_dict.copy()
+    dd['workdir'] = wkdir
+    pm = SequanaManager(AttrDict(**dd) ,   "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
     pm.config.config.input_pattern = "Hm2*gz"
     pm.config.config.input_readtag = "_R[12]_"
     pm.config.config.requirements = requirements
     pm.setup()
     pm.teardown()
+
+
+def test_pipeline_parse_containers(tmpdir):
+    wkdir = tmpdir.mkdir("wkdir")
+    dd = default_dict.copy()
+    dd['workdir'] = wkdir
+    dd['use_singularity']
+    pm = SequanaManager(AttrDict(**dd) ,   "fastqc")
+    # fastqc uses 2 apptainers:
+
+    import pkg_resources, packaging
+    fastqc_version = pkg_resources.get_distribution('sequana_fastqc').version
+
+    if packaging.version.parse(fastqc_version) >= packaging.version.parse('1.6.0'):
+        assert len(pm._get_section_content(pm.module.snakefile, "container:")) == 2
+    else:
+        assert len(pm._get_section_content(pm.module.snakefile, "container:")) == 0
+
+
+def test_multiple_downloads(tmpdir):
+
+
+    file1 = tmpdir.join("file1.txt")
+    file2 = tmpdir.join("file2.txt")
+    data = [
+            ('https://raw.githubusercontent.com/sequana/sequana_pipetools/main/README.rst', file1, 0),
+            ('https://raw.githubusercontent.com/sequana/sequana_pipetools/main/requirements.txt', file2, 1)]
+    from sequana_pipetools.sequana_manager import multiple_downloads
+
+    multiple_downloads(data)

@@ -17,3 +17,7 @@ keep-going: True
 printshellcmds: True
 jobs: {jobs}
 wrapper-prefix: {wrappers}
+use-singularity: {use_singularity}
+singularity-args: {singularity_args}
+singularity-prefix: {singularity_prefix}
+forceall: False

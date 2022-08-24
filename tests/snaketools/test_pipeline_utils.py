@@ -14,13 +14,6 @@ def test_onsuccess_cleaner(tmpdir):
     onsucc.add_makefile()
 
 
-def test_build_dynamic_rule(tmpdir):
-
-    code = "whatever"
-    directory = str(tmpdir)
-    snaketools.build_dynamic_rule(code, directory)
-
-
 def test_get_pipeline_statistics():
     snaketools.get_pipeline_statistics()
 
