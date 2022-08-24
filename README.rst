@@ -174,6 +174,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.9.2     * Udate asynchronous downloads to use aiohttp
 0.9.1     * Ability to download automatically singularity images (as URLs) if 
             set in the  pipelines (container field). add the --use-singularity
             option in all pipelines (and --singualrity-prefix)
