@@ -188,3 +188,16 @@ def test_pipeline_parse_containers(tmpdir):
         assert len(pm._get_section_content(pm.module.snakefile, "container:")) == 2
     else:
         assert len(pm._get_section_content(pm.module.snakefile, "container:")) == 0
+
+
+def test_multiple_downloads(tmpdir):
+
+
+    file1 = tmpdir.join("file1.txt")
+    file2 = tmpdir.join("file2.txt")
+    data = [
+            ('https://raw.githubusercontent.com/sequana/sequana_pipetools/main/README.rst', file1, 0),
+            ('https://raw.githubusercontent.com/sequana/sequana_pipetools/main/requirements.txt', file2, 1)]
+    from sequana_pipetools.sequana_manager import multiple_downloads
+
+    multiple_downloads(data)

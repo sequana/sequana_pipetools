@@ -18,9 +18,12 @@ import pkg_resources
 import hashlib
 import sys
 import requests
+import asyncio
 from shutil import which
 from urllib.request import urlretrieve
 from pathlib import Path
+
+from tqdm.asyncio import tqdm
 
 import colorlog
 from deprecated import deprecated
@@ -233,11 +236,17 @@ class SequanaManager:
             logger.info(f"Using sequana-wrappers from {self.sequana_wrappers}")
 
         if self.options.use_singularity:  # pragma: no cover
+
+            # to which, we always add the binding to home directory
             home = str(Path.home())
             if os.path.exists("/pasteur"):
-                self.command += f" --use-singularity --singularity-args ' -B {home}:{home} -B /pasteur:/pasteur'"
+                singularity_args = f"--singularity-args=' -B {home}:{home} -B /pasteur:/pasteur {self.options.singularity_args}'"
+                self.command += f" --use-singularity {singularity_args}"
             else:
-                self.command += f" --use-singularity --singularity-args ' -B {home}:{home} '"
+                singularity_args = f"--singularity-args=' -B {home}:{home}{self.options.singularity_args}'"
+                self.command += f" --use-singularity {singularity_args}"
+
+            # finally, the prefix where images are stored
             self.command += f" --singularity-prefix {self.singularity_prefix} "
 
         # FIXME a job is not a core. Ideally, we should add a core option
@@ -354,10 +363,12 @@ class SequanaManager:
             if self.options.use_singularity: #pragma: no cover
                 options["singularity_prefix"] = self.singularity_prefix
                 home = str(Path.home())
+                options["singularity_args"] = self.options.singularity_args
+
                 if os.path.exists("/pasteur"):
-                    options["singularity_args"] = f" -B {home}:{home} -B /pasteur:/pasteur"
+                    options["singularity_args"] += f" -B {home}:{home} -B /pasteur:/pasteur"
                 else:
-                    options["singularity_args"] = f" --singularity-args ' -B {home}:{home} "
+                    options["singularity_args"] += f" --singularity-args ' -B {home}:{home} "
             else:
                 options["singularity_prefix"] = ""
                 options["singularity_args"] = ""
@@ -567,7 +578,6 @@ class SequanaManager:
         # actual files ending in .rules and .smk
         included_files = [x for x in included_files if x.endswith(('.smk','.rules'))]
 
-
         for included_file in included_files:
             suburls = self._get_section_content(Path(self.module.snakefile).parent / included_file, "container:")
             suburls = [x for x in suburls if x.startswith("http")]
@@ -585,24 +595,58 @@ class SequanaManager:
 
         os.makedirs(self.singularity_prefix, exist_ok=True)
 
+        count = 0
+        files_to_download = []
+
+        # define the URLs and the output filename. Also, remove urls that
+        # have already been downloaded. 
         for url in urls:
             name = _hash(url)
-
             outfile = f"{self.singularity_prefix}/{name}.simg"
             if os.path.exists(outfile):
                 logger.info(f"Found corresponding image of {url} in {outfile}")
             else:
-                logger.info(f"Downloading {url}")
-                try:
-                    response = requests.get(url)
-                    with open(outfile, "wb") as fout:
-                        fout.write(response.content)
-                except requests.ConnectionError:
-                    logger.critical(
-                        f"{url} could not be downloaded. Your pipeline will probably won't work if you use --use-singularity. Continue with other images"
-                    )
-                    pass
+                files_to_download.append((url, outfile, count))
+                count += 1
+                logger.info(f"Preparing {url} for download")
 
+        try:    # try an asynchrone downloads
+            #multiple_downloads(urls_to_download, names, positions)
+            multiple_downloads(files_to_download)
+        except Exception: #pragma: no cover
+            try:
+                response = requests.get(url)
+                with open(outfile, "wb") as fout:
+                    fout.write(response.content)
+            except requests.ConnectionError:
+                logger.critical(
+                    f"{url} could not be downloaded. Your pipeline will probably won't work if you use --use-singularity. Continue with other images"
+                )
+                pass
+
+
+def multiple_downloads(files_to_download):
+
+    @asyncio.coroutine
+    def download(url, name, position):
+        response = requests.get(url, stream=True)
+
+        with tqdm.wrapattr(open(name, "wb"), "write",
+                  miniters=1, desc=url.split('/')[-1],
+                  total=int(response.headers.get('content-length', 0)), position=position) as fout:
+            for chunk in response.iter_content(chunk_size=4096):
+                fout.write(chunk)
+                yield
+
+    async def download_all(files_to_download):
+        """data_to_download is a list of tuples
+        each tuple contain the url to download, its output name, and a unique 
+        position for the progress bar."""
+        await asyncio.gather(*(download(*data) for data in files_to_download))
+
+    asyncio.run(
+     download_all(files_to_download)
+    )
 
 def get_pipeline_location(pipeline_name):
     class Opt:

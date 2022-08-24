@@ -154,7 +154,13 @@ class SnakemakeOptions:
             "--singularity-prefix",
             dest="singularity_prefix",
             default=False,
-            help="""If set, pipelines will download singularity files in this directory otherwise they will be downloaded in the working directory of the pipeline (.""",
+            help="""If set, pipelines will download singularity files in this directory otherwise they will be downloaded in the working directory of the pipeline .""",
+        )
+        group.add_argument(
+            "--singularity-args",
+            dest="singularity_args",
+            default="",
+            help="""provide any arguments accepted by singularity. By default, we set -B $HOME:$HOME """,
         )
 
 
