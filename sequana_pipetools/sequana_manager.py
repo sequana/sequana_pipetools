@@ -17,7 +17,7 @@ import subprocess
 import pkg_resources
 import hashlib
 import sys
-import requests
+import aiohttp
 import asyncio
 from shutil import which
 from urllib.request import urlretrieve
@@ -32,7 +32,7 @@ from easydev import CustomConfig
 from sequana_pipetools.snaketools.profile import create_profile
 
 from .misc import Colors, PipetoolsException, print_version
-from .snaketools import FastQFactory, Module, SequanaConfig
+from .snaketools import Module, SequanaConfig
 
 logger = colorlog.getLogger(__name__)
 
@@ -132,10 +132,12 @@ class SequanaManager:
             "SEQUANA_WRAPPERS", "https://raw.githubusercontent.com/sequana/sequana-wrappers/"
         )
 
-        if self.options.singularity_prefix: #pragma: no cover
+        if self.options.singularity_prefix:  # pragma: no cover
             self.singularity_prefix = self.options.singularity_prefix
-        else: #pragma: no cover
-            self.singularity_prefix = os.environ.get("SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/.sequana/apptainers")
+        else:  # pragma: no cover
+            self.singularity_prefix = os.environ.get(
+                "SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/.sequana/apptainers"
+            )
 
     def exists(self, filename, exit_on_error=True, warning_only=False):  # pragma: no cover
         """This is a convenient function to check if a directory/file exists
@@ -240,7 +242,9 @@ class SequanaManager:
             # to which, we always add the binding to home directory
             home = str(Path.home())
             if os.path.exists("/pasteur"):
-                singularity_args = f"--singularity-args=' -B {home}:{home} -B /pasteur:/pasteur {self.options.singularity_args}'"
+                singularity_args = (
+                    f"--singularity-args=' -B {home}:{home} -B /pasteur:/pasteur {self.options.singularity_args}'"
+                )
                 self.command += f" --use-singularity {singularity_args}"
             else:
                 singularity_args = f"--singularity-args=' -B {home}:{home}{self.options.singularity_args}'"
@@ -357,10 +361,10 @@ class SequanaManager:
                 "wrappers": self.sequana_wrappers,
                 "jobs": self.options.jobs,
                 "forceall": False,
-                "use_singularity": self.options.use_singularity
+                "use_singularity": self.options.use_singularity,
             }
 
-            if self.options.use_singularity: #pragma: no cover
+            if self.options.use_singularity:  # pragma: no cover
                 options["singularity_prefix"] = self.singularity_prefix
                 home = str(Path.home())
                 options["singularity_args"] = self.options.singularity_args
@@ -375,7 +379,6 @@ class SequanaManager:
                 options["singularity_prefix"] = ""
                 options["singularity_args"] = ""
 
-
             if self.options.profile == "slurm":
                 # add slurm options
                 options.update(
@@ -388,7 +391,7 @@ class SequanaManager:
                 if self.options.slurm_queue != "common":
                     options.update({"partition": self.options.slurm_queue, "qos": self.options.slurm_queue})
 
-            profile_dir = create_profile(self.workdir , self.options.profile, **options)
+            profile_dir = create_profile(self.workdir, self.options.profile, **options)
             command = f"#!/bin/bash\nsnakemake -s {snakefilename} --profile {profile_dir}"
             command_file.write_text(command)
         else:
@@ -439,7 +442,7 @@ class SequanaManager:
         # introspecting sections written as:
         # container:
         #     "https://...image.img"
-        if self.options.use_singularity: #pragma: no cover
+        if self.options.use_singularity:  # pragma: no cover
             self._download_zenodo_images()
 
         # finally, we copy the files be found in the requirements section of the
@@ -578,7 +581,7 @@ class SequanaManager:
 
         # included_files may include former modules from sequana. Need to keep only
         # actual files ending in .rules and .smk
-        included_files = [x for x in included_files if x.endswith(('.smk','.rules'))]
+        included_files = [x for x in included_files if x.endswith((".smk", ".rules"))]
 
         for included_file in included_files:
             suburls = self._get_section_content(Path(self.module.snakefile).parent / included_file, "container:")
@@ -601,7 +604,7 @@ class SequanaManager:
         files_to_download = []
 
         # define the URLs and the output filename. Also, remove urls that
-        # have already been downloaded. 
+        # have already been downloaded.
         for url in urls:
             name = _hash(url)
             outfile = f"{self.singularity_prefix}/{name}.simg"
@@ -612,39 +615,41 @@ class SequanaManager:
                 count += 1
                 logger.info(f"Preparing {url} for download")
 
-        try:    # try an asynchrone downloads
+        try:  # try an asynchrone downloads
             multiple_downloads(files_to_download)
         except KeyboardInterrupt:
             logger.info("The download was interruped, removing partially downloaded files")
             for values in files_to_download:
                 filename = values[1]
                 Path(filename).unlink()
-            logger.critical("You requested singularity but some URL could not be downloaded. Your pipeline will probably not be fully executabl"
-                )
+            logger.critical(
+                "You requested singularity but some URL could not be downloaded. Your pipeline will probably not be fully executabl"
+            )
 
 
 def multiple_downloads(files_to_download):
-
-    @asyncio.coroutine
-    def download(url, name, position):
-        response = requests.get(url, stream=True)
-
-        with tqdm.wrapattr(open(name, "wb"), "write",
-                  miniters=1, desc=url.split('/')[-1],
-                  total=int(response.headers.get('content-length', 0)), position=position) as fout:
-            for chunk in response.iter_content(chunk_size=4096):
-                fout.write(chunk)
-                yield
+    async def download(session, url, name, position):
+        async with session.get(url) as resp:
+            with tqdm.wrapattr(
+                open(name, "wb"),
+                "write",
+                miniters=1,
+                desc=url.split("/")[-1],
+                total=int(resp.headers.get("content-length", 0)),
+                position=position,
+            ) as fout:
+                async for chunk in resp.content.iter_chunked(4096):
+                    fout.write(chunk)
 
     async def download_all(files_to_download):
         """data_to_download is a list of tuples
-        each tuple contain the url to download, its output name, and a unique 
+        each tuple contain the url to download, its output name, and a unique
         position for the progress bar."""
-        await asyncio.gather(*(download(*data) for data in files_to_download))
+        async with aiohttp.ClientSession() as session:
+            await asyncio.gather(*(download(session, *data) for data in files_to_download))
 
-    asyncio.run(
-     download_all(files_to_download)
-    )
+    asyncio.run(download_all(files_to_download))
+
 
 def get_pipeline_location(pipeline_name):
     class Opt:
