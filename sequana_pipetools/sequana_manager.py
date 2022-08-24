@@ -365,6 +365,8 @@ class SequanaManager:
                 home = str(Path.home())
                 options["singularity_args"] = self.options.singularity_args
 
+                # specific to Institut Pasteur cluster.
+                # FIXME could be a the sequana config file to make it generic
                 if os.path.exists("/pasteur"):
                     options["singularity_args"] += f" -B {home}:{home} -B /pasteur:/pasteur"
                 else:
@@ -611,18 +613,14 @@ class SequanaManager:
                 logger.info(f"Preparing {url} for download")
 
         try:    # try an asynchrone downloads
-            #multiple_downloads(urls_to_download, names, positions)
             multiple_downloads(files_to_download)
-        except Exception: #pragma: no cover
-            try:
-                response = requests.get(url)
-                with open(outfile, "wb") as fout:
-                    fout.write(response.content)
-            except requests.ConnectionError:
-                logger.critical(
-                    f"{url} could not be downloaded. Your pipeline will probably won't work if you use --use-singularity. Continue with other images"
+        except KeyboardInterrupt:
+            logger.info("The download was interruped, removing partially downloaded files")
+            for values in files_to_download:
+                filename = values[1]
+                Path(filename).unlink()
+            logger.critical("You requested singularity but some URL could not be downloaded. Your pipeline will probably not be fully executabl"
                 )
-                pass
 
 
 def multiple_downloads(files_to_download):
