@@ -16,6 +16,7 @@ def test_valid_config(tmpdir):
     config = SequanaConfig(s.config)
     fh = tmpdir.join("config.yml")
     config.save(fh)
+    config.create_draft_schema()
 
 
 # this is a regression bug that guarantees that

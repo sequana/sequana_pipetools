@@ -370,9 +370,6 @@ class PipelineManager(PipelineManagerBase):
         elif use_fastq_factory:
             logger.info(f"Using FastQFactory (readtag {readtag})")
 
-            # if not cfg.config.get('input_readtag', ""):
-            #    logger.warning("No input_readtag option found in the config file. Since you specify fastq=True, the PipelineManager set it to _R[12]_ for you but we strongly recommend to set it in your config file using input_readtag='_R[12]_'.")
-            #    cfg.config.input_readtag = "_R[12]_"
             self._get_fastq_files(glob_dir, cfg.config.input_readtag)
             if self.paired:
                 logger.info("Paired data found")

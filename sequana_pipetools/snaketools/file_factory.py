@@ -316,7 +316,7 @@ class FastQFactory(FileFactory):
                 raise ValueError(msg)
 
             if len(self.filenames) == 0:
-                msg = "No files found with the requested pattern ({}) and readtag ({})"
+                msg = "No files found with the requested pattern ({}) and readtag ({}). If your data is not paired, set the readtag to empty string"
                 msg = msg.format(pattern, self.read_tag)
                 logger.error(msg)
                 raise ValueError(msg)

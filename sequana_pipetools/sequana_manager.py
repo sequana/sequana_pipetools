@@ -195,7 +195,7 @@ class SequanaManager:
         try:
             ver = pkg_resources.require("sequana".format(self.name))[0].version
             return ver
-        except DistributionNotFound:  # pragma: no cover
+        except pkg_resources.DistributionNotFound:  # pragma: no cover
             return "not installed"
 
     def _guess_scheduler(self):

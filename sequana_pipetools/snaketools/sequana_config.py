@@ -202,3 +202,18 @@ class SequanaConfig:
         except (SchemaError, CoreError) as err:
             logger.warning(err.msg)
             return False
+
+    def create_draft_schema(self):
+        """Creates a draft schema from the config file"""
+
+        tab = " "*4
+        print("type: map\nmapping:")
+        for k,v in self.config.items():
+            if isinstance(v, str):
+                print(f"{tab}\"{k}\":\n{tab}{tab}type: str\n{tab}{tab}required: False")
+            else:
+                #second level
+                 print(f"{tab}\"{k}\":\n{tab}{tab}type: map\n{tab}{tab}mapping:")
+                 for k2,v2 in self.config[k].items():
+                     print(f"{tab}{tab}{tab}\"{k2}\":\n{tab}{tab}{tab}{tab}type: str\n{tab}{tab}{tab}{tab}required: False")
+
