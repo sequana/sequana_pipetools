@@ -174,6 +174,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.9.3     * hotfix missing import when checking sequana version
+          * add config2schema utility function for developers
 0.9.2     * Udate asynchronous downloads to use aiohttp
 0.9.1     * Ability to download automatically singularity images (as URLs) if 
             set in the  pipelines (container field). add the --use-singularity
