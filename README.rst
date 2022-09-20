@@ -174,6 +174,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.9.4     * If timeout occurs while singularity is downloaded, catch the error
+            remove truncated file.
 0.9.3     * hotfix missing import when checking sequana version
           * add config2schema utility function for developers
 0.9.2     * Udate asynchronous downloads to use aiohttp

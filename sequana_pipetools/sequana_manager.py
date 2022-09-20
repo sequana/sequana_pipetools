@@ -617,19 +617,19 @@ class SequanaManager:
 
         try:  # try an asynchrone downloads
             multiple_downloads(files_to_download)
-        except KeyboardInterrupt:
-            logger.info("The download was interruped, removing partially downloaded files")
+        except (KeyboardInterrupt, asyncio.TimeoutError):
+            logger.info("The download was interruped or network was too slow. Removing partially downloaded files")
             for values in files_to_download:
                 filename = values[1]
                 Path(filename).unlink()
             logger.critical(
-                "You requested singularity but some URL could not be downloaded. Your pipeline will probably not be fully executabl"
-            )
+                "Keep going but your pipeline will probably not be fully executable since images could not be downloaded")
 
+# FIXME. could use a sequana config file in .config/sequana/
+def multiple_downloads(files_to_download, timeout=3600):
 
-def multiple_downloads(files_to_download):
     async def download(session, url, name, position):
-        async with session.get(url) as resp:
+        async with session.get(url, timeout=timeout) as resp:
             with tqdm.wrapattr(
                 open(name, "wb"),
                 "write",
