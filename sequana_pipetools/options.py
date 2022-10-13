@@ -181,8 +181,7 @@ class InputOptions:
                 help="""pattern for the paired/single end FastQ. If your files are
                 tagged with _R1_ or _R2_, please set this value to '_R[12]_'. If your
                 files are tagged with  _1 and _2, you must change this readtag
-                accordingly to '_[12]'. This option is used only if
-                --paired-data is used""",
+                accordingly to '_[12]'.""",
             )
 
 
