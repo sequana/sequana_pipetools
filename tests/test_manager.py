@@ -12,8 +12,8 @@ from . import test_dir
 default_dict = {
     "version": False,
     "level": "INFO",
-    "use_singularity": False,
-    "singularity_prefix": "",
+    "use_apptainer": False,
+    "apptainer_prefix": "",
     "jobs": 1,
     "run_mode": "local",
     "profile": "local",
@@ -174,7 +174,7 @@ def test_pipeline_parse_containers(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
     dd = default_dict.copy()
     dd["workdir"] = wkdir
-    dd["use_singularity"]
+    dd["use_apptainer"]
     pm = SequanaManager(AttrDict(**dd), "fastqc")
     # fastqc uses 2 apptainers:
 

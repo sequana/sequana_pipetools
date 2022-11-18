@@ -53,7 +53,7 @@ class SequanaManager:
                 workdir = "fastqc"
                 job=1
                 force = True
-                use_singularity = False
+                use_apptainer = False
                 def __init__(self):
                     pass
             from sequana_pipetools import SequanaManager
@@ -132,10 +132,10 @@ class SequanaManager:
             "SEQUANA_WRAPPERS", "https://raw.githubusercontent.com/sequana/sequana-wrappers/"
         )
 
-        if self.options.singularity_prefix:  # pragma: no cover
-            self.singularity_prefix = self.options.singularity_prefix
+        if self.options.apptainer_prefix:  # pragma: no cover
+            self.apptainer_prefix = self.options.apptainer_prefix
         else:  # pragma: no cover
-            self.singularity_prefix = os.environ.get(
+            self.apptainer_prefix = os.environ.get(
                 "SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/.sequana/apptainers"
             )
 
@@ -237,21 +237,21 @@ class SequanaManager:
             self.command += f" --wrapper-prefix {self.sequana_wrappers} "
             logger.info(f"Using sequana-wrappers from {self.sequana_wrappers}")
 
-        if self.options.use_singularity:  # pragma: no cover
+        if self.options.use_apptainer:  # pragma: no cover
 
             # to which, we always add the binding to home directory
             home = str(Path.home())
             if os.path.exists("/pasteur"):
-                singularity_args = (
-                    f"--singularity-args=' -B {home}:{home} -B /pasteur:/pasteur {self.options.singularity_args}'"
+                apptainer_args = (
+                    f"--singularity-args=' -B {home}:{home} -B /pasteur:/pasteur {self.options.apptainer_args}'"
                 )
-                self.command += f" --use-singularity {singularity_args}"
+                self.command += f" --use-singularity {apptainer_args}"
             else:
-                singularity_args = f"--singularity-args=' -B {home}:{home}{self.options.singularity_args}'"
-                self.command += f" --use-singularity {singularity_args}"
+                apptainer_args = f"--singularity-args=' -B {home}:{home}{self.options.apptainer_args}'"
+                self.command += f" --use-singularity {apptainer_args}"
 
             # finally, the prefix where images are stored
-            self.command += f" --singularity-prefix {self.singularity_prefix} "
+            self.command += f" --singularity-prefix {self.apptainer_prefix} "
 
         # FIXME a job is not a core. Ideally, we should add a core option
         if self._guess_scheduler() == "local":
@@ -361,23 +361,22 @@ class SequanaManager:
                 "wrappers": self.sequana_wrappers,
                 "jobs": self.options.jobs,
                 "forceall": False,
-                "use_singularity": self.options.use_singularity,
+                "use_apptainer": self.options.use_apptainer,
             }
 
-            if self.options.use_singularity:  # pragma: no cover
-                options["singularity_prefix"] = self.singularity_prefix
+            if self.options.use_apptainer:  # pragma: no cover
+                options["apptainer_prefix"] = self.apptainer_prefix
                 home = str(Path.home())
-                options["singularity_args"] = self.options.singularity_args
+                options["apptainer_args"] = self.options.apptainer_args
 
                 # specific to Institut Pasteur cluster.
-                # FIXME could be a the sequana config file to make it generic
                 if os.path.exists("/pasteur"):
-                    options["singularity_args"] += f" -B {home}:{home} -B /pasteur:/pasteur"
+                    options["apptainer_args"] += f" -B {home}:{home} -B /pasteur:/pasteur"
                 else:
-                    options["singularity_args"] += f" --singularity-args ' -B {home}:{home} "
+                    options["apptainer_args"] += f" --apptainer-args ' -B {home}:{home} "
             else:
-                options["singularity_prefix"] = ""
-                options["singularity_args"] = ""
+                options["apptainer_prefix"] = ""
+                options["apptainer_args"] = ""
 
             if self.options.profile == "slurm":
                 # add slurm options
@@ -437,12 +436,12 @@ class SequanaManager:
                 cfg = SequanaConfig(f"{self.workdir}/{config_name}")
                 cfg.check_config_with_schema(f"{self.workdir}/{schema_name}")
 
-        # if --use-singularity is set, we need to download images for the users
+        # if --use-apptainer is set, we need to download images for the users
         # Sequana pipelines will store images in Zenodo website (via damona).
         # introspecting sections written as:
         # container:
         #     "https://...image.img"
-        if self.options.use_singularity:  # pragma: no cover
+        if self.options.use_apptainer:  # pragma: no cover
             self._download_zenodo_images()
 
         # finally, we copy the files be found in the requirements section of the
@@ -570,7 +569,7 @@ class SequanaManager:
         Snakefile.
 
         """
-        logger.info(f"You set --use-singularity. Downloading containers into {self.singularity_prefix}")
+        logger.info(f"You set --use-apptainer. Downloading containers into {self.apptainer_prefix}")
         # first get the urls in the main snakefile
         urls = self._get_section_content(self.module.snakefile, "container:")
         urls = [x for x in urls if x.startswith("http")]
@@ -583,10 +582,15 @@ class SequanaManager:
         # actual files ending in .rules and .smk
         included_files = [x for x in included_files if x.endswith((".smk", ".rules"))]
 
+        # for back compatibility, we scan the pipeline looking for container that start with http
         for included_file in included_files:
             suburls = self._get_section_content(Path(self.module.snakefile).parent / included_file, "container:")
             suburls = [x for x in suburls if x.startswith("http")]
             urls.extend(suburls)
+
+        # but more generally, we ish to retrieve the containers URLs from the config file
+        apps = self.config.config.get("apptainers", [])
+        urls.extend((x for x in apps.values() if x.strip()))
 
         # make sure there are unique URLs
         urls = set(urls)
@@ -598,7 +602,7 @@ class SequanaManager:
             md5hash.update(url.encode())
             return md5hash.hexdigest()
 
-        os.makedirs(self.singularity_prefix, exist_ok=True)
+        os.makedirs(self.apptainer_prefix, exist_ok=True)
 
         count = 0
         files_to_download = []
@@ -607,7 +611,7 @@ class SequanaManager:
         # have already been downloaded.
         for url in urls:
             name = _hash(url)
-            outfile = f"{self.singularity_prefix}/{name}.simg"
+            outfile = f"{self.apptainer_prefix}/{name}.simg"
             if os.path.exists(outfile):
                 logger.info(f"Found corresponding image of {url} in {outfile}")
             else:
@@ -625,7 +629,7 @@ class SequanaManager:
             logger.critical(
                 "Keep going but your pipeline will probably not be fully executable since images could not be downloaded")
 
-# FIXME. could use a sequana config file in .config/sequana/
+
 def multiple_downloads(files_to_download, timeout=3600):
 
     async def download(session, url, name, position):
@@ -658,6 +662,6 @@ def get_pipeline_location(pipeline_name):
     options = Opt()
     options.workdir = "."
     options.version = False
-    options.singularity_prefix = ""
+    options.apptainer_prefix = ""
     p = SequanaManager(options, pipeline_name)
     return p._get_package_location()

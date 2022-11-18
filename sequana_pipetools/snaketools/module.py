@@ -344,11 +344,7 @@ or open a Python shell and type::
             # _ = self.is_executable()
             missing = " ".join(missing)
             txt = f"""Some executable or Python packages are not available: {missing}
-Some functionalities may not work. Consider adding them with  conda or damona (singularity based): 
-
-            pip install damona
-            damona install sequana_tools 
-            damona activate sequana_tools
+Some functionalities may not work. Consider adding them with conda or set the --use-apptainer options.
 
             """
 

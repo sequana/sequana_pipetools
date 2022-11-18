@@ -143,24 +143,38 @@ class SnakemakeOptions:
             default=False,
             help="""If the working directory exists, proceed anyway.""",
         )
+        if "--use-singularity" in sys.argv:
+            print("--use-singularity is deprecated, use --use-apptainer instead.")
+            sys.exit(1)
+
         group.add_argument(
-            "--use-singularity",
-            dest="use_singularity",
+            "--use-apptainer",
+            dest="use_apptainer",
             action="store_true",
             default=False,
-            help="""If set, pipelines will download singularity files for all external tools.""",
+            help="""If set, pipelines will download apptainer files for all external tools.""",
         )
+
+        if "--singularity-prefix" in sys.argv:
+            print("--singularity-prefix is deprecated, use --apptainer-prefix instead.")
+            sys.exit(1)
+
         group.add_argument(
-            "--singularity-prefix",
-            dest="singularity_prefix",
+            "--apptainer-prefix",
+            dest="apptainer_prefix",
             default=False,
-            help="""If set, pipelines will download singularity files in this directory otherwise they will be downloaded in the working directory of the pipeline .""",
-        )
+            help="""If set, pipelines will download apptainer files in this directory otherwise they will be downloaded in the working directory of the pipeline .""",
+            )
+
+        if "--singularity-args" in sys.argv:
+            print("--singularity-args is deprecated, use --apptainer-args instead.")
+            sys.exit(1)
+
         group.add_argument(
-            "--singularity-args",
-            dest="singularity_args",
+            "--apptainer-args",
+            dest="apptainer_args",
             default="",
-            help="""provide any arguments accepted by singularity. By default, we set -B $HOME:$HOME """,
+            help="""provide any arguments accepted by apptainer. By default, we set -B $HOME:$HOME """,
         )
 
 
