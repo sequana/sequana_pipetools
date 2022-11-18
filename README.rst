@@ -174,6 +174,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.9.5     * replaced singularity word by apptainer (--use-aptainer instead of 
+            --use-singularity)
 0.9.4     * If timeout occurs while singularity is downloaded, catch the error
             remove truncated file.
 0.9.3     * hotfix missing import when checking sequana version
