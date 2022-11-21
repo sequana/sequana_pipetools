@@ -2,6 +2,7 @@ deprecated
 easydev
 parse
 ruamel.yaml
+packaging
 pykwalify
 importlib_resources
 pyyaml

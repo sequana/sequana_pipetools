@@ -6,6 +6,10 @@ from sequana_pipetools import SequanaManager
 from sequana_pipetools import SequanaConfig
 from sequana_pipetools.sequana_manager import get_pipeline_location
 
+import pkg_resources
+from packaging.version import parse as parse_version
+
+
 from . import test_dir
 
 
@@ -178,11 +182,10 @@ def test_pipeline_parse_containers(tmpdir):
     pm = SequanaManager(AttrDict(**dd), "fastqc")
     # fastqc uses 2 apptainers:
 
-    import pkg_resources, packaging
 
     fastqc_version = pkg_resources.get_distribution("sequana_fastqc").version
 
-    if packaging.version.parse(fastqc_version) >= packaging.version.parse("1.6.0"):
+    if parse_version(fastqc_version) >= parse_version("1.6.0"):
         assert len(pm._get_section_content(pm.module.snakefile, "container:")) == 2
     else:
         assert len(pm._get_section_content(pm.module.snakefile, "container:")) == 0

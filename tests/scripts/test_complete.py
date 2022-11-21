@@ -1,8 +1,8 @@
 import sys
 import pytest
 
-from sequana_pipetools.completion import main
-from sequana_pipetools.completion import Complete
+from sequana_pipetools.scripts.completion import main
+from sequana_pipetools.scripts.completion import Complete
 
 
 def test_complete():

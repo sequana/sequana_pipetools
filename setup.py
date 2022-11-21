@@ -2,8 +2,9 @@ from setuptools import setup, find_packages
 
 
 _MAJOR = 0
-_MINOR = 9
-_MICRO = 6
+_MINOR = 10
+_MICRO = 0
+
 version = f"{_MAJOR}.{_MINOR}.{_MICRO}"
 release = f"{_MAJOR}.{_MINOR}"
 
@@ -61,8 +62,9 @@ setup(
     zip_safe=False,
     entry_points={
         "console_scripts": [
-            "sequana_completion=sequana_pipetools.completion:main",
-            "sequana_slurm_status=sequana_pipetools.slurm:main",
+            "sequana_completion=sequana_pipetools.scripts.completion:main",
+            "sequana_slurm_status=sequana_pipetools.scripts.slurm:main",
+            "sequana_start_pipeline=sequana_pipetools.scripts.start_pipeline:main",
         ]
     },
 )

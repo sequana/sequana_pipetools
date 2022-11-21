@@ -185,6 +185,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.10.0    * incorporate the sequana_start_template from sequana and refactorise
+            the scripts into scripts/
 0.9.6     * hotfix on apptainer to be back compatible if no apptainers section
             is found in the config file.
 0.9.5     * replaced singularity word by apptainer (--use-aptainer instead of 

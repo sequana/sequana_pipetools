@@ -10,7 +10,6 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import argparse
 import os
 import re
 import sys
@@ -18,7 +17,6 @@ from pathlib import Path
 
 import colorlog
 import parse
-
 logger = colorlog.getLogger(__name__)
 
 
@@ -158,48 +156,3 @@ class DebugJob:
             if "command not found" in data:
                 return "Command not found"
 
-
-class Options(argparse.ArgumentParser):
-    def __init__(self, prog="sequana_slurm_status"):
-        usage = """
-
-    sequana_slurm_status
-    sequana_slurm_status --directory ./rnaseq/
-
-    """
-
-        super(Options, self).__init__(
-            usage=usage,
-            prog=prog,
-            description="""This tool scan slurm jobs trying o infer useful
-summary of errorse""",
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        )
-
-        self.add_argument(
-            "--directory",
-            type=str,
-            default=".",
-            help="""Directory where to introspect slurm jobs""",
-        )
-        self.add_argument("--context", type=int, default=5, help="""Number of errors to show""")
-
-
-def main(args=None):
-
-    if args is None:
-        args = sys.argv[:]
-
-    user_options = Options()
-
-    if "--help" in args:
-        user_options.parse_args(["prog", "--help"])
-    else:
-        options = user_options.parse_args(args[1:])
-
-    dj = DebugJob(options.directory, context=options.context)
-    print(dj)
-
-
-if __name__ == "__main__":
-    main()

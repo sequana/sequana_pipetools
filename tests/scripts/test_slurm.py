@@ -1,12 +1,12 @@
 from sequana_pipetools import slurm
-import os
+from sequana_pipetools.scripts.slurm import main
 import sys
-
 
 
 from . import test_dir
 
-sharedir = f"{test_dir}/data"
+sharedir = f"{test_dir}/../data"
+
 
 def test():
     try:
@@ -21,7 +21,7 @@ def test():
 
 def test_command():
     sys.argv = ["test", "--directory", sharedir]
-    slurm.main()
+    main()
 
 
 def test_get_error_message():
