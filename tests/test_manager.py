@@ -6,6 +6,10 @@ from sequana_pipetools import SequanaManager
 from sequana_pipetools import SequanaConfig
 from sequana_pipetools.sequana_manager import get_pipeline_location
 
+import pkg_resources
+from packaging.version import parse as parse_version
+
+
 from . import test_dir
 
 
