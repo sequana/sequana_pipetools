@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 _MAJOR = 0
 _MINOR = 9
-_MICRO = 5
+_MICRO = 6
 version = f"{_MAJOR}.{_MINOR}.{_MICRO}"
 release = f"{_MAJOR}.{_MINOR}"
 
@@ -25,6 +25,7 @@ metainfo = {
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "Topic :: Scientific/Engineering :: Bio-Informatics",
         "Topic :: Scientific/Engineering :: Information Analysis",
@@ -55,7 +56,7 @@ setup(
     # This is recursive include of data files
     exclude_package_data={"": ["__pycache__"]},
     package_data={
-        "": ["*.yaml", "*.rules", "*.json", "requirements.txt", "*png", "fastq_screen.conf"],
+        "": ["*.yaml", "*.rules", "*.json", "requirements.txt", "*png"],
     },
     zip_safe=False,
     entry_points={

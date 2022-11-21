@@ -61,10 +61,8 @@ class SequanaManager:
             pm = SequanaManager(o, "fastqc")
 
 
-        The working_directory is uesd to copy the pipeline in it.
+        The working_directory is used to copy the pipeline in it.
 
-
-        .. todo:: allows options to be None and fill it with miminum contents
         """
         # the logger must be defined here because from a pipeline, it may not
         # have been defined yet.
@@ -588,8 +586,8 @@ class SequanaManager:
             suburls = [x for x in suburls if x.startswith("http")]
             urls.extend(suburls)
 
-        # but more generally, we ish to retrieve the containers URLs from the config file
-        apps = self.config.config.get("apptainers", [])
+        # but more generally, we wish to retrieve the containers URLs from the config file
+        apps = self.config.config.get("apptainers", {})
         urls.extend((x for x in apps.values() if x.strip()))
 
         # make sure there are unique URLs
