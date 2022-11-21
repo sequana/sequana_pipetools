@@ -74,6 +74,17 @@ pipelines even more independent as shown in **Fig3**. We called it
     pipetools library provide common tools to all pipelines to help in their
     creation/management. For instance, common parser for options.
 
+and finally, we dropped the rules/ available in Sequana to build an independent package with a set of Snakemake
+wrappers: These wrappers available on https://github.com/sequana/sequana-wrappers have also the advantage of being tested through continuous integration.
+
+.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/wrappers.png
+    :scale: 40%
+
+    **Figure 3** New Sequana framework 2021. The library itself with the core, the
+    bioinformatics tools is now fully independent of the pipelines. 
+
+
+
 
 
 
@@ -174,6 +185,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.9.6     * hotfix on apptainer to be back compatible if no apptainers section
+            is found in the config file.
 0.9.5     * replaced singularity word by apptainer (--use-aptainer instead of 
             --use-singularity)
 0.9.4     * If timeout occurs while singularity is downloaded, catch the error
