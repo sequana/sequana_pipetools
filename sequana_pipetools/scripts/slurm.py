@@ -36,8 +36,7 @@ class Options(argparse.ArgumentParser):
         super(Options, self).__init__(
             usage=usage,
             prog=prog,
-            description="""This tool scan slurm jobs trying o infer useful
-summary of errorse""",
+            description="""This tool scan slurm jobs trying to infer useful summary of errors""",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         )
 
