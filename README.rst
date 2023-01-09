@@ -185,6 +185,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.10.1    * any python module can implement a Sequana pipeline.
 0.10.0    * incorporate the sequana_start_template from sequana and refactorise
             the scripts into scripts/
 0.9.6     * hotfix on apptainer to be back compatible if no apptainers section

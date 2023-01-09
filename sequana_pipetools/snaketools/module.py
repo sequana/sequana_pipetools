@@ -10,7 +10,6 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import glob
 import os
 
 import colorlog

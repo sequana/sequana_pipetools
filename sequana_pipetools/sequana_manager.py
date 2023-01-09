@@ -172,21 +172,23 @@ class SequanaManager:
                 urlretrieve(requirement, filename=self.workdir / output)
 
     def _get_package_location(self):
-        fullname = f"sequana_{self.name}"
-        try:
-            import pkg_resources
+        import site
 
-            info = pkg_resources.get_distribution(fullname)
-            sharedir = os.sep.join([info.location, "sequana_pipelines", self.name, "data"])
-        except pkg_resources.DistributionNotFound:  # pragma: no cover
-            # appears that we should never enter here because already checked in the constructor
-            logger.error(f"package provided ({fullname}) not installed.")
-            raise PipetoolsException
+        for site_package in site.getsitepackages():
+            pipeline_path = Path(site_package) / "sequana_pipelines" / self.name
+            if pipeline_path.exists():
+                return pipeline_path / "data"
 
-        return sharedir
+        logger.error(f"package provided ({self.name}) not installed.")
+        raise PipetoolsException
+
 
     def _get_package_version(self):
-        ver = pkg_resources.require("sequana_{}".format(self.name))[0].version
+        try:
+            ver = pkg_resources.require("sequana_{}".format(self.name))[0].version
+        except pkg_resources.DistributionNotFound:
+            # check if the package exists
+            ver = pkg_resources.require(self.name)[0].version
         return ver
 
     def _get_sequana_version(self):
