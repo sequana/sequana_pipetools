@@ -7,3 +7,4 @@ pykwalify
 importlib_resources
 pyyaml
 aiohttp
+tqdm
