@@ -132,10 +132,12 @@ class SequanaManager:
 
         if self.options.apptainer_prefix:  # pragma: no cover
             self.apptainer_prefix = self.options.apptainer_prefix
+            self.local_apptainers = False
         else:  # pragma: no cover
             self.apptainer_prefix = os.environ.get(
                 "SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/.sequana/apptainers"
             )
+            self.local_apptainers = True
 
     def exists(self, filename, exit_on_error=True, warning_only=False):  # pragma: no cover
         """This is a convenient function to check if a directory/file exists
@@ -251,7 +253,10 @@ class SequanaManager:
                 self.command += f" --use-singularity {apptainer_args}"
 
             # finally, the prefix where images are stored
-            self.command += f" --singularity-prefix {self.apptainer_prefix} "
+            if self.local_apptainers:
+                self.command += f" --singularity-prefix .sequana/apptainers"
+            else:
+                self.command += f" --singularity-prefix {self.apptainer_prefix} "
 
         # FIXME a job is not a core. Ideally, we should add a core option
         if self._guess_scheduler() == "local":
@@ -365,7 +370,10 @@ class SequanaManager:
             }
 
             if self.options.use_apptainer:  # pragma: no cover
-                options["apptainer_prefix"] = self.apptainer_prefix
+                if self.local_apptainers:
+                    options["apptainer_prefix"] = ".sequana/apptainers"
+                else:
+                    options["apptainer_prefix"] = self.apptainer_prefix
                 home = str(Path.home())
                 options["apptainer_args"] = self.options.apptainer_args
 
