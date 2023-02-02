@@ -54,6 +54,7 @@ class SequanaManager:
                 job=1
                 force = True
                 use_apptainer = False
+                apptainer_prefix = ""
                 def __init__(self):
                     pass
             from sequana_pipetools import SequanaManager
@@ -178,6 +179,11 @@ class SequanaManager:
 
         for site_package in site.getsitepackages():
             pipeline_path = Path(site_package) / "sequana_pipelines" / self.name
+            if pipeline_path.exists():
+                return pipeline_path / "data"
+
+            # if it does not exist, this may be a "develop" mode.
+            pipeline_path = Path(site_package) / f"sequana-{self.name}.egg-link"
             if pipeline_path.exists():
                 return pipeline_path / "data"
 
