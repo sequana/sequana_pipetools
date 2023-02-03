@@ -185,6 +185,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.10.2    * Fixes https://github.com/sequana/sequana_pipetools/issues/49
+            that properly sets the apptainer prefix in defualt mode
 0.10.1    * any python module can implement a Sequana pipeline.
 0.10.0    * incorporate the sequana_start_template from sequana and refactorise
             the scripts into scripts/
