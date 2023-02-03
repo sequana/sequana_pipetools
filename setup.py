@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 _MAJOR = 0
 _MINOR = 10
-_MICRO = 1
+_MICRO = 2
 
 version = f"{_MAJOR}.{_MINOR}.{_MICRO}"
 release = f"{_MAJOR}.{_MINOR}"
