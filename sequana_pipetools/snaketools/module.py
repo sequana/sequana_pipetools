@@ -293,13 +293,14 @@ or open a Python shell and type::
         # reads the file and interpret it to figure out the
         # executables/packages and pipelines required
         pipelines = []
+
         with open(self.requirements, "r") as fh:
             data = fh.read()
             datalist = [this.strip() for this in data.split("\n") if len(this.strip()) > 0]
             reqlist = []
             for this in datalist:
                 if this.startswith("-"):
-                    req = this.split("-")[1].split()[0].strip()
+                    req = this.split("-", 1)[1].strip()
                     if req.startswith("["):
                         req = req.replace("[", "")
                         req = req.replace("]", "")
