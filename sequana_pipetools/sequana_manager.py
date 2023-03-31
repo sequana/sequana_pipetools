@@ -201,7 +201,7 @@ class SequanaManager:
 
     def _get_sequana_version(self):
         try:
-            ver = pkg_resources.require("sequana".format(self.name))[0].version
+            ver = pkg_resources.require(f"sequana.{self.name}")[0].version
             return ver
         except pkg_resources.DistributionNotFound:  # pragma: no cover
             return "not installed"
@@ -260,7 +260,7 @@ class SequanaManager:
 
             # finally, the prefix where images are stored
             if self.local_apptainers:
-                self.command += f" --singularity-prefix .sequana/apptainers"
+                self.command += " --singularity-prefix .sequana/apptainers"
             else:
                 self.command += f" --singularity-prefix {self.apptainer_prefix} "
 
@@ -489,16 +489,24 @@ class SequanaManager:
             fout.write(f"#!/bin/sh\nsnakemake -s {snakefilename} --unlock -j 1")
 
         # save environement
-        try:
+
+        if shutil.which("conda"):
             cmd = "conda list"
-            with open("{}/.sequana/env.yml".format(self.workdir), "w") as fout:
+            with open(f"{self.workdir}/.sequana/env.yml", "w") as fout:
                 subprocess.call(cmd.split(), stdout=fout)
             logger.debug("Saved your conda environment into env.yml")
-        except Exception:
-            cmd = "pip freeze"
-            with open("{}/.sequana/pip.yml".format(self.workdir), "w") as fout:
+        else:
+            with open(f"{self.workdir}/.sequana/env.yml", "w") as fout:
+                fout.write("conda not found")
+
+        if shutil.which("pip"):
+            cmd = f"{sys.executable} pip freeze"
+            with open(f"{self.workdir}/.sequana/pip.yml", "w") as fout:
                 subprocess.call(cmd.split(), stdout=fout)
             logger.debug("Saved your pip environement into pip.txt (conda not found)")
+        else:
+            with open(f"{self.workdir}/.sequana/pip.yml", "w") as fout:
+                fout.write("pip not found")
 
         # General information
 
