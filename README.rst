@@ -27,16 +27,14 @@
 What is sequana_pipetools ?
 ============================
 
-**sequana_pipetools** is a set of tools to help us managing the `Sequana <https://sequana.readthedocs.io>`_ pipelines (NGS pipelines such as RNA-seq, Variant, ChIP-seq, etc).
+**sequana_pipetools** is a collection of tools that assists with the management of `Sequana <https://sequana.readthedocs.io>`_ pipelines, which includes next-generation sequencing (NGS) pipelines like RNA-seq, variant calling, ChIP-seq, and others.
 
-The goal of this package is to make the deployment of `Sequana pipelines <https://sequana.readthedocs.io>`_ easier
-by moving some of the common tools used by the different pipelines in a pure
-Python library. 
+The aim of this package is to simplify the deployment of `Sequana pipelines <https://sequana.readthedocs.io>`_ by
+creatin a pure Python library that includse commonly used tools for different pipelines.
 
-
-The Sequana framework used to have all bioinformatics, snakemake rules,
-pipelines, tools to manage pipelines in a single library (Sequana) as described
-in **Fig 1** here below.
+Previously, the Sequana framework incorporated alll bioinformatics, Snakemake rules,
+pipelines, and pipeline management tools into a single library (Sequana) as illustrated
+in **Fig 1** below.
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/veryold.png
     :scale: 40%
@@ -44,10 +42,8 @@ in **Fig 1** here below.
     **Figure 1** Old Sequana framework will all pipelines and Sequana library in the same
     place including pipetools (this library).
 
-Each time we changed anything, the entire library needed to be checked carefully
-(even though we had 80% test coverage). Each time a pipeline was added, new
-dependencies woule be needed, and so on. So, we first decided to make all
-pipelines independent as shown in **Fig 2**:
+Whenever changes were made to the Sequana library, a thorough check of the entire library was necessary, despite
+having 80% test coverage. Adding new pipelines also necessitated the addition of new dependencies, and the process was becoming increasingly complex. To mitigate this issue, we initially made all pipelines independent, as illustrated in **Fig. 2**. This way, pipeline changes could be made without updating Sequana and vice versa, which was a significant improvment.
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/old.png
     :scale: 40%
@@ -56,36 +52,28 @@ pipelines independent as shown in **Fig 2**:
     repositories. A `cookie cutter <https://github.com/sequana/sequana_pipeline_template>`_ 
     ease the creation of scuh pipelines
 
-That way, we could change a pipeline without the need to update Sequana, and
-vice-versa. This was already a great jump ahead. Yet, some tools reprensented
-here by the *pipetools* box were required by all pipelines. This was mostly for
-providing user interface, sanity check of input data, etc. This was moving fast
-with new pipelines added every month. To make the pipelines and Sequana more
-modular, we decided to create a pure Python library that would make the
-pipelines even more independent as shown in **Fig3**. We called it
-**sequana_pipetools**.
+
+However, certain tools, such as those used for user interface and input data sanity checks, were required by all pipelines, as depicted by the pipetools box in the figure. As new pipelines were being added every month, we aimed to make the pipelines and Sequana more modular. Consequently, we created a pure Python library known as **sequana_pipetools**, as shown in **Fig. 3**, to make the pipelines even more autonomous.
+
+
 
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/new.png
     :scale: 40%
 
-    **Figure 3** New Sequana framework. The library itself with the core, the
-    bioinformatics tools is now independent of the pipelines. Besides, the
-    pipetools library provide common tools to all pipelines to help in their
-    creation/management. For instance, common parser for options.
+    **Figure 3** New Sequana framework. The library contains the core and
+    bioinformatics tools and is now distinct from  the pipelines. Additionally, the
+    sequana_pipetools library supplies common tools to assist in the creaton and management of all pipelines, 
+    such as shared parser for options.
 
-and finally, we dropped the rules/ available in Sequana to build an independent package with a set of Snakemake
-wrappers: These wrappers available on https://github.com/sequana/sequana-wrappers have also the advantage of being tested through continuous integration.
+Finally, we dropped the rules/ available in Sequana to build an independent package with a set of Snakemake
+wrappers. These wrappers are available on https://github.com/sequana/sequana-wrappers and have also the advantage of being tested through continuous integration.
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/wrappers.png
     :scale: 40%
 
     **Figure 3** New Sequana framework 2021. The library itself with the core, the
     bioinformatics tools is now fully independent of the pipelines. 
-
-
-
-
 
 
 Installation
@@ -97,9 +85,14 @@ from pypi website::
 
 No dependencies for this package except Python itself. In practice, this package
 has no interest if not used with a Sequana pipeline. So, when using it,
-you will need to install the relevant Sequana pipelines that you wish to use.
+you will need to install the relevant Sequana pipelines that you wish to use. For example:
 
-This package is for `Sequana <https://sequana.readthedocs.io>`_ developers. 
+    pip install sequana_rnaseq
+    pip install sequana_fastqc
+    ...
+
+
+This package is for `Sequana <https://sequana.readthedocs.io>`_ developers.
 To get more help, go to the doc directory and build the local sphinx directory using::
 
     make html
