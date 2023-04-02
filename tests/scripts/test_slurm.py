@@ -13,7 +13,7 @@ def test():
         dj = slurm.DebugJob(".")
         dj
         assert False
-    except:
+    except Exception:
         assert True
     dj = slurm.DebugJob(sharedir)
     dj

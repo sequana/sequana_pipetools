@@ -164,7 +164,7 @@ class SnakemakeOptions:
             dest="apptainer_prefix",
             default=False,
             help="""If set, pipelines will download apptainer files in this directory otherwise they will be downloaded in the working directory of the pipeline .""",
-            )
+        )
 
         if "--singularity-args" in sys.argv:
             print("--singularity-args is deprecated, use --apptainer-args instead.")

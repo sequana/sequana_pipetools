@@ -135,9 +135,7 @@ class SequanaManager:
             self.apptainer_prefix = self.options.apptainer_prefix
             self.local_apptainers = False
         else:  # pragma: no cover
-            self.apptainer_prefix = os.environ.get(
-                "SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/.sequana/apptainers"
-            )
+            self.apptainer_prefix = os.environ.get("SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/.sequana/apptainers")
             self.local_apptainers = True
 
     def exists(self, filename, exit_on_error=True, warning_only=False):  # pragma: no cover
@@ -189,7 +187,6 @@ class SequanaManager:
 
         logger.error(f"package provided ({self.name}) not installed.")
         raise PipetoolsException
-
 
     def _get_package_version(self):
         try:
@@ -500,7 +497,7 @@ class SequanaManager:
                 fout.write("conda not found")
 
         if shutil.which("pip"):
-            cmd = f"{sys.executable} pip freeze"
+            cmd = f"{sys.executable} -m pip freeze"
             with open(f"{self.workdir}/.sequana/pip.yml", "w") as fout:
                 subprocess.call(cmd.split(), stdout=fout)
             logger.debug("Saved your pip environement into pip.txt (conda not found)")
@@ -649,11 +646,11 @@ class SequanaManager:
                 filename = values[1]
                 Path(filename).unlink()
             logger.critical(
-                "Keep going but your pipeline will probably not be fully executable since images could not be downloaded")
+                "Keep going but your pipeline will probably not be fully executable since images could not be downloaded"
+            )
 
 
 def multiple_downloads(files_to_download, timeout=3600):
-
     async def download(session, url, name, position):
         async with session.get(url, timeout=timeout) as resp:
             with tqdm.wrapattr(

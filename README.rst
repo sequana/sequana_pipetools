@@ -13,6 +13,9 @@
     :target: https://sequana-pipetools.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://app.codacy.com/project/badge/Grade/9031e4e4213e4e57a876fd5b792b5003
+   :target: https://app.codacy.com/gh/sequana/sequana_pipetools/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
+
 .. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
    :target: http://joss.theoj.org/papers/10.21105/joss.00352
    :alt: JOSS (journal of open source software) DOI
@@ -178,6 +181,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.11.1    * fix regression, add codacy badge, applied black
 0.11.0    * More robust code to check pip executable. 
 0.10.2    * Fixes https://github.com/sequana/sequana_pipetools/issues/49
             that properly sets the apptainer prefix in defualt mode

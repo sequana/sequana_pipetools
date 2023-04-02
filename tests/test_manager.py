@@ -182,7 +182,6 @@ def test_pipeline_parse_containers(tmpdir):
     pm = SequanaManager(AttrDict(**dd), "fastqc")
     # fastqc uses 2 apptainers:
 
-
     fastqc_version = pkg_resources.get_distribution("sequana_fastqc").version
 
     if parse_version(fastqc_version) >= parse_version("1.6.0"):

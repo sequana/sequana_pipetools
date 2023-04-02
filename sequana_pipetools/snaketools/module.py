@@ -138,15 +138,15 @@ or open a Python shell and type::
             return filename
 
     def __repr__(self):
-        str = "Name: %s\n" % self._name
-        str += "Path: %s\n" % self.path
-        str += "Config: %s\n" % self.config
-        str += "Cluster config: %s\n" % self.cluster_config
-        str += "Schema for config file: %s\n" % self.schema_config
-        str += "Multiqc config file: %s\n" % self.multiqc_config
-        str += "requirements file: %s\n" % self.requirements
-        str += "version: %s\n" % self.version
-        return str
+        _str = "Name: %s\n" % self._name
+        _str += "Path: %s\n" % self.path
+        _str += "Config: %s\n" % self.config
+        _str += "Cluster config: %s\n" % self.cluster_config
+        _str += "Schema for config file: %s\n" % self.schema_config
+        _str += "Multiqc config file: %s\n" % self.multiqc_config
+        _str += "requirements file: %s\n" % self.requirements
+        _str += "version: %s\n" % self.version
+        return _str
 
     def __str__(self):
         txt = "Rule **" + self.name + "**:\n" + self.description

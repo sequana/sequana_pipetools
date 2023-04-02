@@ -17,6 +17,7 @@ from pathlib import Path
 
 import colorlog
 import parse
+
 logger = colorlog.getLogger(__name__)
 
 
@@ -155,4 +156,3 @@ class DebugJob:
             data = f.read()
             if "command not found" in data:
                 return "Command not found"
-

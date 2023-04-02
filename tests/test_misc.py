@@ -1,7 +1,6 @@
 from sequana_pipetools.misc import Colors, print_version, error
 
 
-
 def test_colors():
 
     c = Colors()
@@ -34,4 +33,3 @@ def test_print_version():
         print_version("sequana_dummy")
     except:
         pass
-
