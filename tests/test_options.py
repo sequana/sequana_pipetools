@@ -1,24 +1,25 @@
-from sequana_pipetools.options import *
 import argparse
+import pytest
+import sys
+from sequana_pipetools.options import (
+    before_pipeline,
+    TrimmingOptions,
+    SnakemakeOptions,
+    KrakenOptions,
+    FeatureCountsOptions,
+)
 
 
 def test_misc():
 
-    import sys
-
     sys.argv.append("--version")
-    from sequana_pipetools.options import init_pipeline
 
-    try:
-        init_pipeline("fastqc")
-    except Exception:
-        pass
+    with pytest.raises(SystemExit):
+        before_pipeline("fastqc")
     sys.argv.remove("--version")
     sys.argv.append("--deps")
-    try:
-        init_pipeline("fastqc")
-    except Exception:
-        pass
+    with pytest.raises(SystemExit):
+        before_pipeline("fastqc")
 
 
 def test_feature_counts():
@@ -33,14 +34,11 @@ def test_trimming_options():
     so = TrimmingOptions()
     so.add_options(p)
     p.parse_args(["--trimming-quality", "40"])
-    try:
+    with pytest.raises(SystemExit) as e_info:
         p.parse_args(["--trimming-quality", "-40"])
-    except Exception:
-        argparse.ArgumentTypeError
 
 
 def test_snakemake_options():
-    from sequana_pipetools.options import SnakemakeOptions
 
     p = argparse.ArgumentParser()
     so = SnakemakeOptions()
@@ -50,7 +48,6 @@ def test_snakemake_options():
 
 
 def test_krakenl_options():
-    from sequana_pipetools.options import KrakenOptions
 
     p = argparse.ArgumentParser()
     so = KrakenOptions()

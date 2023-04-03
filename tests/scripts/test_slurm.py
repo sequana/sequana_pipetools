@@ -1,7 +1,7 @@
 from sequana_pipetools import slurm
 from sequana_pipetools.scripts.slurm import main
 import sys
-
+import pytest
 
 from . import test_dir
 
@@ -9,12 +9,9 @@ sharedir = f"{test_dir}/../data"
 
 
 def test():
-    try:
+    with pytest.raises(SystemExit):
         dj = slurm.DebugJob(".")
         dj
-        assert False
-    except Exception:
-        assert True
     dj = slurm.DebugJob(sharedir)
     dj
 

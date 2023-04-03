@@ -181,7 +181,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
-0.11.1    * fix regression, add codacy badge, applied black
+0.11.1    * fix regression, add codacy badge, applied black, remove 
+            init_pipeline deprecated function.
 0.11.0    * More robust code to check pip executable. 
 0.10.2    * Fixes https://github.com/sequana/sequana_pipetools/issues/49
             that properly sets the apptainer prefix in defualt mode
