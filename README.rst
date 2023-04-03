@@ -13,6 +13,9 @@
     :target: https://sequana-pipetools.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
+.. image:: https://app.codacy.com/project/badge/Grade/9031e4e4213e4e57a876fd5b792b5003
+   :target: https://app.codacy.com/gh/sequana/sequana_pipetools/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
+
 .. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
    :target: http://joss.theoj.org/papers/10.21105/joss.00352
    :alt: JOSS (journal of open source software) DOI
@@ -54,9 +57,6 @@ having 80% test coverage. Adding new pipelines also necessitated the addition of
 
 
 However, certain tools, such as those used for user interface and input data sanity checks, were required by all pipelines, as depicted by the pipetools box in the figure. As new pipelines were being added every month, we aimed to make the pipelines and Sequana more modular. Consequently, we created a pure Python library known as **sequana_pipetools**, as shown in **Fig. 3**, to make the pipelines even more autonomous.
-
-
-
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/new.png
     :scale: 40%
@@ -147,12 +147,20 @@ Developers should look at e.g. module sequana_pipetools.options
 for the API reference and one of the official sequana pipeline (e.g.,
 https://github.com/sequana/sequana_variant_calling) to get help from examples.
 
+The Options classes provided can be used and combined to design pipelines. 
 
-The Options classes provided can be used and combined to design pipelines. The
-code from sequana_pipetools is used within our template to automatically create
-pipeline tree structure using a cookie cutter. This cookie cutter is available  
-in https://github.com/sequana/sequana_pipeline_template and as a
-standalone in Sequana itself (sequana_init_pipeline).
+
+How to create skeleton of a Sequana pipeline with cookiecutter
+=================================================================
+
+In version 0.11 and below, there was a standalone called **sequana_start_pipeline** that would help you to automatically create the structure of a Sequana pipeline. This stadanlone was dropped in version 0.11.1
+
+Since it is based on cookiecutter, it is quite easy to do it yourself as follows::
+
+    pip install cookiecuter
+    cookiecutter https://github.com/sequana/sequana_pipeline_template -o . --overwrite-if-exists
+
+and then follow the instructions. You will be asked some questions such as the name of your pipeline (eg. variant), a description, keywords and the *project_slug* (just press enter).
 
 What is Sequana ?
 =================
@@ -178,6 +186,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.11.1    * fix regression, add codacy badge, applied black, remove 
+            init_pipeline deprecated function.
 0.11.0    * More robust code to check pip executable. 
 0.10.2    * Fixes https://github.com/sequana/sequana_pipetools/issues/49
             that properly sets the apptainer prefix in defualt mode

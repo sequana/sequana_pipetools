@@ -75,9 +75,9 @@ class OnSuccessCleaner:
         self.bundle = bundle
         self.custom_commands = ""
 
-    def add_bundle(self, input="*", output="bundle.tar.gz"):
+    def add_bundle(self, input_pattern="*", output="bundle.tar.gz"):
         self.bundle = True
-        self.bundle_input = input
+        self.bundle_input = input_pattern
         self.bundle_output = output
 
     def add_makefile(self):

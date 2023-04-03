@@ -1,23 +1,25 @@
-from sequana_pipetools.options import *
-from easydev import AttrDict
 import argparse
+import pytest
+import sys
+from sequana_pipetools.options import (
+    before_pipeline,
+    TrimmingOptions,
+    SnakemakeOptions,
+    KrakenOptions,
+    FeatureCountsOptions,
+)
 
 
 def test_misc():
 
-    import sys
     sys.argv.append("--version")
-    from sequana_pipetools.options import init_pipeline
-    try:
-        init_pipeline("fastqc")
-    except:
-        pass
+
+    with pytest.raises(SystemExit):
+        before_pipeline("fastqc")
     sys.argv.remove("--version")
     sys.argv.append("--deps")
-    try:
-        init_pipeline("fastqc")
-    except:
-        pass
+    with pytest.raises(SystemExit):
+        before_pipeline("fastqc")
 
 
 def test_feature_counts():
@@ -32,25 +34,21 @@ def test_trimming_options():
     so = TrimmingOptions()
     so.add_options(p)
     p.parse_args(["--trimming-quality", "40"])
-    try:
+    with pytest.raises(SystemExit):
         p.parse_args(["--trimming-quality", "-40"])
-    except:
-        argparse.ArgumentTypeError
-
 
 
 def test_snakemake_options():
-    from sequana_pipetools.options import SnakemakeOptions
+
     p = argparse.ArgumentParser()
     so = SnakemakeOptions()
-    so._default_jobs() #test sheduler
+    so._default_jobs()  # test sheduler
     so.add_options(p)
     p.parse_args([])
 
 
-
 def test_krakenl_options():
-    from sequana_pipetools.options import KrakenOptions
+
     p = argparse.ArgumentParser()
     so = KrakenOptions()
     so.add_options(p)
@@ -59,6 +57,7 @@ def test_krakenl_options():
 
 def test_slurm_options():
     from sequana_pipetools.options import SlurmOptions
+
     p = argparse.ArgumentParser()
     so = SlurmOptions()
     so.add_options(p)
@@ -67,6 +66,7 @@ def test_slurm_options():
 
 def test_input_options():
     from sequana_pipetools.options import InputOptions
+
     p = argparse.ArgumentParser()
     so = InputOptions()
     so.add_options(p)
@@ -75,6 +75,7 @@ def test_input_options():
 
 def test_general_options():
     from sequana_pipetools.options import GeneralOptions
+
     p = argparse.ArgumentParser()
     so = GeneralOptions()
     so.add_options(p)

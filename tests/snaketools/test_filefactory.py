@@ -54,12 +54,9 @@ def test_fastqfactory():
     assert sorted(ff.tags) == sorted(["Hm2_GTGAAA_L005_R2_001", "Hm2_GTGAAA_L005_R1_001"])
 
 
-
-
-
 def test_file_factory_sample_names():
 
-    # prefix.mess.A.fastq.gz 
+    # prefix.mess.A.fastq.gz
     # prefix.mess.B.fastq.gz
     #
     # should return A and B easily
@@ -67,13 +64,13 @@ def test_file_factory_sample_names():
     assert set(ff.filenames) == {"A", "B"}
 
     # prefix.A.fastq.gz and prefix.mess.A.fastq.gz
-    # should return mess and A because they do not have 
+    # should return mess and A because they do not have
     # the same structure. In simple cases it should work out of the box
     ff = snaketools.FileFactory(test_dir + "/data/prefix.*A.*")
     assert set(ff.filenames) == {"mess", "A"}
 
-    # but in more complex cases, 
-    # prefix.mess.A.fastq.gz 
+    # but in more complex cases,
+    # prefix.mess.A.fastq.gz
     # prefix.mess.A.fastq.gz
     # prefix.A.fastq.gz
     # prefix.B.fastq.gz
@@ -84,33 +81,15 @@ def test_file_factory_sample_names():
         ff = snaketools.FileFactory(test_dir + "/data/prefix.*.gz")
         ff.filenames
 
-    # This cannot be solved. But removing a non unique prefix is possible 
-    # using a list of prefixes to remove. 
-    ff = snaketools.FileFactory(test_dir + "/data/prefix2*gz", 
-        extra_prefixes_to_strip=['prefix2.', 'mess.'])
-    assert set(ff.filenames) == {'A', 'C', 'B'}
+    # This cannot be solved. But removing a non unique prefix is possible
+    # using a list of prefixes to remove.
+    ff = snaketools.FileFactory(test_dir + "/data/prefix2*gz", extra_prefixes_to_strip=["prefix2.", "mess."])
+    assert set(ff.filenames) == {"A", "C", "B"}
 
-    # special case of a single file should not remove the prefix.  
+    # special case of a single file should not remove the prefix.
     ff = snaketools.FileFactory(test_dir + "/data/prefix.A.fastq.gz")
     assert set(ff.filenames) == {"prefix"}
 
     # finally, we can also use a sample_pattern
-    ff = snaketools.FileFactory(test_dir + "/data/prefix.mess.*", 
-        sample_pattern='prefix.mess.{sample}.fastq.gz')
+    ff = snaketools.FileFactory(test_dir + "/data/prefix.mess.*", sample_pattern="prefix.mess.{sample}.fastq.gz")
     assert set(ff.filenames) == {"A", "B"}
-   
-
- 
-
-
-
-
-
-
-
-
-
-
-
-
-

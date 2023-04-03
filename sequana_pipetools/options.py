@@ -29,11 +29,6 @@ __all__ = [
 ]
 
 
-def init_pipeline(NAME):
-    print("init_pipeline is deprecated, please use before_pipeline instead")
-    before_pipeline(NAME)
-
-
 def before_pipeline(NAME):
     """A function to provide --version and --deps for all pipelines"""
 
@@ -164,7 +159,7 @@ class SnakemakeOptions:
             dest="apptainer_prefix",
             default=False,
             help="""If set, pipelines will download apptainer files in this directory otherwise they will be downloaded in the working directory of the pipeline .""",
-            )
+        )
 
         if "--singularity-args" in sys.argv:
             print("--singularity-args is deprecated, use --apptainer-args instead.")
