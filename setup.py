@@ -64,7 +64,6 @@ setup(
         "console_scripts": [
             "sequana_completion=sequana_pipetools.scripts.completion:main",
             "sequana_slurm_status=sequana_pipetools.scripts.slurm:main",
-            "sequana_start_pipeline=sequana_pipetools.scripts.start_pipeline:main",
         ]
     },
 )

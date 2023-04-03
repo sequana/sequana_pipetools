@@ -34,7 +34,7 @@ def test_trimming_options():
     so = TrimmingOptions()
     so.add_options(p)
     p.parse_args(["--trimming-quality", "40"])
-    with pytest.raises(SystemExit) as e_info:
+    with pytest.raises(SystemExit):
         p.parse_args(["--trimming-quality", "-40"])
 
 
