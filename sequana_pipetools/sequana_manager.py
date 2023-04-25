@@ -261,11 +261,11 @@ class SequanaManager:
             home = str(Path.home())
             if os.path.exists("/pasteur"):
                 apptainer_args = (
-                    f"--singularity-args=' -B {home}:{home} -B /pasteur:/pasteur {self.options.apptainer_args}'"
+                    f"--singularity-args=' -B {home} -B /pasteur {self.options.apptainer_args}'"
                 )
                 self.command += f" --use-singularity {apptainer_args}"
             else:
-                apptainer_args = f"--singularity-args=' -B {home}:{home}{self.options.apptainer_args}'"
+                apptainer_args = f"--singularity-args=' -B {home} {self.options.apptainer_args}'"
                 self.command += f" --use-singularity {apptainer_args}"
 
             # finally, the prefix where images are stored
@@ -408,7 +408,7 @@ class SequanaManager:
                     {
                         "partition": "common",
                         "qos": "normal",
-                        "memory": self.options.slurm_memory,
+                        "memory": f"'{self.options.slurm_memory}'",  # quotes needed to avoid error in profile (° ͜ʖ °)
                     }
                 )
                 if self.options.slurm_queue != "common":
