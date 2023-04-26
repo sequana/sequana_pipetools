@@ -257,16 +257,16 @@ class SequanaManager:
 
         if self.options.use_apptainer:  # pragma: no cover
 
-            # to which, we always add the binding to home directory
-            home = str(Path.home())
-            if os.path.exists("/pasteur"):
-                apptainer_args = (
-                    f"--singularity-args=' -B {home} -B /pasteur {self.options.apptainer_args}'"
-                )
-                self.command += f" --use-singularity {apptainer_args}"
-            else:
-                apptainer_args = f"--singularity-args=' -B {home} {self.options.apptainer_args}'"
-                self.command += f" --use-singularity {apptainer_args}"
+            # --home directory set using the getcwd command already done in snakemake
+            # but let us add -e to make sure a clean environment is used. This will avoid
+            # unwanted side effect
+            apptainer_args = f"--singularity-args=' -e "
+
+            # and any user apptainer arguments (not ending ')
+            apptainer_args += f"{self.options.apptainer_args}'"
+
+            # to add to the main command
+            self.command += f" --use-singularity {apptainer_args}"
 
             # finally, the prefix where images are stored
             if self.local_apptainers:
@@ -275,11 +275,11 @@ class SequanaManager:
                 if Path(self.apptainer_prefix ).is_absolute():
                     self.command += f" --singularity-prefix {self.apptainer_prefix} "
                 else:
-                    # if we set prefix to e.g. ./images then in the pipeline/script.sh, 
+                    # if we set prefix to e.g. ./images then in the pipeline/script.sh,
                     # the prefix is also ./images whereas it should be ../images
                     self.command += f" --singularity-prefix ../{self.apptainer_prefix} "
 
-        # FIXME a job is not a core. Ideally, we should add a core option
+        # set up core/jobs options
         if self._guess_scheduler() == "local":
             self.command += " -p --cores {} ".format(self.options.jobs)
         else:
