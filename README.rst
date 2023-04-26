@@ -85,7 +85,7 @@ from pypi website::
 
 No dependencies for this package except Python itself. In practice, this package
 has no interest if not used with a Sequana pipeline. So, when using it,
-you will need to install the relevant Sequana pipelines that you wish to use. For example:
+you will need to install the relevant Sequana pipelines that you wish to use. For example::
 
     pip install sequana_rnaseq
     pip install sequana_fastqc
@@ -186,6 +186,10 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.12.0    * factorise hash function to have url2hash easily accessible
+          * Use pth file to retrieve data dir in editable mode
+          * remove harcoded bind path for apptainer. Uses env variable instead
+          * Fixes singularity-prefix path in shell script if not absolute
 0.11.1    * fix regression, add codacy badge, applied black, remove 
             init_pipeline deprecated function.
 0.11.0    * More robust code to check pip executable. 
