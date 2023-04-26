@@ -176,9 +176,22 @@ class SequanaManager:
         import site
 
         for site_package in site.getsitepackages():
-            pipeline_path = Path(site_package) / "sequana_pipelines" / self.name
+            site_path = Path(site_package)
+            pipeline_path = site_path / "sequana_pipelines" / self.name
             if pipeline_path.exists():
                 return pipeline_path / "data"
+
+            # python egg seems deprecated, editable mode create a .pth file
+            pth_file = site_path / f"{self.name}.pth"
+            if not pth_file.exists():
+                # some packages have "sequana-name"
+                pth_file = site_path / f"sequana-{self.name}.pth"
+            try:
+                pipeline_path = Path(pth_file.read_text().rstrip()) / "sequana_pipelines" / self.name
+                if pipeline_path.exists:
+                    return pipeline_path / "data"
+            except FileNotFoundError:
+                pass
 
             # if it does not exist, this may be a "develop" mode.
             pipeline_path = Path(site_package) / f"sequana-{self.name}.egg-link"
@@ -248,11 +261,11 @@ class SequanaManager:
             home = str(Path.home())
             if os.path.exists("/pasteur"):
                 apptainer_args = (
-                    f"--singularity-args=' -B {home}:{home} -B /pasteur:/pasteur {self.options.apptainer_args}'"
+                    f"--singularity-args=' -B {home} -B /pasteur {self.options.apptainer_args}'"
                 )
                 self.command += f" --use-singularity {apptainer_args}"
             else:
-                apptainer_args = f"--singularity-args=' -B {home}:{home}{self.options.apptainer_args}'"
+                apptainer_args = f"--singularity-args=' -B {home} {self.options.apptainer_args}'"
                 self.command += f" --use-singularity {apptainer_args}"
 
             # finally, the prefix where images are stored
@@ -395,7 +408,7 @@ class SequanaManager:
                     {
                         "partition": "common",
                         "qos": "normal",
-                        "memory": self.options.slurm_memory,
+                        "memory": f"'{self.options.slurm_memory}'",  # quotes needed to avoid error in profile (° ͜ʖ °)
                     }
                 )
                 if self.options.slurm_queue != "common":

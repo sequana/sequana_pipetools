@@ -498,7 +498,7 @@ commas""",
 
 
 class SlurmOptions:
-    def __init__(self, group_name="slurm", memory=4000, queue="common", cores=4, profile=None):
+    def __init__(self, group_name="slurm", memory="4G", queue="common", cores=4, profile=None):
         """
 
         ::
@@ -538,9 +538,9 @@ class SlurmOptions:
             "--slurm-memory",
             dest="slurm_memory",
             default=self.memory,
-            help="""memory in Mb (default 4000; stands for 4000 Mbytes).
+            help="""Specify the memory required by default. (default 4G; stands for 4 Gbytes).
             Ignored and replaced if a cluster_config.yaml file is part
-            of your pipeline (e.g. rnaseq)""",
+            of your pipeline (e.g. rnaseq) or in config.yaml using profile.""",
         )
         group.add_argument(
             "--profile",
