@@ -25,7 +25,6 @@ from pathlib import Path
 from tqdm.asyncio import tqdm
 
 import colorlog
-from deprecated import deprecated
 from easydev import CustomConfig
 
 from sequana_pipetools.snaketools.profile import create_profile
@@ -452,7 +451,6 @@ class SequanaManager:
                 if self.options.force:
                     shutil.rmtree(self.workdir / "rules")
                     shutil.copytree(self.module.rules, self.workdir / "rules")
-                pass
 
         # the schema if any
         if self.module.schema_config:
@@ -549,14 +547,6 @@ class SequanaManager:
         else:
             logger.info("A completion if possible with sequana_completion --name {}".format(self.name))
 
-    @deprecated(version="1.0", reason="will be removed soon. Not used.")
-    def update_config(self, config, options, section_name):  # pragma: no cover
-        for option_name in config[section_name]:
-            try:
-                config[section_name][option_name] = getattr(options, section_name + "_" + option_name)
-            except AttributeError:
-                logger.debug("update_config. Could not find {}".format(option_name))
-
     def _get_section_content(self, filename, section_name):
         """searching for a given section (e.g. container)
 
@@ -641,10 +631,19 @@ class SequanaManager:
         # define the URLs and the output filename. Also, remove urls that
         # have already been downloaded.
         for url in urls:
-            # guarantess that output filename to be saved have the same
-            # unique ID as those expected by snakemake
-            name = url2hash(url)
+            # get file name and hash name. The hash name is required by snakemake
+            # but keeping original name helps debugging
+            name = Path(url).name
+            hashname = url2hash(url)
+
             outfile = f"{self.apptainer_prefix}/{name}.simg"
+            linkfile = f"{self.apptainer_prefix}/{hashname}.simg"
+
+            try:
+                Path(linkfile).symlink_to(f"{name}.simg")
+            except FileExistsError:
+                pass
+
             if os.path.exists(outfile):
                 logger.info(f"Found corresponding image of {url} in {outfile}")
             else:
@@ -655,7 +654,7 @@ class SequanaManager:
         try:  # try an asynchrone downloads
             multiple_downloads(files_to_download)
         except (KeyboardInterrupt, asyncio.TimeoutError):
-            logger.info("The download was interruped or network was too slow. Removing partially downloaded files")
+            logger.info("The download was interrupted or network was too slow. Removing partially downloaded files")
             for values in files_to_download:
                 filename = values[1]
                 Path(filename).unlink()

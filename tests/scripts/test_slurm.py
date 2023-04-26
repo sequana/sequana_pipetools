@@ -13,7 +13,7 @@ def test():
         dj = slurm.DebugJob(".")
         dj
     dj = slurm.DebugJob(sharedir)
-    dj
+    assert dj
 
 
 def test_command():

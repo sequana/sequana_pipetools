@@ -92,7 +92,7 @@ class ModuleFinder(metaclass=Singleton):
             if self._is_version(module_name, this):
                 # the module name is the name before the version + the version
                 module_name = filename.replace(".rules", "") + "/" + module_name
-                name, version = module_name.split("/")
+                _, version = module_name.split("/")
                 self._paths[module_name] = whatever + os.sep + version
             else:
                 self._paths[module_name] = whatever + os.sep + module_name
