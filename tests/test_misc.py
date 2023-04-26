@@ -1,4 +1,9 @@
-from sequana_pipetools.misc import Colors, print_version, error
+from sequana_pipetools.misc import Colors, print_version, error, url2hash
+
+
+def test_url2hash():
+    md5 = url2hash("https://zenodo.org/record/7822910/files/samtools_1.17_minimap2_2.24.0.img")
+    assert md5 == 'c3e4a8244ce7b65fa873ebda134fea7f'
 
 
 def test_colors():
