@@ -15,7 +15,6 @@ import os
 import shutil
 import subprocess
 import pkg_resources
-import hashlib
 import sys
 import aiohttp
 import asyncio
@@ -30,6 +29,7 @@ from deprecated import deprecated
 from easydev import CustomConfig
 
 from sequana_pipetools.snaketools.profile import create_profile
+from sequana_pipetools.misc import url2hash
 
 from .misc import Colors, PipetoolsException, print_version
 from .snaketools import Module, SequanaConfig
@@ -272,7 +272,12 @@ class SequanaManager:
             if self.local_apptainers:
                 self.command += " --singularity-prefix .sequana/apptainers"
             else:
-                self.command += f" --singularity-prefix {self.apptainer_prefix} "
+                if Path(self.apptainer_prefix ).is_absolute():
+                    self.command += f" --singularity-prefix {self.apptainer_prefix} "
+                else:
+                    # if we set prefix to e.g. ./images then in the pipeline/script.sh, 
+                    # the prefix is also ./images whereas it should be ../images
+                    self.command += f" --singularity-prefix ../{self.apptainer_prefix} "
 
         # FIXME a job is not a core. Ideally, we should add a core option
         if self._guess_scheduler() == "local":
@@ -627,13 +632,7 @@ class SequanaManager:
         # make sure there are unique URLs
         urls = set(urls)
 
-        # guarantess that output filename to be saved have the same
-        # unique ID as those expected by snakemake
-        def _hash(url):
-            md5hash = hashlib.md5()
-            md5hash.update(url.encode())
-            return md5hash.hexdigest()
-
+        # directory where images will be saved
         os.makedirs(self.apptainer_prefix, exist_ok=True)
 
         count = 0
@@ -642,7 +641,9 @@ class SequanaManager:
         # define the URLs and the output filename. Also, remove urls that
         # have already been downloaded.
         for url in urls:
-            name = _hash(url)
+            # guarantess that output filename to be saved have the same
+            # unique ID as those expected by snakemake
+            name = url2hash(url)
             outfile = f"{self.apptainer_prefix}/{name}.simg"
             if os.path.exists(outfile):
                 logger.info(f"Found corresponding image of {url} in {outfile}")
@@ -681,7 +682,7 @@ def multiple_downloads(files_to_download, timeout=3600):
         """data_to_download is a list of tuples
         each tuple contain the url to download, its output name, and a unique
         position for the progress bar."""
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(limit=10)) as session:
             await asyncio.gather(*(download(session, *data) for data in files_to_download))
 
     asyncio.run(download_all(files_to_download))
