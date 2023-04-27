@@ -15,7 +15,6 @@ import os
 import shutil
 import subprocess
 import pkg_resources
-import hashlib
 import sys
 import aiohttp
 import asyncio
@@ -26,10 +25,10 @@ from pathlib import Path
 from tqdm.asyncio import tqdm
 
 import colorlog
-from deprecated import deprecated
 from easydev import CustomConfig
 
 from sequana_pipetools.snaketools.profile import create_profile
+from sequana_pipetools.misc import url2hash
 
 from .misc import Colors, PipetoolsException, print_version
 from .snaketools import Module, SequanaConfig
@@ -257,24 +256,29 @@ class SequanaManager:
 
         if self.options.use_apptainer:  # pragma: no cover
 
-            # to which, we always add the binding to home directory
-            home = str(Path.home())
-            if os.path.exists("/pasteur"):
-                apptainer_args = (
-                    f"--singularity-args=' -B {home} -B /pasteur {self.options.apptainer_args}'"
-                )
-                self.command += f" --use-singularity {apptainer_args}"
-            else:
-                apptainer_args = f"--singularity-args=' -B {home} {self.options.apptainer_args}'"
-                self.command += f" --use-singularity {apptainer_args}"
+            # --home directory set using the getcwd command already done in snakemake
+            # but let us add -e to make sure a clean environment is used. This will avoid
+            # unwanted side effect
+            apptainer_args = f"--singularity-args=' -e "
+
+            # and any user apptainer arguments (not ending ')
+            apptainer_args += f"{self.options.apptainer_args}'"
+
+            # to add to the main command
+            self.command += f" --use-singularity {apptainer_args}"
 
             # finally, the prefix where images are stored
             if self.local_apptainers:
                 self.command += " --singularity-prefix .sequana/apptainers"
             else:
-                self.command += f" --singularity-prefix {self.apptainer_prefix} "
+                if Path(self.apptainer_prefix ).is_absolute():
+                    self.command += f" --singularity-prefix {self.apptainer_prefix} "
+                else:
+                    # if we set prefix to e.g. ./images then in the pipeline/script.sh,
+                    # the prefix is also ./images whereas it should be ../images
+                    self.command += f" --singularity-prefix ../{self.apptainer_prefix} "
 
-        # FIXME a job is not a core. Ideally, we should add a core option
+        # set up core/jobs options
         if self._guess_scheduler() == "local":
             self.command += " -p --cores {} ".format(self.options.jobs)
         else:
@@ -447,7 +451,6 @@ class SequanaManager:
                 if self.options.force:
                     shutil.rmtree(self.workdir / "rules")
                     shutil.copytree(self.module.rules, self.workdir / "rules")
-                pass
 
         # the schema if any
         if self.module.schema_config:
@@ -544,14 +547,6 @@ class SequanaManager:
         else:
             logger.info("A completion if possible with sequana_completion --name {}".format(self.name))
 
-    @deprecated(version="1.0", reason="will be removed soon. Not used.")
-    def update_config(self, config, options, section_name):  # pragma: no cover
-        for option_name in config[section_name]:
-            try:
-                config[section_name][option_name] = getattr(options, section_name + "_" + option_name)
-            except AttributeError:
-                logger.debug("update_config. Could not find {}".format(option_name))
-
     def _get_section_content(self, filename, section_name):
         """searching for a given section (e.g. container)
 
@@ -627,13 +622,7 @@ class SequanaManager:
         # make sure there are unique URLs
         urls = set(urls)
 
-        # guarantess that output filename to be saved have the same
-        # unique ID as those expected by snakemake
-        def _hash(url):
-            md5hash = hashlib.md5()
-            md5hash.update(url.encode())
-            return md5hash.hexdigest()
-
+        # directory where images will be saved
         os.makedirs(self.apptainer_prefix, exist_ok=True)
 
         count = 0
@@ -642,8 +631,19 @@ class SequanaManager:
         # define the URLs and the output filename. Also, remove urls that
         # have already been downloaded.
         for url in urls:
-            name = _hash(url)
+            # get file name and hash name. The hash name is required by snakemake
+            # but keeping original name helps debugging
+            name = Path(url).name
+            hashname = url2hash(url)
+
             outfile = f"{self.apptainer_prefix}/{name}.simg"
+            linkfile = f"{self.apptainer_prefix}/{hashname}.simg"
+
+            try:
+                Path(linkfile).symlink_to(f"{name}.simg")
+            except FileExistsError:
+                pass
+
             if os.path.exists(outfile):
                 logger.info(f"Found corresponding image of {url} in {outfile}")
             else:
@@ -654,7 +654,7 @@ class SequanaManager:
         try:  # try an asynchrone downloads
             multiple_downloads(files_to_download)
         except (KeyboardInterrupt, asyncio.TimeoutError):
-            logger.info("The download was interruped or network was too slow. Removing partially downloaded files")
+            logger.info("The download was interrupted or network was too slow. Removing partially downloaded files")
             for values in files_to_download:
                 filename = values[1]
                 Path(filename).unlink()
@@ -681,7 +681,7 @@ def multiple_downloads(files_to_download, timeout=3600):
         """data_to_download is a list of tuples
         each tuple contain the url to download, its output name, and a unique
         position for the progress bar."""
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(limit=10)) as session:
             await asyncio.gather(*(download(session, *data) for data in files_to_download))
 
     asyncio.run(download_all(files_to_download))

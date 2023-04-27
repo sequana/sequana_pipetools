@@ -263,7 +263,6 @@ class FastQFactory(FileFactory):
         pattern,
         extension=["fq.gz", "fastq.gz"],
         read_tag="_R[12]_",
-        # verbose=False, paired=True,
         extra_prefixes_to_strip=[],
         sample_pattern=None,
         **kwargs,

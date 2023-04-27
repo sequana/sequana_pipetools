@@ -11,10 +11,17 @@
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import sys
-
+import hashlib
 import pkg_resources
 
-__all__ = ["Colors", "print_version", "error"]
+
+__all__ = ["Colors", "print_version", "error", "url2hash"]
+
+
+def url2hash(url):
+    md5hash = hashlib.md5()
+    md5hash.update(url.encode())
+    return md5hash.hexdigest()
 
 
 class Singleton(type):

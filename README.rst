@@ -23,7 +23,7 @@
 :Overview: A set of tools to help building or using Sequana pipelines
 :Status: Production
 :Issues: Please fill a report on `github <https://github.com/sequana/sequana/issues>`__
-:Python version: Python 3.7, 3.8, 3.9
+:Python version: Python 3.8, 3.9, 3.10
 :Citation: Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352,  `JOSS DOI doi:10.21105/joss.00352 <http://www.doi2bib.org/bib/10.21105%2Fjoss.00352>`_
 
 
@@ -85,7 +85,7 @@ from pypi website::
 
 No dependencies for this package except Python itself. In practice, this package
 has no interest if not used with a Sequana pipeline. So, when using it,
-you will need to install the relevant Sequana pipelines that you wish to use. For example:
+you will need to install the relevant Sequana pipelines that you wish to use. For example::
 
     pip install sequana_rnaseq
     pip install sequana_fastqc
@@ -162,6 +162,34 @@ Since it is based on cookiecutter, it is quite easy to do it yourself as follows
 
 and then follow the instructions. You will be asked some questions such as the name of your pipeline (eg. variant), a description, keywords and the *project_slug* (just press enter).
 
+
+Setting up and Running Sequana pipelines
+=========================================
+
+
+When you execute a sequana pipeline, e.g.::
+
+    sequana_fastqc --input-directory data
+
+a working directory is created (with the name of the pipeline; here fastqc). Moreover, the working directory
+contains a shell script that will hide the snakemake command. This snakemake command with make use
+of the sequana wrappers and will use the official sequana github repository by default
+(https://github.com/sequana/sequana-wrappers). This may be overwritten. For instance, you may use a local clone. To do
+so, you will need to create an environment variable::
+
+    export SEQUANA_WRAPPERS="git+file:///home/user/github/sequana-wrappers
+
+If you decide to use singularity/apptainer, one common error on a cluster is that non-standard paths are not found. You can bind them using the -B option but a more general set up is to create thos environment variable::
+
+    export SINGULARITY_BINDPATH=" -B /path_to_bind"
+
+for Singularity setup, or ::
+
+    export APPTAINER_BINDPATH=" -B /path_to_bind"
+
+for Apptainer setup.
+
+
 What is Sequana ?
 =================
 
@@ -186,6 +214,10 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.12.0    * factorise hash function to have url2hash easily accessible
+          * Use pth file to retrieve data dir in editable mode
+          * remove harcoded bind path for apptainer. Uses env variable instead
+          * Fixes singularity-prefix path in shell script if not absolute
 0.11.1    * fix regression, add codacy badge, applied black, remove 
             init_pipeline deprecated function.
 0.11.0    * More robust code to check pip executable. 
