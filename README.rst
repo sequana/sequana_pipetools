@@ -181,11 +181,11 @@ so, you will need to create an environment variable::
 
 If you decide to use singularity/apptainer, one common error on a cluster is that non-standard paths are not found. You can bind them using the -B option but a more general set up is to create thos environment variable::
 
-    export SINGULARITY_BINDPATH=" -B /path_to_bind"
+    export SINGULARITY_BINDPATH="  /path_to_bind"
 
 for Singularity setup, or ::
 
-    export APPTAINER_BINDPATH=" -B /path_to_bind"
+    export APPTAINER_BINDPATH=" /path_to_bind"
 
 for Apptainer setup.
 
