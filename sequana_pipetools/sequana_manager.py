@@ -183,8 +183,8 @@ class SequanaManager:
             # python egg seems deprecated, editable mode create a .pth file
             pth_file = site_path / f"{self.name}.pth"
             if not pth_file.exists():
-                # some packages have "sequana-name"
-                pth_file = site_path / f"sequana-{self.name}.pth"
+                # some packages have "sequana_name"
+                pth_file = site_path / f"sequana_{self.name}.pth"
             try:
                 pipeline_path = Path(pth_file.read_text().rstrip()) / "sequana_pipelines" / self.name
                 if pipeline_path.exists:
