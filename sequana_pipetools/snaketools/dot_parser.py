@@ -67,10 +67,10 @@ class DOTParser:
             data = fh.read()
 
         if not output_filename:
-            output_filename = os.path.basename(self.filename)
+            output_filename = os.path.basename(self.filename).replace(".dot", ".ann.dot")
 
         # The DOT parsing
-        with open(output_filename.replace(".dot", ".ann.dot"), "w") as fout:
+        with open(output_filename, "w") as fout:
             indices_to_drop = set()
             for line in data.split("\n"):
                 if line.strip().startswith("node["):
