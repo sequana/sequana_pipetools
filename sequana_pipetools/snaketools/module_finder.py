@@ -12,6 +12,7 @@
 ##############################################################################
 import os
 import sys
+import pkgutil
 
 import colorlog
 import pkg_resources
@@ -101,10 +102,9 @@ class ModuleFinder(metaclass=Singleton):
         try:
             import sequana_pipelines
         except ModuleNotFoundError:
-            logger.warning("sequana pipelines not installed. Please install a pipeline from github.com/sequana")
+            logger.debug("sequana pipelines not installed. Please install a pipeline from github.com/sequana")
             return
 
-        import pkgutil
 
         for ff, module_name, _ in pkgutil.iter_modules(sequana_pipelines.__path__):
             self._paths[f"pipeline:{module_name}"] = ff.path + os.sep + module_name
