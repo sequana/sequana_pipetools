@@ -256,13 +256,13 @@ class SequanaManager:
 
         if self.options.use_apptainer:  # pragma: no cover
 
-            # --home directory set using the getcwd command already done in snakemake
-            # but let us add -e to make sure a clean environment is used. This will avoid
-            # unwanted side effect
-            apptainer_args = f"--singularity-args=' -e "
-
-            # and any user apptainer arguments (not ending ')
-            apptainer_args += f"{self.options.apptainer_args}'"
+            # --home directory is set by snakemake using getcwd(), which prevent the
+            # /home/user/ to be seen somehow. Therefore, we bind the /home manually.
+            # We could have reset --home /home but we may have a side effect with snakemake.
+            # We also add the -e to make sure a clean environment is used. This will avoid
+            # unwanted side effect. We also appdn any user apptainer arguments.
+            home = str(Path.home())
+            apptainer_args = f"--singularity-args=' -e -B {home} {self.options.apptainer_args}'"
 
             # to add to the main command
             self.command += f" --use-singularity {apptainer_args}"
@@ -394,14 +394,14 @@ class SequanaManager:
                     options["apptainer_prefix"] = ".sequana/apptainers"
                 else:
                     options["apptainer_prefix"] = self.apptainer_prefix
-                home = str(Path.home())
-                options["apptainer_args"] = self.options.apptainer_args
 
-                # specific to Institut Pasteur cluster.
-                if os.path.exists("/pasteur"):
-                    options["apptainer_args"] += f" -B {home}:{home} -B /pasteur:/pasteur"
-                else:
-                    options["apptainer_args"] += f" --apptainer-args ' -B {home}:{home} "
+                # --home directory is set by snakemake using getcwd(), which prevent the
+                # /home/user/ to be seen somehow. Therefore, we bind the /home manually.
+                # We could have reset --home /home but we may have a side effect with snakemake.
+                # We also add the -e to make sure a clean environment is used. This will avoid
+                # unwanted side effect. We also appdn any user apptainer arguments.
+                home = str(Path.home())
+                options["apptainer_args"] = f" --singularity-args=' -e -B {home} {self.options.apptainer_args}'"
             else:
                 options["apptainer_prefix"] = ""
                 options["apptainer_args"] = ""

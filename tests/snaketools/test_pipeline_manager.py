@@ -37,9 +37,7 @@ def test_pipeline_manager(tmpdir):
     pm = snaketools.PipelineManager("custom", cfg)
     assert not pm.paired
 
-    pm.getwkdir("pipeline:fastqc")
     pm.getrawdata()
-    pm.getname("pipeline:fastqc")
 
     # Test different configuration of input_directory, input_readtag,
     # input_pattern
