@@ -71,17 +71,6 @@ class PipelineManagerBase:
         )
         raise PipetoolsException(msg)
 
-    @deprecated(version="1.0", reason="will be removed in v1.0. Update your pipelines.")
-    def getname(self, rulename, suffix=None):
-        """In the basename, include rulename and suffix"""
-        if suffix is None:
-            suffix = ""
-        return self.basename % rulename + suffix
-
-    @deprecated(version="1.0", reason="will be removed in v1.0. Update your pipelines.")
-    def getwkdir(self, rulename):
-        return os.path.join(self.sample, rulename)
-
     def getrawdata(self):
         """Return list of raw data
 

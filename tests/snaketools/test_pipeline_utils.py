@@ -18,10 +18,6 @@ def test_get_pipeline_statistics():
     snaketools.get_pipeline_statistics()
 
 
-def test_create_cleanup(tmpdir):
-    snaketools.create_cleanup(tmpdir)
-
-
 def test_makefile(tmpdir):
     mk = snaketools.Makefile()
     mk.makefile_filename = tmpdir.join("Makefile")

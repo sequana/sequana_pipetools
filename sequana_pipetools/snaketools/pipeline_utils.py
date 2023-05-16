@@ -14,7 +14,6 @@ import os
 
 import colorlog
 import easydev
-from deprecated import deprecated
 
 from .module import Module, modules
 
@@ -161,29 +160,3 @@ def message(mes):
     This adds the // -- characters in front of the prin statements."""
     logger.info("// -- " + mes)
 
-
-@deprecated(version="v1", reason="hsa been replaced by the usage of a Makefile")
-def create_cleanup(targetdir, exclude=["logs"]):
-    """A script to include in directory created by the different pipelines to
-    cleanup the directory"""
-    filename = targetdir + os.sep + "sequana_cleanup.py"
-    with open(filename, "w") as fout:
-        fout.write(
-            """
-import glob, os, shutil, time
-from easydev import shellcmd
-
-exclude = {}
-for this in glob.glob("*"):
-    if os.path.isdir(this) and this not in exclude and this.startswith('report') is False:
-        print('Deleting %s' % this)
-        time.sleep(0.1)
-        shellcmd("rm -rf %s" % this)
-shellcmd("rm -f  snakejob.* slurm-*")
-shellcmd("rm -rf .snakemake")
-shellcmd("rm -f sequana_cleanup.py")
-""".format(
-                exclude
-            )
-        )
-    return filename

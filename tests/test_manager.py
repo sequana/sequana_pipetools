@@ -180,12 +180,12 @@ def test_pipeline_parse_containers(tmpdir):
     dd["workdir"] = wkdir
     dd["use_apptainer"]
     pm = SequanaManager(AttrDict(**dd), "fastqc")
-    # fastqc uses 2 apptainers:
+    # fastqc uses 3 apptainers:
 
     fastqc_version = pkg_resources.get_distribution("sequana_fastqc").version
 
     if parse_version(fastqc_version) >= parse_version("1.6.0"):
-        assert len(pm._get_section_content(pm.module.snakefile, "container:")) == 2
+        assert len(pm._get_section_content(pm.module.snakefile, "container:")) in [2, 3]
     else:
         assert len(pm._get_section_content(pm.module.snakefile, "container:")) == 0
 
