@@ -215,7 +215,7 @@ Changelog
 Version   Description
 ========= ======================================================================
 0.12.2    * Fix the singularity arguments by (i) adding -e and (ii) bind the
-             /home. Indeed, snakemake sets --home to the current directory. 
+            /home. Indeed, snakemake sets --home to the current directory. 
             Somehow the /home is lost. Removed deprecated function
 0.12.1    * fix regression bug
 0.12.0    * factorise hash function to have url2hash easily accessible
