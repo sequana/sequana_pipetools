@@ -214,6 +214,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.12.3    * fixes singularity-args in profile 
 0.12.2    * Fix the singularity arguments by (i) adding -e and (ii) bind the
             /home. Indeed, snakemake sets --home to the current directory. 
             Somehow the /home is lost. Removed deprecated function

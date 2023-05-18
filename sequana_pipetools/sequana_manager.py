@@ -401,7 +401,7 @@ class SequanaManager:
                 # We also add the -e to make sure a clean environment is used. This will avoid
                 # unwanted side effect. We also appdn any user apptainer arguments.
                 home = str(Path.home())
-                options["apptainer_args"] = f" --singularity-args=' -e -B {home} {self.options.apptainer_args}'"
+                options["apptainer_args"] = f" ' -e -B {home} {self.options.apptainer_args}'"
             else:
                 options["apptainer_prefix"] = ""
                 options["apptainer_args"] = ""
@@ -501,7 +501,7 @@ class SequanaManager:
         with open(self.workdir / "unlock.sh", "w") as fout:
             fout.write(f"#!/bin/sh\nsnakemake -s {snakefilename} --unlock -j 1")
 
-        # save environement
+        # save environment
 
         if shutil.which("conda"):
             cmd = "conda list"
@@ -516,7 +516,7 @@ class SequanaManager:
             cmd = f"{sys.executable} -m pip freeze"
             with open(f"{self.workdir}/.sequana/pip.yml", "w") as fout:
                 subprocess.call(cmd.split(), stdout=fout)
-            logger.debug("Saved your pip environement into pip.txt (conda not found)")
+            logger.debug("Saved your pip environment into pip.txt (conda not found)")
         else:
             with open(f"{self.workdir}/.sequana/pip.yml", "w") as fout:
                 fout.write("pip not found")
@@ -628,19 +628,21 @@ class SequanaManager:
         count = 0
         files_to_download = []
 
-        # define the URLs and the output filename. Also, remove urls that
-        # have already been downloaded.
+        # define the URLs and the output filename. 
         for url in urls:
             # get file name and hash name. The hash name is required by snakemake
             # but keeping original name helps debugging
             name = Path(url).name
             hashname = url2hash(url)
 
-            outfile = f"{self.apptainer_prefix}/{name}.simg"
+            # URL from damona/sequana ends with .img extension.
+            # snakemake expected .simg hence but hasname above uses the original name.
+
+            outfile = f"{self.apptainer_prefix}/{name}"
             linkfile = f"{self.apptainer_prefix}/{hashname}.simg"
 
             try:
-                Path(linkfile).symlink_to(f"{name}.simg")
+                Path(linkfile).symlink_to(f"{name}")
             except FileExistsError:
                 pass
 
