@@ -214,18 +214,19 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
-0.12.3    * fixes singularity-args in profile 
+0.12.4    * handles sequana pipeline with underscores (e.g. pacbio_qc)
+0.12.3    * fixes singularity-args in profile
 0.12.2    * Fix the singularity arguments by (i) adding -e and (ii) bind the
-            /home. Indeed, snakemake sets --home to the current directory. 
+            /home. Indeed, snakemake sets --home to the current directory.
             Somehow the /home is lost. Removed deprecated function
 0.12.1    * fix regression bug
 0.12.0    * factorise hash function to have url2hash easily accessible
           * Use pth file to retrieve data dir in editable mode
           * remove harcoded bind path for apptainer. Uses env variable instead
           * Fixes singularity-prefix path in shell script if not absolute
-0.11.1    * fix regression, add codacy badge, applied black, remove 
+0.11.1    * fix regression, add codacy badge, applied black, remove
             init_pipeline deprecated function.
-0.11.0    * More robust code to check pip executable. 
+0.11.0    * More robust code to check pip executable.
 0.10.2    * Fixes https://github.com/sequana/sequana_pipetools/issues/49
             that properly sets the apptainer prefix in defualt mode
 0.10.1    * any python module can implement a Sequana pipeline.
@@ -233,14 +234,14 @@ Version   Description
             the scripts into scripts/
 0.9.6     * hotfix on apptainer to be back compatible if no apptainers section
             is found in the config file.
-0.9.5     * replaced singularity word by apptainer (--use-aptainer instead of 
+0.9.5     * replaced singularity word by apptainer (--use-aptainer instead of
             --use-singularity)
 0.9.4     * If timeout occurs while singularity is downloaded, catch the error
             remove truncated file.
 0.9.3     * hotfix missing import when checking sequana version
           * add config2schema utility function for developers
 0.9.2     * Udate asynchronous downloads to use aiohttp
-0.9.1     * Ability to download automatically singularity images (as URLs) if 
+0.9.1     * Ability to download automatically singularity images (as URLs) if
             set in the  pipelines (container field). add the --use-singularity
             option in all pipelines (and --singualrity-prefix)
 0.9.0     * **MAJOR update/Aug 2022**
@@ -259,21 +260,21 @@ Version   Description
 0.7.6     * simplify the setup() method in pipeline manager
 0.7.5     * can set a SEQUANA_WRAPPERS env variable to use local wrappers
 0.7.4     * switch biomics to biomicspole for the slurm queue (internal change)
-0.7.3     * add schema pipeline manager directory & fix attrdict error with yaml 
+0.7.3     * add schema pipeline manager directory & fix attrdict error with yaml
 0.7.2     * allows pipeline and rules to have the same name
 0.7.1     * Fix the --from-project option
 0.7.0     * Set the --wrapper-prefix to point to the  sequana-wrappers github
 0.6.3     * Fix SequanaConfig file
-0.6.2     * Fix script creation to include wrapper and take new snakemake 
+0.6.2     * Fix script creation to include wrapper and take new snakemake
             syntax into account
 0.6.1     * update schema handling
-0.6.0     * Move all modules related to pipelines rom sequana into 
-            sequana_pipetools; This release should now be the entry point for 
+0.6.0     * Move all modules related to pipelines rom sequana into
+            sequana_pipetools; This release should now be the entry point for
             all Sequana pipelines (no need to import sequana itself).
 0.5.3     * feature removed in sequana to deal with adapter removal and
-            changes updated in the package (removed the 'design' option 
+            changes updated in the package (removed the 'design' option
             from the cutadapt rules and needed)
-          * Improve TrimmingOptions to provide specific list of tools 
+          * Improve TrimmingOptions to provide specific list of tools
             and a default trimming tool
 0.5.2     * add TrimmingOptions class intended at replacing CutadaptOptions
           * to avoid extra spaces, add '-o nospace' in all completion files
@@ -289,16 +290,16 @@ Version   Description
 0.2.6     * previous new feature led to overhead of a few seconds with --help
             in this version, we include it only when using --version
 0.2.5     * include newest_version feature
-0.2.4     * completion can now handle multiple directories/files properly 
+0.2.4     * completion can now handle multiple directories/files properly
           * better doc and more tests
 0.2.3     * fix completion to avoir 2 scripts to overwrite each other
 0.2.2     * add a deprecated warning + before_pipeline function
 0.2.1     * add --from-project option to import existing config file
           * remove --paired-data option
-0.2.0     add content from sequana.pipeline_common to handle all kind of 
-          options in the argparse of all pipelines. This is independent of 
+0.2.0     add content from sequana.pipeline_common to handle all kind of
+          options in the argparse of all pipelines. This is independent of
           sequana to speed up the --version and --help calls
-0.1.2     add version of the pipeline in the output completion file 
+0.1.2     add version of the pipeline in the output completion file
 0.1.1     release bug fix
 0.1.0     creation of the package
 ========= ======================================================================
