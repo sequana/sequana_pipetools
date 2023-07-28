@@ -23,7 +23,7 @@
 :Overview: A set of tools to help building or using Sequana pipelines
 :Status: Production
 :Issues: Please fill a report on `github <https://github.com/sequana/sequana/issues>`__
-:Python version: Python 3.8, 3.9, 3.10
+:Python version: Python 3.8, 3.9, 3.10, 3.11
 :Citation: Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352,  `JOSS DOI doi:10.21105/joss.00352 <http://www.doi2bib.org/bib/10.21105%2Fjoss.00352>`_
 
 
@@ -214,6 +214,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.12.5    * automatically populater 'wrappers' in PipelineManager' based on the 
+            config entry 'sequana_wrappers'.
 0.12.4    * handles sequana pipeline with underscores (e.g. pacbio_qc)
 0.12.3    * fixes singularity-args in profile
 0.12.2    * Fix the singularity arguments by (i) adding -e and (ii) bind the

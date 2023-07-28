@@ -40,10 +40,6 @@ class PipelineManagerBase:
             if not cfg.check_config_with_schema(schema):
                 raise PipetoolsException("Please check the config file, some mandatory values are missing.")
 
-        # Used by the dynamic rules to defined the location where to copy
-        # dynamic rules.
-        # self.pipeline_dir = os.getcwd() + os.sep
-
         # Populate the config with additional information
         self.config = cfg.config
         self.config.pipeline_name = name
@@ -324,6 +320,13 @@ class PipelineManager(PipelineManagerBase):
         # be provided anyway.
         if "input_pattern" not in cfg.config:
             self.error("The PipelineManager expect the field 'input_pattern' to be in your config file")
+
+
+        # uses the provided tag if any, otherwise use the main branch of the wrappers
+        if "sequana_wrappers" not in cfg.config:
+            logger.warning("This pipeline has no sequana_wrappers in its config file. Using the branch 'main' by default")
+        self.wrappers = cfg.config.get("sequana_wrappers", "main")
+
 
         readtag = cfg.config.get("input_readtag", None)
         use_fastq_factory = True if readtag else False
