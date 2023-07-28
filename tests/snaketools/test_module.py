@@ -7,8 +7,8 @@ def test_md5():
 
 
 def test_modules():
-    assert "dag" in snaketools.modules.keys()
-    assert snaketools.modules["dag"].endswith("dag.rules")
+    assert "fastp" in snaketools.modules.keys()
+    assert snaketools.modules["fastp"].endswith("fastp.rules")
 
 
 def test_module():
@@ -20,10 +20,6 @@ def test_module():
     print(m)
     m.path
     m.snakefile
-    m.overview
-    # a rule with README
-    m = snaketools.Module("dag")
-    m.description
     m.overview
     assert m.is_executable()
     m.check()
