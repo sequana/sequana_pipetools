@@ -1,3 +1,0 @@
-pytest
-mock
-git+https://github.com/sequana/fastqc.git@main#egg=sequana-fastqc

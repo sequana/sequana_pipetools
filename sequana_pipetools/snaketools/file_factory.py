@@ -198,8 +198,10 @@ class FileFactory:
         pathname = set(self.pathnames)
         if len(pathname) == 1:
             return list(pathname)[0] + os.sep
+        elif len(pathname) == 0:
+            raise ValueError(f"found no pathname; no input files found in  {self.patten} ?")
         else:
-            raise ValueError("found more than one pathname")
+            raise ValueError(f"found more than one pathname {pathname}.")
 
     pathname = property(_pathname, doc="the common relative path")
 

@@ -253,6 +253,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.13.0    * switch to pyproject and fixes #64
 0.12.5    * automatically populater 'wrappers' in PipelineManager' based on the 
             config entry 'sequana_wrappers'.
 0.12.4    * handles sequana pipeline with underscores (e.g. pacbio_qc)
