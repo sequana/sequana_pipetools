@@ -183,6 +183,13 @@ class PipelineManagerDirectory(PipelineManagerBase):
     def __init__(self, name, config, schema=None):
         super().__init__(name, config, schema)
 
+        # uses the provided sequana_wrappers version if any, otherwise use the main branch of the wrappers
+        if "sequana_wrappers" not in self.config:
+            logger.warning(
+                "This pipeline has no sequana_wrappers in its config file. Using the branch 'main' by default"
+            )
+        self.wrappers = self.config.get("sequana_wrappers", "main")
+
 
 class PipelineManager(PipelineManagerBase):
     """Utility to manage easily the snakemake pipeline including input files
@@ -321,12 +328,12 @@ class PipelineManager(PipelineManagerBase):
         if "input_pattern" not in cfg.config:
             self.error("The PipelineManager expect the field 'input_pattern' to be in your config file")
 
-
-        # uses the provided tag if any, otherwise use the main branch of the wrappers
+        # uses the provided sequana_wrappers version if any, otherwise use the main branch of the wrappers
         if "sequana_wrappers" not in cfg.config:
-            logger.warning("This pipeline has no sequana_wrappers in its config file. Using the branch 'main' by default")
+            logger.warning(
+                "This pipeline has no sequana_wrappers in its config file. Using the branch 'main' by default"
+            )
         self.wrappers = cfg.config.get("sequana_wrappers", "main")
-
 
         readtag = cfg.config.get("input_readtag", None)
         use_fastq_factory = True if readtag else False
