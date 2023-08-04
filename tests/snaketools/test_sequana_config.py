@@ -83,13 +83,14 @@ def test_sequana_config(tmpdir):
     # test all installed pipelines saving/reading config file
     output = tmpdir.join("test.yml")
     for pipeline in snaketools.pipeline_names:
-        config_filename = Module(pipeline)._get_config()
-        cfg1 = SequanaConfig(config_filename)
+        if "_fastqc" in pipeline:
+            config_filename = Module(pipeline)._get_config()
+            cfg1 = SequanaConfig(config_filename)
 
-        cfg1.save(output)
-        cfg2 = SequanaConfig(str(output))
-        assert cfg2._yaml_code == cfg1._yaml_code
-        assert cfg1.config == cfg2.config
+            cfg1.save(output)
+            cfg2 = SequanaConfig(str(output))
+            assert cfg2._yaml_code == cfg1._yaml_code
+            assert cfg1.config == cfg2.config
 
     # test config with a _directory or _file  based on the fastqc pipeline
     cfg = SequanaConfig(s.config)

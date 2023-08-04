@@ -33,7 +33,7 @@ What is sequana_pipetools ?
 **sequana_pipetools** is a collection of tools that assists with the management of `Sequana <https://sequana.readthedocs.io>`_ pipelines, which includes next-generation sequencing (NGS) pipelines like RNA-seq, variant calling, ChIP-seq, and others.
 
 The aim of this package is to simplify the deployment of `Sequana pipelines <https://sequana.readthedocs.io>`_ by
-creatin a pure Python library that includse commonly used tools for different pipelines.
+creating a pure Python library that includes commonly used tools for different pipelines.
 
 Previously, the Sequana framework incorporated alll bioinformatics, Snakemake rules,
 pipelines, and pipeline management tools into a single library (Sequana) as illustrated
@@ -153,14 +153,53 @@ The Options classes provided can be used and combined to design pipelines.
 How to create skeleton of a Sequana pipeline with cookiecutter
 =================================================================
 
-In version 0.11 and below, there was a standalone called **sequana_start_pipeline** that would help you to automatically create the structure of a Sequana pipeline. This stadanlone was dropped in version 0.11.1
-
-Since it is based on cookiecutter, it is quite easy to do it yourself as follows::
+You can start a Sequana pipeline skeleton as follows::
 
     pip install cookiecuter
     cookiecutter https://github.com/sequana/sequana_pipeline_template -o . --overwrite-if-exists
 
 and then follow the instructions. You will be asked some questions such as the name of your pipeline (eg. variant), a description, keywords and the *project_slug* (just press enter).
+
+How to use sequana pipetools within your Pipeline
+##################################################
+
+For FastQ files (paired ot not), The config file should look like::
+
+    sequana_wrappers: "v0.15.1"
+
+    input_directory: '.'
+    input_readtag: "_R[12]_"
+    input_pattern: '*fastq.gz'
+
+
+    apptainers:
+        fastqc: "https://zenodo.org/record/7923780/files/fastqc_0.12.1.img"
+
+    section1:
+        key1: value1
+        key2: value2
+
+And your pipeline could make use of this as follows::
+
+    configfile: "config.yaml"
+
+    from sequana_pipetools import PipelineManager
+    manager = PipelineManager("fastqc", config)
+
+    # you can then figure out wheter it is paired or not:
+    manager.paired
+
+    # get the wrapper version to be used within a rule:
+    manager.wrappers
+
+    # the raw data (with a wild card) for the first rule
+    manager.getrawdata()
+
+    # add a Makefile to clean things at the end
+    manager.teardown()
+
+
+
 
 
 Setting up and Running Sequana pipelines
@@ -214,6 +253,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.13.0    * switch to pyproject and fixes #64
 0.12.5    * automatically populater 'wrappers' in PipelineManager' based on the 
             config entry 'sequana_wrappers'.
 0.12.4    * handles sequana pipeline with underscores (e.g. pacbio_qc)

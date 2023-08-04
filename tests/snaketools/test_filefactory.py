@@ -22,12 +22,12 @@ def test_file_name_factory():
         ff.extensions
 
     # list
-    list_files = glob.glob("*.py")
+    list_files = glob.glob("*.*")
     ff = snaketools.FileFactory(list_files)
     inner_test(ff)
 
     # glob
-    ff = snaketools.FileFactory("*py")
+    ff = snaketools.FileFactory("*.*")
     inner_test(ff)
 
     ff = snaketools.FastQFactory(test_dir + "/data/Hm2*fastq.gz", verbose=True)

@@ -155,7 +155,7 @@ def test_copy_requirements(tmpdir):
     requirements = [
         # "phiX174.fa",
         str(tmp_require),
-        "https://raw.githubusercontent.com/sequana/sequana/master/README.rst",
+        "https://raw.githubusercontent.com/sequana/sequana/main/README.rst",
         "__init__.py",
         "setup.py",
     ]
