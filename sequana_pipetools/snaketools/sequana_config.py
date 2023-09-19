@@ -94,7 +94,9 @@ class SequanaConfig:
         if os.path.exists(data):
             yaml = ruamel.yaml.YAML()
             with open(data, "r") as fh:
-                self._yaml_code = yaml.load(fh.read())
+                thisdata = fh.read()
+                print(thisdata)
+                self._yaml_code = yaml.load(thisdata)
 
             # import the Python yaml module to avoid ruamel.yaml ordereddict and
             # other structures. We only want the data

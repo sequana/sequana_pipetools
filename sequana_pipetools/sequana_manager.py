@@ -370,6 +370,7 @@ class SequanaManager:
         are copied in the working directory
 
         """
+
         if check_input_files:
             self.check_input_files()
 
@@ -456,6 +457,12 @@ class SequanaManager:
                 if self.options.force:
                     shutil.rmtree(self.workdir / "rules")
                     shutil.copytree(self.module.rules, self.workdir / "rules")
+
+        # the requirements (standalone) and version
+        if self.module.requirements:
+            with open(self.workdir / ".sequana" / "requirements.txt", "w") as fout:
+                for x in self.module.requirements_names:
+                    fout.write(f"{x}\n")
 
         # the schema if any
         if self.module.schema_config:

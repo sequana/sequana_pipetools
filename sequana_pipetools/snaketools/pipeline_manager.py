@@ -106,8 +106,10 @@ class PipelineManagerBase:
 
         if self.matplotlib_backend:
             import matplotlib as mpl
-
             mpl.use(self.matplotlib_backend)
+
+        # Create a file with the dependencies used. Based on the requirements.
+
 
     def _get_snakefile(self):
         return self._snakefile
@@ -136,6 +138,20 @@ class PipelineManagerBase:
         cleaner.directories_to_remove.extend(extra_dirs_to_remove)
         cleaner.files_to_remove.extend(extra_files_to_remove)
         cleaner.add_makefile()
+
+        # create the version file given the requirements
+        if os.path.exists(".sequana/requirements.txt"):
+            with open(".sequana/requirements.txt", "r") as fin:
+                deps = fin.readlines()
+                with open(".sequana/versions.txt", "w") as fout:
+                    from versionix.parser import get_version
+                    for dep in deps:
+                        dep = dep.strip()
+                        try:
+                            version = get_version(dep, verbose=False)
+                        except (KeyError, SystemExit):
+                            version = "unknown"
+                        fout.write(f"{dep}\t{version}\n")
 
     def get_html_summary(self, float="left", width=30):
         import pandas as pd

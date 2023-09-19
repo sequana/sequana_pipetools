@@ -124,6 +124,7 @@ or open a Python shell and type::
         self._snakefile = None
         self._description = None
         self._requirements = None
+        self._requirements_names = None
 
     def is_pipeline(self):
         """Return true is this module is a pipeline"""
@@ -273,7 +274,39 @@ or open a Python shell and type::
             self._requirements = self._get_file("requirements.txt")
             return self._requirements
 
-    requirements = property(_get_requirements, doc="list of requirements")
+    requirements = property(_get_requirements, doc="requirements filename")
+
+    def _get_requirements_names(self):
+        if self._requirements_names is not None:
+            return self._requirements_names
+        if self.requirements is None:
+            self._requirements_names = []
+            return self._requirements_names
+        if self.requirements:
+            with open(self.requirements, "r") as fh:
+                data = fh.read()
+                datalist = [this.strip() for this in data.split("\n") if len(this.strip()) > 0]
+                reqlist = []
+                for this in datalist:
+                    if this.startswith("-"):
+                        req = this.split("-", 1)[1].strip()
+                        if req.startswith("["):
+                            req = req.replace("[", "")
+                            req = req.replace("]", "")
+                            pipelines.append(req)
+                        else:
+                            reqlist.append(req)
+                    else:
+                        req = this.strip()
+                        if req.startswith("["):
+                            req = req.replace("[", "")
+                            req = req.replace("]", "")
+                            pipelines.append(req)
+                        else:
+                            reqlist.append(req)
+            self._requirements_names = reqlist 
+            return self._requirements_names
+    requirements_names = property(_get_requirements_names, doc="list of requirements names")
 
     def is_executable(self):
         """Is the module executable
@@ -294,33 +327,11 @@ or open a Python shell and type::
         # executables/packages and pipelines required
         pipelines = []
 
-        with open(self.requirements, "r") as fh:
-            data = fh.read()
-            datalist = [this.strip() for this in data.split("\n") if len(this.strip()) > 0]
-            reqlist = []
-            for this in datalist:
-                if this.startswith("-"):
-                    req = this.split("-", 1)[1].strip()
-                    if req.startswith("["):
-                        req = req.replace("[", "")
-                        req = req.replace("]", "")
-                        pipelines.append(req)
-                    else:
-                        reqlist.append(req)
-                else:
-                    req = this.strip()
-                    if req.startswith("["):
-                        req = req.replace("[", "")
-                        req = req.replace("]", "")
-                        pipelines.append(req)
-                    else:
-                        reqlist.append(req)
-
         # Check the pipelines independently
         for pipeline in pipelines:
             Module(pipeline).check()
 
-        for req in reqlist:
+        for req in self.requirements_names:
             # It is either a Python package or an executable
             if req.startswith("#"):
                 continue
