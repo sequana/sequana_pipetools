@@ -150,14 +150,12 @@ def test_copy_requirements(tmpdir):
     # 4- an existing file in the same directory as the target dir
 
     # Case 3: a temporary file
-    tmp_require = tmpdir.join("requirement.txt")
+    tmp_require = tmpdir.join("tmp.txt")
 
     requirements = [
-        # "phiX174.fa",
         str(tmp_require),
         "https://raw.githubusercontent.com/sequana/sequana/main/README.rst",
         "__init__.py",
-        "setup.py",
     ]
 
     wkdir = tmpdir.mkdir("wkdir")
@@ -169,6 +167,7 @@ def test_copy_requirements(tmpdir):
     pm.config.config.input_directory = f"{test_dir}/data/"
     pm.config.config.input_pattern = "Hm2*gz"
     pm.config.config.input_readtag = "_R[12]_"
+    pm.config.config.sequana_wrappers = "v0.15.1"
     pm.config.config.requirements = requirements
     pm.setup()
     pm.teardown()
