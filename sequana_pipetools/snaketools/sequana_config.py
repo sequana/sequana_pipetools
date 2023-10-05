@@ -95,7 +95,6 @@ class SequanaConfig:
             yaml = ruamel.yaml.YAML()
             with open(data, "r") as fh:
                 thisdata = fh.read()
-                print(thisdata)
                 self._yaml_code = yaml.load(thisdata)
 
             # import the Python yaml module to avoid ruamel.yaml ordereddict and
