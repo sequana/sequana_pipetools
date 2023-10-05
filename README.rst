@@ -253,6 +253,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.14.1    * remove a print statement
 0.14.0    * Module now returns the list of requirements. SequanaManager 
             creates a txt file with all standalones from the requirements. 
 0.13.0    * switch to pyproject and fixes #64
