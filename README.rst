@@ -253,6 +253,13 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.15.0    * remove useless code (readme, description) related to old rules
+          * requirements.txt renamed in tools.txt to store the required tools to 
+            run a pipeline. 
+          * remove copy_requirements, not used in any pipelines (replaced by code
+            in main.py of the pipelines)
+          * a utility function called getmetadata that returns dictionary 
+            with name, version, wrappers version)
 0.14.1    * remove a print statement
 0.14.0    * Module now returns the list of requirements. SequanaManager 
             creates a txt file with all standalones from the requirements. 

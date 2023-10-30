@@ -62,7 +62,8 @@ class Module:
           **sequana** for consistency. Rules do not have any but pipelines
           do. So if a pipeline does not provide a config.yaml, the one found
           in ./sequana/sequana/pipelines will be used.
-        - a **requirements.txt**
+        - a **tools.txt** with list of expected standalones required by the pipeline 
+          (non-python tools).
 
     .. note:: Developers who wish to include new rules should refer to the
         Developer guide.
@@ -122,7 +123,6 @@ or open a Python shell and type::
         self._name = name
 
         self._snakefile = None
-        self._description = None
         self._requirements = None
         self._requirements_names = None
 
@@ -145,12 +145,12 @@ or open a Python shell and type::
         _str += "Cluster config: %s\n" % self.cluster_config
         _str += "Schema for config file: %s\n" % self.schema_config
         _str += "Multiqc config file: %s\n" % self.multiqc_config
-        _str += "requirements file: %s\n" % self.requirements
+        _str += "tools file: %s\n" % self.requirements
         _str += "version: %s\n" % self.version
         return _str
 
     def __str__(self):
-        txt = "Rule **" + self.name + "**:\n" + self.description
+        txt = "Rule **" + self.name 
         return txt
 
     def _get_version(self):
@@ -210,24 +210,6 @@ or open a Python shell and type::
 
     cluster_config = property(_get_cluster_config, doc="full path to the config cluster file of the module")
 
-    def _get_readme(self):
-        return self._get_file("README.rst")
-
-    readme = property(_get_readme, doc="full path to the README file of the module")
-
-    def _get_overview(self):
-        result = "no information. For developers: please fix the pipeline "
-        result += "README.rst file by adding an :Overview: field"
-        for this in self.description.split("\n"):
-            if this.startswith(":Overview:"):
-                try:
-                    result = this.split(":Overview:")[1].strip()
-                except IndexError:
-                    result += "Bad format in :Overview: field"
-        return result
-
-    overview = property(_get_overview)
-
     def _get_snakefile(self):
         if self._snakefile:
             return self._snakefile
@@ -270,7 +252,11 @@ or open a Python shell and type::
     def _get_requirements(self):
         if self._requirements is not None:
             return self._requirements
+        if self._get_file("tools.txt"):
+            self._requirements = self._get_file("tools.txt")
+            return self._requirements
         if self._get_file("requirements.txt"):
+            logger.warning("Warning for developer. The requirements.txt should be renamed into tools.txt")
             self._requirements = self._get_file("requirements.txt")
             return self._requirements
 
@@ -366,16 +352,6 @@ Some functionalities may not work. Consider adding them with conda or set the --
                 for this in missing:
                     txt += "- %s\n" % this
                 raise ValueError(txt)
-
-    def _get_description(self):
-        try:
-            with open(self.readme) as fh:
-                self._description = fh.read()
-        except TypeError:
-            self._description = "no description"
-        return self._description
-
-    description = property(_get_description, doc=("Content of the README file associated with "))
 
     def md5(self):
         """return md5 of snakefile and its default configuration file

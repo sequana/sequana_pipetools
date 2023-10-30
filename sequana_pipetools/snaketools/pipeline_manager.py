@@ -11,6 +11,8 @@
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import os
+import shutil
+import importlib
 
 import colorlog
 from sequana_pipetools.misc import PipetoolsException
@@ -50,6 +52,15 @@ class PipelineManagerBase:
         self.basename = "{sample}/%s/{sample}"
 
         self.setup()
+
+    def getmetadata(self):
+        data = {}
+        data['name'] = self.name
+        data['rulegraph'] = ".sequana/rulegraph.svg"
+        data["sequana_wrappers"] = self.config.get("sequana_wrappers", "latest")
+        pipeline = importlib.import_module(f"sequana_pipelines.{self.name}")
+        data["pipeline_version"] = pipeline.version
+        return data
 
     def error(self, msg):
         msg = (
@@ -108,9 +119,6 @@ class PipelineManagerBase:
             import matplotlib as mpl
             mpl.use(self.matplotlib_backend)
 
-        # Create a file with the dependencies used. Based on the requirements.
-
-
     def _get_snakefile(self):
         return self._snakefile
 
@@ -127,7 +135,6 @@ class PipelineManagerBase:
                     else:
                         fout.write(line)
                     line = fin.readline()  # read the next line
-        import shutil
 
         shutil.move(filename + "_tmp_", filename)
 
@@ -140,8 +147,8 @@ class PipelineManagerBase:
         cleaner.add_makefile()
 
         # create the version file given the requirements
-        if os.path.exists(".sequana/requirements.txt"):
-            with open(".sequana/requirements.txt", "r") as fin:
+        if os.path.exists(".sequana/tools.txt"):
+            with open(".sequana/tools.txt", "r") as fin:
                 deps = fin.readlines()
                 with open(".sequana/versions.txt", "w") as fout:
                     from versionix.parser import get_version

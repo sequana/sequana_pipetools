@@ -7,20 +7,18 @@ def test_md5():
 
 
 def test_modules():
-    assert "fastp" in snaketools.modules.keys()
-    assert snaketools.modules["fastp"].endswith("fastp.rules")
+    assert "cutadapt" in snaketools.modules.keys()
+    assert snaketools.modules["cutadapt"].endswith("cutadapt.rules")
 
 
 def test_module():
     # a rule without README
-    m = snaketools.Module("fastp")
-    m.description
+    m = snaketools.Module("cutadapt")
     m  # test __repr__
     m.__repr__()
     print(m)
     m.path
     m.snakefile
-    m.overview
     assert m.is_executable()
     m.check()
 
@@ -30,7 +28,6 @@ def test_module():
     m.check()
     m.snakefile
     m.name
-    m.overview
     assert m.schema_config.endswith("schema.yaml")
 
 
