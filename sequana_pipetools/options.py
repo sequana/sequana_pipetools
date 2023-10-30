@@ -547,5 +547,5 @@ class SlurmOptions:
             dest="profile",
             default=self.profile,
             choices=["local", "slurm"],
-            help="Create cluster (HPC) profile directory. By default, it use local profile",
+            help="Create cluster (HPC) profile directory. By default, it uses local profile",
         )

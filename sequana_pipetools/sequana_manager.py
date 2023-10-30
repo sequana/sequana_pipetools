@@ -152,25 +152,6 @@ class SequanaManager:
             return False
         return True
 
-    def copy_requirements(self):
-        # Copy is done by the sequana manager once at the creation of the
-        # working directory. Should not be done after otherwise, if snakemake reads
-        # the snakefile several times, copy_requirements may be called several times
-        if "requirements" not in self.config.config:
-            return
-
-        for requirement in self.config.config.requirements:
-            logger.info(f"Copying {requirement} file into {self.workdir}")
-            if os.path.exists(requirement):
-                try:
-                    shutil.copy(requirement, self.workdir)
-                except shutil.SameFileError:  # pragma: no cover
-                    pass  # the target and input may be the same
-            elif requirement.startswith("http"):
-                logger.info(f"This file {requirement} will be needed. Downloading")
-                output = requirement.split("/")[-1]
-                urlretrieve(requirement, filename=self.workdir / output)
-
     def _get_package_location(self):
         import site
 
@@ -234,16 +215,6 @@ class SequanaManager:
         - Copy the pipeline and associated files (e.g. config file)
         - Create a script in the directory ready to use
 
-        If there is a "requirements" section in your config file, it looks
-        like::
-
-            requirements:
-                - path to file1
-                - path to file2
-
-        It means that those files will be required by the pipeline to run
-        correctly. If the file exists, use it , otherwise look into
-        the pipeline itself.
 
         """
         # First we create the beginning of the command with the optional
@@ -366,9 +337,6 @@ class SequanaManager:
         * the schema.yaml file used to check the content of the
           config.yaml file
 
-        if the config.yaml contains a requirements section, the files requested
-        are copied in the working directory
-
         """
 
         if check_input_files:
@@ -459,8 +427,10 @@ class SequanaManager:
                     shutil.copytree(self.module.rules, self.workdir / "rules")
 
         # the requirements (standalone) and version
-        if self.module.requirements:
-            with open(self.workdir / ".sequana" / "requirements.txt", "w") as fout:
+        infile = self.workdir / ".sequana" / "tools.txt"
+
+        if self.module.requirements and os.path.exists(infile):
+            with open(self.workdir / ".sequana" / "tools.txt", "w") as fout:
                 for x in self.module.requirements_names:
                     fout.write(f"{x}\n")
 
@@ -483,9 +453,6 @@ class SequanaManager:
         if self.options.use_apptainer:  # pragma: no cover
             self._download_zenodo_images()
 
-        # finally, we copy the files be found in the requirements section of the
-        # config file.
-        self.copy_requirements()
 
         # some information
         msg = "Check the script in {}/{}.sh as well as "

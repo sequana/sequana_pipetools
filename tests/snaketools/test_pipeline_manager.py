@@ -21,6 +21,8 @@ def test_pipeline_manager(tmpdir):
     with pytest.raises(PipetoolsException):
         pm = snaketools.PipelineManager("custom", cfg)
 
+        pm.getmetadata()
+
     # normal behaviour
     cfg = SequanaConfig(config)
     file1 = os.path.join(test_dir, "data", "Hm2_GTGAAA_L005_R1_001.fastq.gz")
