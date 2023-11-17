@@ -1,12 +1,12 @@
 from sequana_pipetools import slurm
 from sequana_pipetools.scripts.slurm import main
-import sys
 import pytest
 
 from . import test_dir
 
 sharedir = f"{test_dir}/../data"
 
+from click.testing import CliRunner
 
 def test():
     with pytest.raises(SystemExit):
@@ -17,8 +17,10 @@ def test():
 
 
 def test_command():
-    sys.argv = ["test", "--directory", sharedir]
-    main()
+    runner = CliRunner()
+    results = runner.invoke(main, ['--directory', sharedir])
+    assert results.exit_code == 0
+
 
 
 def test_get_error_message():

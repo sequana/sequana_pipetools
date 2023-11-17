@@ -87,26 +87,27 @@ def error(msg, pipeline):
 
 
 def print_version(name):
+
+    try:
+        ver = pkg_resources.require("sequana_{}".format(name))[0].version
+        print("sequana_{} version: {}".format(name, ver))
+    except Exception as err:
+        print(err)
+        print("sequana_{} version: ?".format(name))
+
     try:
         version = pkg_resources.require("sequana")[0].version
-        print("Sequana version used: {}".format(version))
+        print("Sequana version: {}".format(version))
     except Exception:  # pragma: no cover
         pass
 
     try:
         version = pkg_resources.require("sequana_pipetools")[0].version
-        print("Sequana_pipetools version used: {}".format(version))
+        print("Sequana_pipetools version: {}".format(version))
     except Exception as err:  # pragma: no cover
         print(err)
-        print("Sequana_pipetools version used: ?")
+        print("Sequana_pipetools version: ?")
 
-    try:
-        ver = pkg_resources.require("sequana_{}".format(name))[0].version
-        print("pipeline sequana_{} version used: {}".format(name, ver))
-    except Exception as err:
-        print(err)
-        print("pipeline sequana_{} version used: ?".format(name))
-        sys.exit(1)
     print(Colors().purple("\nHow to help ?\n- Please, consider citing us (see sequana.readthedocs.io)"))
     print(Colors().purple("- Contribute to the code or documentation"))
     print(Colors().purple("- Fill issues on https://github.com/sequana/sequana/issues/new/choose"))

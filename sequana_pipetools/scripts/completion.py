@@ -10,43 +10,26 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import argparse
 import importlib
 import os
 import pkgutil
 import sys
+from easydev import AttrDict
 
 from pkg_resources import DistributionNotFound
+
+import rich_click as click
 
 __all__ = ["Complete"]
 
 
-class Options(argparse.ArgumentParser):
-    def __init__(self, prog="sequana_completion"):
-        usage = """
-    sequana_completion --name rnaseq
-    sequana_completion --name all
-    """
+click.rich_click.USE_MARKDOWN = True
+click.rich_click.SHOW_METAVARS_COLUMN = False
+click.rich_click.APPEND_METAVARS_HELP = True
+click.rich_click.STYLE_ERRORS_SUGGESTION = "magenta italic"
+click.rich_click.SHOW_ARGUMENTS = True
 
-        super(Options, self).__init__(
-            usage=usage,
-            prog=prog,
-            description="""This tool creates completion script for sequana
-pipelines. Each pipeline has its own in .config/sequana/pipelines that you can
-source at your convenience""",
-            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        )
-
-        self.add_argument(
-            "--force", action="store_true", help="""overwrite files in sequana config pipeline directory"""
-        )
-        self.add_argument(
-            "--name",
-            type=str,
-            help="""Name of a pipelines for which you wish to
-            create the completion file. Set to a valid name ror to create all
-scripts, use --name all """,
-        )
+CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 class Complete:
@@ -186,28 +169,27 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
         return data
 
 
-def main(args=None):
+@click.command(context_settings=CONTEXT_SETTINGS)
+@click.option(
+    "--name",
+    type=click.STRING,
+    required=True,
+    help="""Name of a pipelines for which you wish to
+           create the completion file. Set to a valid name ror to create all
+    scripts, use --name all """,
+)
+@click.option("--force", is_flag=True, help="""overwrite files in sequana config pipeline directory""")
+def main(**kwargs):
+    """This tool creates completion script for sequana pipelines.
 
-    if args is None:
-        args = sys.argv[:]
+    Each pipeline has its own in .config/sequana/pipelines that you can source at your convenience.
 
-    user_options = Options()
+    Examples:
 
-    # If --help or no options provided, show the help
-    if len(args) == 1:
-        user_options.parse_args(["prog", "--help"])
-    else:
-        options = user_options.parse_args(args[1:])
-
-    if options.name == "all":
-        try:
-            import sequana_pipelines
-
-            names = [module_name for ff, module_name, valid in pkgutil.iter_modules(sequana_pipelines.__path__)]
-        except ModuleNotFoundError:  # pragma: no cover
-            pass
-    else:
-        names = [options.name]
+        sequana_completion --name rnaseq
+        sequana_completion --name all
+    """
+    options = AttrDict(**kwargs)
 
     if options.force is False:
         msg = "This will replace files in ./config/sequana/pipelines. " "Do you want to proceed y/n: "
@@ -215,15 +197,17 @@ def main(args=None):
     else:
         choice = "y"
 
+
+    name = options.name
+
     if choice == "y":
         print("Please source the files using:: \n")
-        for name in names:
-            try:
-                c = Complete(name)
-                c.save_completion_script()
-                print("source ~/.config/sequana/pipelines/{}.sh".format(name))
-            except DistributionNotFound:  # pragma: no cover
-                print(f"# Warning {name} could not be imported. Nothing done")
+        try:
+            c = Complete(name)
+            c.save_completion_script()
+            print("source ~/.config/sequana/pipelines/{}.sh".format(name))
+        except DistributionNotFound:  # pragma: no cover
+            print(f"# Warning {name} could not be imported. Nothing done")
         print("\nto activate the completion")
     else:  # pragma: no cover
         print("Stopping creation of completion scripts")

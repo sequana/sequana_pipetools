@@ -5,27 +5,27 @@ from sequana_pipetools.scripts.completion import main
 from sequana_pipetools.scripts.completion import Complete
 
 
+
+from click.testing import CliRunner
+
+
 def test_complete():
-    c = Complete("fastqc")
+    c = Complete("rnaseq")
     c.save_completion_script()
 
 
 def test_main(monkeypatch):
-    sys.argv = ["dummy", "--name", "fastqc"]
+
     monkeypatch.setattr("builtins.input", lambda x: 'y')
-    main()
+    runner = CliRunner()
+    results = runner.invoke(main, ['--name', "rnaseq"])
+    assert results.exit_code == 0
 
-    sys.argv = ["dummy", "--name", "fastqc", "--force"]
-    main()
+    runner = CliRunner()
+    results = runner.invoke(main, ['--name', "rnaseq", "--force"])
+    assert results.exit_code == 0
 
-    sys.argv = ["dummy", "--help"]
-    with pytest.raises(SystemExit):
-        main()
+    runner = CliRunner()
+    results = runner.invoke(main, ['--help'])
+    assert results.exit_code == 0
 
-    sys.argv = ["dummy"]
-    with pytest.raises(SystemExit):
-        main()
-
-    sys.argv = ["dummy", "--name", "all"]
-    monkeypatch.setattr("builtins.input", lambda x: 'y')
-    main()

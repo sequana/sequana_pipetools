@@ -113,6 +113,7 @@ class SequanaConfig:
         # before saving it
         self._update_yaml()
 
+
         # get the YAML formatted code and save it
         yaml = ruamel.yaml.YAML()
         yaml.default_style = ""

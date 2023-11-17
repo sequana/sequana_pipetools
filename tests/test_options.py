@@ -7,6 +7,7 @@ from sequana_pipetools.options import (
     SnakemakeOptions,
     KrakenOptions,
     FeatureCountsOptions,
+    ClickGeneralOptions,
 )
 
 
@@ -75,8 +76,44 @@ def test_input_options():
 
 def test_general_options():
     from sequana_pipetools.options import GeneralOptions
-
     p = argparse.ArgumentParser()
     so = GeneralOptions()
     so.add_options(p)
     p.parse_args([])
+
+
+def test_click_general_options():
+    from sequana_pipetools.options import (
+        ClickGeneralOptions, 
+        ClickSlurmOptions, 
+        ClickSnakemakeOptions,
+        ClickFeatureCountsOptions,
+        ClickTrimmingOptions,
+        ClickKrakenOptions,
+        ClickInputOptions, include_options_from)
+    import rich_click as click
+
+    click.rich_click.OPTION_GROUPS = {
+        f"sequana_TEST": [],
+    }
+
+
+
+    @click.command()
+    @include_options_from(ClickGeneralOptions, caller="TEST")
+    @include_options_from(ClickSlurmOptions, caller="TEST")
+    @include_options_from(ClickInputOptions, caller="TEST")
+    @include_options_from(ClickSnakemakeOptions, caller="TEST")
+    @include_options_from(ClickKrakenOptions, caller="TEST")
+    @include_options_from(ClickFeatureCountsOptions, caller="TEST")
+    @include_options_from(ClickTrimmingOptions, caller="TEST")
+    @click.option("--run", is_flag=True,
+            help="""execute the pipeline directly""")
+    def main(**kwargs):
+        pass
+    try:
+        main(["--help"])
+        assert False
+    except SystemExit:
+        assert True
+
