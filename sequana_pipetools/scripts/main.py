@@ -11,7 +11,7 @@
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import rich_click as click
-from sequana_pipetools.slurm import DebugJob
+from sequana_pipetools import version
 
 click.rich_click.USE_MARKDOWN = True
 click.rich_click.SHOW_METAVARS_COLUMN = False
@@ -24,24 +24,14 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option(
-    "--directory", "directory", type=click.STRING, default=".", help="Directory where to introspect slurm jobs"
+    "--version", is_flag=True
 )
-@click.option("--context", type=click.INT, default=5, help="""Number of errors to show""")
 def main(**kwargs):
     """
-    Scans slurm jobs trying to infer useful summary of errors
-
-    ----
-
-    Examples:
-
-        sequana_slurm_status
-        sequana_slurm_status --directory ./rnaseq/
 
     """
-    dj = DebugJob(kwargs["directory"], context=kwargs["context"])
-    print(dj)
-
+    if kwargs['version']:
+        print(f"sequana_pipetools v{version}")
 
 if __name__ == "__main__":
     main()

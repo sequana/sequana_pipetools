@@ -253,6 +253,10 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.16.0    * scripts now use click instead of argparse
+          * All Options classes have now an equivalent using click.
+            For example GeneralOptions has a class ClickGeneralOptions.
+            The GeneralOptions is kept for now for back compatibility
 0.15.0    * remove useless code (readme, description) related to old rules
           * requirements.txt renamed in tools.txt to store the required tools to 
             run a pipeline. 

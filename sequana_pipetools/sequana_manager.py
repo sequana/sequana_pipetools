@@ -384,7 +384,7 @@ class SequanaManager:
                 # add slurm options
                 options.update(
                     {
-                        "partition": "common",
+                        "partition": f"common",
                         "qos": "normal",
                         "memory": f"'{self.options.slurm_memory}'",  # quotes needed to avoid error in profile (° ͜ʖ °)
                     }
