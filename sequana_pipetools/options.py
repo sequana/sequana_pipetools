@@ -58,7 +58,7 @@ def init_click(NAME, groups={}):
     may reuse it. It also sets the HEADER_TEXT and initiate a
     OPTION_GROUPS to be used by rich_click.
 
-    In a sequana pipeline, you canuse this code::
+    In a sequana pipeline, you can use this code::
 
         CTX = init_click(NAME, groups={
                 "Pipeline Specific": [
