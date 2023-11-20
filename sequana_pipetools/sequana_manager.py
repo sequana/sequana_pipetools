@@ -25,7 +25,7 @@ from pathlib import Path
 from tqdm.asyncio import tqdm
 
 import colorlog
-from easydev import CustomConfig
+from easydev import CustomConfig, AttrDict
 
 from sequana_pipetools.snaketools.profile import create_profile
 from sequana_pipetools.misc import url2hash
@@ -64,6 +64,17 @@ class SequanaManager:
         The working_directory is used to copy the pipeline in it.
 
         """
+
+        # Old argparse version provide a structure with attributes
+        # whereas new click provides a dictionary. Here we covnert the
+        # dictionary into a attribute/class like using AttrDict
+
+
+        try:
+            options.version
+        except AttributeError:
+            options = AttrDict(**options)
+
         # the logger must be defined here because from a pipeline, it may not
         # have been defined yet.
         try:
@@ -72,12 +83,8 @@ class SequanaManager:
             logger.warning("Your pipeline does not have a level option.")
             options.level = "INFO"
 
+
         self.options = options
-
-        if self.options.version:
-            print_version(name)
-            sys.exit(0)
-
         self.name = name
 
         # handy printer
@@ -96,7 +103,13 @@ class SequanaManager:
         # Do we start from an existing project with a valid config file
         config_name = os.path.basename(self.module.config)
         self.config = None
-        if "from_project" in dir(options) and options.from_project:
+
+        try:
+            options.from_project
+        except AttributeError:
+            options.from_project = False
+
+        if options.from_project:
             possible_filenames = (
                 # from project tries to find a valid config.yaml
                 # options.from_project,  # exact config file path
@@ -255,28 +268,11 @@ class SequanaManager:
                     self.command += f" --singularity-prefix ../{self.apptainer_prefix} "
 
         # set up core/jobs options
-        if self._guess_scheduler() == "local":
+        if self.options.profile == "local":
             self.command += " -p --cores {} ".format(self.options.jobs)
         else:
             self.command += " -p --jobs {}".format(self.options.jobs)
 
-        if self.options.run_mode is None:
-            self.options.run_mode = self._guess_scheduler()
-            logger.debug("Guessed scheduler is {}".format(self.options.run_mode))
-
-        if self.options.run_mode == "slurm":
-            if self.options.slurm_queue == "common":
-                slurm_queue = ""
-            else:
-                slurm_queue = " --qos {} -p {}".format(self.options.slurm_queue, self.options.slurm_queue)
-
-            if self.module.cluster_config:
-                self.command += ' --cluster "sbatch --mem={cluster.ram} --cpus-per-task={threads}"'
-                self.command += " --cluster-config cluster_config.json "
-            else:
-                self.command += ' --cluster "sbatch --mem {} -c {} {}"'.format(
-                    self.options.slurm_memory, self.options.slurm_cores_per_job, slurm_queue
-                )
 
         # This should be in the setup, not in the teardown since we may want to
         # copy files when creating the pipeline. This is the case e.g. in the
@@ -354,49 +350,48 @@ class SequanaManager:
         # the final command
         command_file = self.workdir / f"{self.name}.sh"
         snakefilename = os.path.basename(self.module.snakefile)
-        if self.options.run_mode == self.options.profile:
-            # use profile command
-            options = {
-                "wrappers": self.sequana_wrappers,
-                "jobs": self.options.jobs,
-                "forceall": False,
-                "use_apptainer": self.options.use_apptainer,
-            }
 
-            if self.options.use_apptainer:  # pragma: no cover
-                if self.local_apptainers:
-                    options["apptainer_prefix"] = ".sequana/apptainers"
-                else:
-                    options["apptainer_prefix"] = self.apptainer_prefix
 
-                # --home directory is set by snakemake using getcwd(), which prevent the
-                # /home/user/ to be seen somehow. Therefore, we bind the /home manually.
-                # We could have reset --home /home but we may have a side effect with snakemake.
-                # We also add the -e to make sure a clean environment is used. This will avoid
-                # unwanted side effect. We also appdn any user apptainer arguments.
-                home = str(Path.home())
-                options["apptainer_args"] = f" ' -e -B {home} {self.options.apptainer_args}'"
+        # use profile command
+        options = {
+            "wrappers": self.sequana_wrappers,
+            "jobs": self.options.jobs,
+            "forceall": False,
+            "use_apptainer": self.options.use_apptainer,
+        }
+
+        if self.options.use_apptainer:  # pragma: no cover
+            if self.local_apptainers:
+                options["apptainer_prefix"] = ".sequana/apptainers"
             else:
-                options["apptainer_prefix"] = ""
-                options["apptainer_args"] = ""
+                options["apptainer_prefix"] = self.apptainer_prefix
 
-            if self.options.profile == "slurm":
-                # add slurm options
-                options.update(
-                    {
-                        "partition": f"common",
-                        "qos": "normal",
-                        "memory": f"'{self.options.slurm_memory}'",  # quotes needed to avoid error in profile (° ͜ʖ °)
-                    }
-                )
-                if self.options.slurm_queue != "common":
-                    options.update({"partition": self.options.slurm_queue, "qos": self.options.slurm_queue})
-
-            profile_dir = create_profile(self.workdir, self.options.profile, **options)
-            command = f"#!/bin/bash\nsnakemake -s {snakefilename} --profile {profile_dir}"
-            command_file.write_text(command)
+            # --home directory is set by snakemake using getcwd(), which prevent the
+            # /home/user/ to be seen somehow. Therefore, we bind the /home manually.
+            # We could have reset --home /home but we may have a side effect with snakemake.
+            # We also add the -e to make sure a clean environment is used. This will avoid
+            # unwanted side effect. We also appdn any user apptainer arguments.
+            home = str(Path.home())
+            options["apptainer_args"] = f" ' -e -B {home} {self.options.apptainer_args}'"
         else:
-            command_file.write_text(self.command)
+            options["apptainer_prefix"] = ""
+            options["apptainer_args"] = ""
+
+        if self.options.profile == "slurm":
+            # add slurm options
+            options.update(
+                {
+                    "partition": f"common",
+                    "qos": "normal",
+                    "memory": f"'{self.options.slurm_memory}'",  # quotes needed to avoid error in profile (° ͜ʖ °)
+                }
+            )
+            if self.options.slurm_queue != "common":
+                options.update({"partition": self.options.slurm_queue, "qos": self.options.slurm_queue})
+
+        profile_dir = create_profile(self.workdir, self.options.profile, **options)
+        command = f"#!/bin/bash\nsnakemake -s {snakefilename} --profile {profile_dir}"
+        command_file.write_text(command)
 
         # the snakefile
         shutil.copy(self.module.snakefile, self.workdir / ".sequana")
@@ -455,15 +450,16 @@ class SequanaManager:
 
 
         # some information
-        msg = "Check the script in {}/{}.sh as well as "
+        msg = "Please check the script in {}/{}.sh and "
         msg += f"the configuration file in {{}}/{config_name}.\n"
         print(self.colors.purple(msg.format(self.workdir, self.name, self.workdir)))
 
         msg = "Once ready, execute the script {}.sh using \n\n\t".format(self.name)
-        if self.options.run_mode == "slurm":
+        if self.options.profile == "slurm":
             msg += "cd {}; sbatch {}.sh\n\n".format(self.workdir, self.name)
         else:
             msg += "cd {}; sh {}.sh\n\n".format(self.workdir, self.name)
+        msg += f"You may tune extra parameters related to snakemake in {self.workdir}/{self.name}/.sequana/profile_{self.options.profile}"
         print(self.colors.purple(msg))
 
         # Save an info.txt with the command used
