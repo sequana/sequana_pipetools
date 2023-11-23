@@ -214,6 +214,12 @@ class SequanaManager:
         except pkg_resources.DistributionNotFound:  # pragma: no cover
             return "not installed"
 
+    def error_report(self):
+        """Try to report error from slurm"""
+        from sequana_pipetools.errors import PipeError
+        p = PipeError("fastqc")
+        p.status()
+
     def _guess_scheduler(self):
 
         if which("sbatch") and which("srun"):  # pragma: no cover
@@ -328,7 +334,6 @@ class SequanaManager:
 
         and if present:
 
-        * the cluster_config configuration files for snakemake
         * multiqc_config file for mutliqc reports
         * the schema.yaml file used to check the content of the
           config.yaml file
@@ -403,10 +408,6 @@ class SequanaManager:
         # the logo if any
         if self.module.logo:
             shutil.copy(self.module.logo, self.workdir / ".sequana")
-
-        # the cluster config if any
-        if self.module.cluster_config:
-            shutil.copy(self.module.cluster_config, self.workdir)
 
         # the multiqc if any
         if self.module.multiqc_config:

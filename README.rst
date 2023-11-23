@@ -285,6 +285,9 @@ Version   Description
           * Remove --slurm-cores-per-job redundant with resources from snakemake
           * Way a main.py is coded fully refactored and simplified as described
             in the README
+          * cluster_config are now deprecated in favor of profile
+          * sequana_slurm_status removed. Use manager.error_report in pipelines
+            instead
 0.15.0    * remove useless code (readme, description) related to old rules
           * requirements.txt renamed in tools.txt to store the required tools to 
             run a pipeline. 

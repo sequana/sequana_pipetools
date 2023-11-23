@@ -981,9 +981,7 @@ class ClickSlurmOptions:
                 "slurm_memory",
                 default=self.memory,
                 show_default=True,
-                help="""Specify the memory required by default. (default 4G; stands for 4 Gbytes).
-                Ignored and replaced if a cluster_config.yaml file is part
-                of your pipeline (e.g. rnaseq) or in config.yaml using profile.""",
+                help="""Specify the memory required by default. (default 4G; stands for 4 Gbytes)""",
             ),
             click.option(
                 "--profile",
@@ -1023,9 +1021,7 @@ class SlurmOptions:
             "--slurm-cores-per-job",
             dest="slurm_cores_per_job",
             default=self.cores,
-            help="""Number of cores/jobs to be used at the same time.
-            Ignored and replaced if a cluster_config.yaml file is part
-            of your pipeline (e.g. rnaseq)""",
+            help="""Number of cores/jobs to be used at the same time.""",
         )
         group.add_argument(
             "--slurm-queue",
@@ -1037,9 +1033,7 @@ class SlurmOptions:
             "--slurm-memory",
             dest="slurm_memory",
             default=self.memory,
-            help="""Specify the memory required by default. (default 4G; stands for 4 Gbytes).
-            Ignored and replaced if a cluster_config.yaml file is part
-            of your pipeline (e.g. rnaseq) or in config.yaml using profile.""",
+            help="""Specify the memory required by default. (default 4G; stands for 4 Gbytes).""",
         )
         group.add_argument(
             "--profile",
