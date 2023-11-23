@@ -51,7 +51,6 @@ rich-click = "^1.7.1"
 
 [tool.poetry.scripts]
 sequana_completion = "sequana_pipetools.scripts.completion:main"
-sequana_slurm_status = "sequana_pipetools.scripts.slurm:main"
 sequana_pipetools = "sequana_pipetools.scripts.main:main"
 
 

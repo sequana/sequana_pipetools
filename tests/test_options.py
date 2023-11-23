@@ -10,6 +10,8 @@ from sequana_pipetools.options import (
     ClickGeneralOptions,
 )
 
+# for test_click_general_options() to work we need to define a global variable
+NAME = "TEST"
 
 def test_misc():
 
@@ -98,22 +100,16 @@ def test_click_general_options():
     }
 
 
-
     @click.command()
-    @include_options_from(ClickGeneralOptions, caller="TEST")
-    @include_options_from(ClickSlurmOptions, caller="TEST")
-    @include_options_from(ClickInputOptions, caller="TEST")
-    @include_options_from(ClickSnakemakeOptions, caller="TEST")
-    @include_options_from(ClickKrakenOptions, caller="TEST")
-    @include_options_from(ClickFeatureCountsOptions, caller="TEST")
-    @include_options_from(ClickTrimmingOptions, caller="TEST")
-    @click.option("--run", is_flag=True,
-            help="""execute the pipeline directly""")
+    @include_options_from(ClickGeneralOptions)
+    @include_options_from(ClickSlurmOptions)
+    @include_options_from(ClickInputOptions)
+    @include_options_from(ClickSnakemakeOptions)
+    @include_options_from(ClickKrakenOptions)
+    @include_options_from(ClickFeatureCountsOptions)
+    @include_options_from(ClickTrimmingOptions)
     def main(**kwargs):
         pass
-    try:
+    with pytest.raises(SystemExit):
         main(["--help"])
-        assert False
-    except SystemExit:
-        assert True
 

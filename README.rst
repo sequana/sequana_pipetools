@@ -123,24 +123,47 @@ design the API of your pipelines. For example, the
 sequana_pipetools.options.SlurmOptions can be used as follows inside a standard
 Python module (the last two lines is where the magic happens)::
 
-    import argparse
+
+    import rich_click as click
     from sequana_pipetools.options import *
-    from sequana_pipetools.misc import Colors
-    from sequana_pipetools.info import sequana_epilog, sequana_prolog
+    from sequana_pipetools import SequanaManager
 
-    col = Colors()
     NAME = "fastqc"
+    help = init_click(NAME, groups={
+        "Pipeline Specific": [
+            "--method", "--skip-multiqc"],
+            }
+    )
 
-    class Options(argparse.ArgumentParser):
-        def __init__(self, prog=NAME, epilog=None):
-            usage = col.purple(sequana_prolog.format(**{"name": NAME}))
-            super(Options, self).__init__(usage=usage, prog=prog, description="",
-                epilog=epilog,
-                formatter_class=argparse.ArgumentDefaultsHelpFormatter
-            )
-            # add a new group of options to the parser
-            so = SlurmOptions()
-            so.add_options(self)
+    @click.command(context_settings=help)
+    @include_options_from(ClickSnakemakeOptions, working_directory=NAME)
+    @include_options_from(ClickSlurmOptions)
+    @include_options_from(ClickInputOptions, add_input_readtag=False)
+    @include_options_from(ClickGeneralOptions)
+    @click.option("--method", default="fastqc", type=click.Choice(["fastqc", "falco"]), help="your msg")
+    def main(**options):
+
+        # the real stuff is here
+        manager = SequanaManager(options, NAME)
+        options = manager.options
+
+        manager.setup()
+
+        # Fill the config file with data and specific options
+        cfg = manager.config.config
+        cfg.input_pattern = options.input_pattern
+        cfg.input_directory = os.path.abspath(options.input_directory)
+        cfg.general.method_choice = options.method
+
+        manager.exists(cfg.input_directory)
+
+        # finalise the command and save it; copy the snakemake. update the config
+        # file and save it.
+        manager.teardown()
+
+    if __name__ == "__main__":
+        main()
+ 
 
 
 Developers should look at e.g. module sequana_pipetools.options
@@ -257,6 +280,14 @@ Version   Description
           * All Options classes have now an equivalent using click.
             For example GeneralOptions has a class ClickGeneralOptions.
             The GeneralOptions is kept for now for back compatibility
+          * --run-mode removed and replaced by --profile options. Profiles are
+            used and stored withub .sequana/profiles
+          * Remove --slurm-cores-per-job redundant with resources from snakemake
+          * Way a main.py is coded fully refactored and simplified as described
+            in the README
+          * cluster_config are now deprecated in favor of profile
+          * sequana_slurm_status removed. Use manager.error_report in pipelines
+            instead
 0.15.0    * remove useless code (readme, description) related to old rules
           * requirements.txt renamed in tools.txt to store the required tools to 
             run a pipeline. 

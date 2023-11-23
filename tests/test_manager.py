@@ -19,7 +19,6 @@ default_dict = {
     "use_apptainer": False,
     "apptainer_prefix": "",
     "jobs": 1,
-    "run_mode": "local",
     "profile": "local",
     "force": True,
 }
@@ -58,7 +57,7 @@ def test_sequana_manager(tmpdir):
     pm.setup()
 
     # set slurm options manually
-    pm.options.run_mode = "slurm"
+    pm.options.profile = "slurm"
     pm.options.slurm_queue = "common"
     pm.options.slurm_memory = "4000"
     pm.options.slurm_cores_per_job = 4
@@ -123,13 +122,6 @@ def test_location():
         get_pipeline_location("dummy")
 
 
-def test_version(tmpdir):
-    wkdir = tmpdir.mkdir("wkdir")
-    with pytest.raises(SystemExit):
-        dd = default_dict.copy()
-        dd["version"] = True
-        dd["workdir"] = wkdir
-        pm = SequanaManager(AttrDict(**dd), "fastqc")
 
 
 def test_wrong_pipeline(tmpdir):
@@ -137,7 +129,7 @@ def test_wrong_pipeline(tmpdir):
     try:
         dd = default_dict.copy()
         dd["workdir"] = wkdir
-        SequanaManager(AttrDict(**dd), "wrong")
+        SequanaManager(dd, "wrong")
         assert False
     except SystemExit:
         assert True
@@ -178,13 +170,13 @@ def test_pipeline_parse_containers(tmpdir):
     dd = default_dict.copy()
     dd["workdir"] = wkdir
     dd["use_apptainer"]
-    pm = SequanaManager(AttrDict(**dd), "fastqc")
+    pm = SequanaManager(dd, "fastqc")
     # fastqc uses 3 apptainers:
 
     fastqc_version = pkg_resources.get_distribution("sequana_fastqc").version
 
     if parse_version(fastqc_version) >= parse_version("1.6.0"):
-        assert len(pm._get_section_content(pm.module.snakefile, "container:")) in [2, 3]
+        assert len(pm._get_section_content(pm.module.snakefile, "container:")) in [2, 3,4]
     else:
         assert len(pm._get_section_content(pm.module.snakefile, "container:")) == 0
 

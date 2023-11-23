@@ -42,10 +42,10 @@ class DebugJob:
 
     """
 
-    def __init__(self, path, context=5):
+    def __init__(self, path, context=5, pattern="slurm*.out"):
         self.path = Path(path)
         self.context = context
-        self.slurm_out = sorted([f for f in self.path.glob("slurm*.out")])
+        self.slurm_out = sorted([f for f in self.path.glob(pattern)])
         print("Found {} slurm files to introspect. Please wait.".format(len(self.slurm_out)))
         if not self.slurm_out:
             logger.warning(f"No slurm*.out files were found in {path}")

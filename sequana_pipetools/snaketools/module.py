@@ -142,7 +142,6 @@ or open a Python shell and type::
         _str = "Name: %s\n" % self._name
         _str += "Path: %s\n" % self.path
         _str += "Config: %s\n" % self.config
-        _str += "Cluster config: %s\n" % self.cluster_config
         _str += "Schema for config file: %s\n" % self.schema_config
         _str += "Multiqc config file: %s\n" % self.multiqc_config
         _str += "tools file: %s\n" % self.requirements
@@ -203,12 +202,6 @@ or open a Python shell and type::
         return filename
 
     logo = property(_get_logo, doc="full path to the logo of the module")
-
-    def _get_cluster_config(self):
-        # The default config file for that module
-        return self._get_file("cluster_config.json")
-
-    cluster_config = property(_get_cluster_config, doc="full path to the config cluster file of the module")
 
     def _get_snakefile(self):
         if self._snakefile:
