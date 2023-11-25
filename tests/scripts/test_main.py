@@ -1,7 +1,7 @@
 import sys
 import pytest
 
-from sequana_pipetools.scripts.completion import main
+from sequana_pipetools.scripts.main import main
 
 
 

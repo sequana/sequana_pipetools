@@ -18,5 +18,7 @@ def test():
 
 def test_get_error_message():
     dj = DebugJob(sharedir)
+    dj
+    dj._report()
     for x in dj.slurm_out:
         dj._get_error_message(x)

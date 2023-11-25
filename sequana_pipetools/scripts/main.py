@@ -23,15 +23,12 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
-@click.option(
-    "--version", is_flag=True
-)
+@click.option("--version", is_flag=True)
 def main(**kwargs):
-    """
-
-    """
-    if kwargs['version']:
+    """ """
+    if kwargs["version"]:
         print(f"sequana_pipetools v{version}")
+
 
 if __name__ == "__main__":
     main()

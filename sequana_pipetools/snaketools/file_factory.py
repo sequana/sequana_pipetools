@@ -16,7 +16,6 @@ import re
 import sys
 
 import colorlog
-
 from sequana_pipetools.misc import PipetoolsException
 
 logger = colorlog.getLogger(__name__)
@@ -122,7 +121,6 @@ class FileFactory:
     basenames = property(_get_basenames, doc="the basename without the path (e.g. readme.txt)")
 
     def _get_filenames(self):
-
         # make sure there is a '.' at the end
         prefixes_to_strip = []
 
@@ -153,7 +151,6 @@ class FileFactory:
         prefixes_to_strip += [x.strip(".") + "." for x in self.extra_prefixes_to_strip]
 
         def func(filename):
-
             # if sample pattern is provided, use it in place of the prefixes
             if self.sample_pattern:
                 prefix, suffix = self.sample_pattern.split("{sample}")
@@ -390,7 +387,6 @@ class FastQFactory(FileFactory):
         return self._get_file(tag, "2")
 
     def _get_paired(self):
-
         # If there is no read_tag, this means data is unpaired
         if self.read_tag == "":
             return False

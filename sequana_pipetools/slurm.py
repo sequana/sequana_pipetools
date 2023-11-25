@@ -66,17 +66,14 @@ class DebugJob:
                 self.errors.append({"rule": "NA", "slurm_id": ID, "hint": error})
 
     def __repr__(self):
-
         return self._report()
 
     def _report(self):
-
         message = "#" * 33 + " DEBUG REPORT " + "#" * 33 + "\n\n"
         message += f"The analysis reached {self.percent}%. A total of {self.n_errors} errors has been found.\n"
         message += f"Errors are comming from rule(s): {','.join(set([e['rule'] for e in self.errors]))}\n\n"
 
         for e in self.errors:
-
             if "log" in e:
                 message += f"Rule: {e['rule']}, SlurmID: {e['slurm_id']}\n"
                 message += self._get_error_message(self.path / e["log"])
@@ -97,7 +94,6 @@ class DebugJob:
 
         message = ""
         with open(log_file, "r") as f:
-
             # Get lines with "error" in:
             error_lines = [i for i, line in enumerate(f) if re.findall("error", line, re.IGNORECASE)]
 
@@ -143,7 +139,6 @@ class DebugJob:
             return parsed_errors
 
         else:
-
             errors = """Error in rule {rule:S}:
     jobid: {jobid:d}
     output: {output}

@@ -276,6 +276,9 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.16.1    * Fix/rename error_report into onerror to be included in the Snakemake
+            onerror section. added 'slurm' in slurm output log file in the 
+            profile
 0.16.0    * scripts now use click instead of argparse
           * All Options classes have now an equivalent using click.
             For example GeneralOptions has a class ClickGeneralOptions.

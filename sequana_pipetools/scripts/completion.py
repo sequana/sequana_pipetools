@@ -14,11 +14,10 @@ import importlib
 import os
 import pkgutil
 import sys
-from easydev import AttrDict
-
-from pkg_resources import DistributionNotFound
 
 import rich_click as click
+from easydev import AttrDict
+from pkg_resources import DistributionNotFound
 
 __all__ = ["Complete"]
 
@@ -33,7 +32,6 @@ CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
 class Complete:
-
     # For the -o default, this was an issue with compgen removing the slashes on
     # directrories . Solution was found here:
     # https://stackoverflow.com/questions/12933362/getting-compgen-to-include-slashes-on-directories-when-looking-for-files
@@ -196,7 +194,6 @@ def main(**kwargs):
         choice = input(msg)
     else:
         choice = "y"
-
 
     name = options.name
 

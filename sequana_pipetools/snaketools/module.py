@@ -62,7 +62,7 @@ class Module:
           **sequana** for consistency. Rules do not have any but pipelines
           do. So if a pipeline does not provide a config.yaml, the one found
           in ./sequana/sequana/pipelines will be used.
-        - a **tools.txt** with list of expected standalones required by the pipeline 
+        - a **tools.txt** with list of expected standalones required by the pipeline
           (non-python tools).
 
     .. note:: Developers who wish to include new rules should refer to the
@@ -149,7 +149,7 @@ or open a Python shell and type::
         return _str
 
     def __str__(self):
-        txt = "Rule **" + self.name 
+        txt = "Rule **" + self.name
         return txt
 
     def _get_version(self):
@@ -283,8 +283,9 @@ or open a Python shell and type::
                             pipelines.append(req)
                         else:
                             reqlist.append(req)
-            self._requirements_names = reqlist 
+            self._requirements_names = reqlist
             return self._requirements_names
+
     requirements_names = property(_get_requirements_names, doc="list of requirements names")
 
     def is_executable(self):
@@ -327,7 +328,6 @@ or open a Python shell and type::
         return executable, missing
 
     def check(self, mode="warning"):
-
         executable, missing = self.is_executable()
 
         if executable is False:
