@@ -10,25 +10,24 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
+import asyncio
 import glob
 import os
 import shutil
 import subprocess
-import pkg_resources
 import sys
-import aiohttp
-import asyncio
+from pathlib import Path
 from shutil import which
 from urllib.request import urlretrieve
-from pathlib import Path
 
+import aiohttp
+import colorlog
+import pkg_resources
+from easydev import AttrDict, CustomConfig
 from tqdm.asyncio import tqdm
 
-import colorlog
-from easydev import CustomConfig, AttrDict
-
-from sequana_pipetools.snaketools.profile import create_profile
 from sequana_pipetools.misc import url2hash
+from sequana_pipetools.snaketools.profile import create_profile
 
 from .misc import Colors, PipetoolsException, print_version
 from .snaketools import Module, SequanaConfig
@@ -69,7 +68,6 @@ class SequanaManager:
         # whereas new click provides a dictionary. Here we covnert the
         # dictionary into a attribute/class like using AttrDict
 
-
         try:
             options.version
         except AttributeError:
@@ -82,7 +80,6 @@ class SequanaManager:
         except AttributeError:
             logger.warning("Your pipeline does not have a level option.")
             options.level = "INFO"
-
 
         self.options = options
         self.name = name
@@ -169,7 +166,6 @@ class SequanaManager:
         import site
 
         for site_package in site.getsitepackages():
-
             site_path = Path(site_package)
             pipeline_path = site_path / "sequana_pipelines" / self.name
             if pipeline_path.exists():
@@ -195,7 +191,6 @@ class SequanaManager:
             if pipeline_path.exists():
                 return pipeline_path / "data"
 
-
         logger.error(f"package provided ({self.name}) not installed.")
         raise PipetoolsException
 
@@ -214,14 +209,7 @@ class SequanaManager:
         except pkg_resources.DistributionNotFound:  # pragma: no cover
             return "not installed"
 
-    def error_report(self):
-        """Try to report error from slurm"""
-        from sequana_pipetools.errors import PipeError
-        p = PipeError("fastqc")
-        p.status()
-
     def _guess_scheduler(self):
-
         if which("sbatch") and which("srun"):  # pragma: no cover
             return "slurm"
         else:
@@ -250,7 +238,6 @@ class SequanaManager:
             logger.info(f"Using sequana-wrappers from {self.sequana_wrappers}")
 
         if self.options.use_apptainer:  # pragma: no cover
-
             # --home directory is set by snakemake using getcwd(), which prevent the
             # /home/user/ to be seen somehow. Therefore, we bind the /home manually.
             # We could have reset --home /home but we may have a side effect with snakemake.
@@ -266,7 +253,7 @@ class SequanaManager:
             if self.local_apptainers:
                 self.command += " --singularity-prefix .sequana/apptainers"
             else:
-                if Path(self.apptainer_prefix ).is_absolute():
+                if Path(self.apptainer_prefix).is_absolute():
                     self.command += f" --singularity-prefix {self.apptainer_prefix} "
                 else:
                     # if we set prefix to e.g. ./images then in the pipeline/script.sh,
@@ -278,7 +265,6 @@ class SequanaManager:
             self.command += " -p --cores {} ".format(self.options.jobs)
         else:
             self.command += " -p --jobs {}".format(self.options.jobs)
-
 
         # This should be in the setup, not in the teardown since we may want to
         # copy files when creating the pipeline. This is the case e.g. in the
@@ -355,7 +341,6 @@ class SequanaManager:
         # the final command
         command_file = self.workdir / f"{self.name}.sh"
         snakefilename = os.path.basename(self.module.snakefile)
-
 
         # use profile command
         options = {
@@ -448,7 +433,6 @@ class SequanaManager:
         #     "https://...image.img"
         if self.options.use_apptainer:  # pragma: no cover
             self._download_zenodo_images()
-
 
         # some information
         msg = "Please check the script in {}/{}.sh and "
@@ -604,7 +588,7 @@ class SequanaManager:
         count = 0
         files_to_download = []
 
-        # define the URLs and the output filename. 
+        # define the URLs and the output filename.
         for url in urls:
             # get file name and hash name. The hash name is required by snakemake
             # but keeping original name helps debugging

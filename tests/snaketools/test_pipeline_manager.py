@@ -21,7 +21,6 @@ def test_pipeline_manager(tmpdir):
     with pytest.raises(PipetoolsException):
         pm = snaketools.PipelineManager("custom", cfg)
 
-        pm.getmetadata()
 
     # normal behaviour
     cfg = SequanaConfig(config)
@@ -29,6 +28,7 @@ def test_pipeline_manager(tmpdir):
     cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
     pm = snaketools.PipelineManager("custom", cfg)
     assert not pm.paired
+    pm.teardown()
 
 
     # here not readtag provided, so data is considered to be non-fastq related
@@ -38,8 +38,6 @@ def test_pipeline_manager(tmpdir):
     cfg.config.input_pattern = "Hm*gz"
     pm = snaketools.PipelineManager("custom", cfg)
     assert not pm.paired
-
-    pm.getrawdata()
 
     # Test different configuration of input_directory, input_readtag,
     # input_pattern
@@ -160,6 +158,7 @@ def test_multiqc_clean(tmpdir):
         fout.write('<a href="http://multiqc.info" target="_blank">"\ntest\ntest\ncode')
     pm.clean_multiqc(working_dir / "multiqc.html")
     pm.teardown(outdir=working_dir)
+    pm.onerror()
 
 def test_pipeline_manager_wrong_inputs(tmpdir):
 
@@ -197,3 +196,11 @@ def test_directory():
     cfg.config.input_pattern = "Hm*gz"
     pm = snaketools.pipeline_manager.PipelineManagerDirectory("test", cfg)
 
+def test_pipeline_others():
+    cfg = SequanaConfig({})
+    file1 = os.path.join(test_dir, "data", "Hm2_GTGAAA_L005_R1_001.fastq.gz")
+    cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
+    cfg.config.input_pattern = "Hm*gz"
+    pm = snaketools.pipeline_manager.PipelineManager("fastqc", cfg)
+    #pm.getrawdata()
+    pm.getmetadata()

@@ -10,10 +10,10 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import sys
 import hashlib
-import pkg_resources
+import sys
 
+import pkg_resources
 
 __all__ = ["Colors", "print_version", "error", "url2hash"]
 
@@ -87,7 +87,6 @@ def error(msg, pipeline):
 
 
 def print_version(name):
-
     try:
         ver = pkg_resources.require("sequana_{}".format(name))[0].version
         print("sequana_{} version: {}".format(name, ver))

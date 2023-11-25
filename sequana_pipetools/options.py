@@ -11,12 +11,13 @@
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import argparse
-import os
-import sys
-import shutil
 import inspect
+import os
+import shutil
+import sys
 
 from deprecated import deprecated
+
 from .misc import print_version
 
 __all__ = [
@@ -85,7 +86,7 @@ def init_click(NAME, groups={}):
 
 
 # A decorator to include common set of options
-# This decorator also populate the OPTION GROUPS
+# This decorator also populates the OPTION GROUPS
 # dynamically
 
 
@@ -360,7 +361,7 @@ class SnakemakeOptions:
             default=False,
             help="""If the working directory exists, proceed anyway.""",
         )
-        if "--use-singularity" in sys.argv:
+        if "--use-singularity" in sys.argv:  # pragma: no cover
             print("--use-singularity is deprecated, use --use-apptainer instead.")
             sys.exit(1)
 
@@ -370,7 +371,7 @@ class SnakemakeOptions:
             action="store_true",
             default=False,
             help="""If set, pipelines will download apptainer files for all external tools.""",
-        )
+        )  # pragma: no cover
 
         if "--singularity-prefix" in sys.argv:  # pragma: no cover
             print("--singularity-prefix is deprecated, use --apptainer-prefix instead.")
@@ -903,8 +904,6 @@ class ClickFeatureCountsOptions:
                     --feature-counts-attribute and -feature-counts-feature options respectively""",
             ),
         ]
-
-
 
 
 class FeatureCountsOptions:

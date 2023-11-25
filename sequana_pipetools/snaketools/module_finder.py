@@ -11,8 +11,8 @@
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import os
-import sys
 import pkgutil
+import sys
 
 import colorlog
 import pkg_resources
@@ -104,7 +104,6 @@ class ModuleFinder(metaclass=Singleton):
         except ModuleNotFoundError:
             logger.debug("sequana pipelines not installed. Please install a pipeline from github.com/sequana")
             return
-
 
         for ff, module_name, _ in pkgutil.iter_modules(sequana_pipelines.__path__):
             self._paths[f"pipeline:{module_name}"] = ff.path + os.sep + module_name

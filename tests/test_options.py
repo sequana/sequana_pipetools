@@ -92,13 +92,12 @@ def test_click_general_options():
         ClickFeatureCountsOptions,
         ClickTrimmingOptions,
         ClickKrakenOptions,
-        ClickInputOptions, include_options_from)
+        ClickInputOptions, 
+        include_options_from, 
+        init_click)
     import rich_click as click
 
-    click.rich_click.OPTION_GROUPS = {
-        f"sequana_TEST": [],
-    }
-
+    init_click("TEST", groups={"test":1})
 
     @click.command()
     @include_options_from(ClickGeneralOptions)
@@ -112,4 +111,7 @@ def test_click_general_options():
         pass
     with pytest.raises(SystemExit):
         main(["--help"])
+
+    with pytest.raises(SystemExit):
+        main(["--version"])
 

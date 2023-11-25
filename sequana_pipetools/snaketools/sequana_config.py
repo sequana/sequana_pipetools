@@ -113,7 +113,6 @@ class SequanaConfig:
         # before saving it
         self._update_yaml()
 
-
         # get the YAML formatted code and save it
         yaml = ruamel.yaml.YAML()
         yaml.default_style = ""
@@ -130,7 +129,6 @@ class SequanaConfig:
         # !! essential to use the update() method of the dictionary otherwise
         # comments are lost
         for key, value in data.items():
-
             if isinstance(value, dict):
                 target.update({key: self._recursive_update(target[key], value)})
             elif isinstance(value, list):

@@ -158,4 +158,3 @@ def message(mes):
 
     This adds the // -- characters in front of the prin statements."""
     logger.info("// -- " + mes)
-

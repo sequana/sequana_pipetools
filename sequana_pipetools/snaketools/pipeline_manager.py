@@ -10,18 +10,19 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
+import importlib
 import os
 import shutil
-import importlib
 
 import colorlog
+from deprecated import deprecated
+from sequana_pipetools.errors import PipeError
 from sequana_pipetools.misc import PipetoolsException
 
 from .file_factory import FastQFactory, FileFactory
 from .module import Module
 from .pipeline_utils import OnSuccessCleaner, message
 from .sequana_config import SequanaConfig
-from deprecated import deprecated
 
 logger = colorlog.getLogger(__name__)
 
@@ -55,8 +56,8 @@ class PipelineManagerBase:
 
     def getmetadata(self):
         data = {}
-        data['name'] = self.name
-        data['rulegraph'] = ".sequana/rulegraph.svg"
+        data["name"] = self.name
+        data["rulegraph"] = ".sequana/rulegraph.svg"
         data["sequana_wrappers"] = self.config.get("sequana_wrappers", "latest")
         pipeline = importlib.import_module(f"sequana_pipelines.{self.name}")
         data["pipeline_version"] = pipeline.version
@@ -85,7 +86,7 @@ class PipelineManagerBase:
         otherwise, a function compatible with snakemake is returned. This function
         contains a wildcard to each of the samples found by the manager.
         """
-        if not self.samples:
+        if not self.samples:  # pragma: no cover
             raise ValueError(
                 "Define the samples attribute as a dictionary with"
                 " sample names as keys and the corresponding location as values."
@@ -117,6 +118,7 @@ class PipelineManagerBase:
 
         if self.matplotlib_backend:
             import matplotlib as mpl
+
             mpl.use(self.matplotlib_backend)
 
     def _get_snakefile(self):
@@ -138,8 +140,12 @@ class PipelineManagerBase:
 
         shutil.move(filename + "_tmp_", filename)
 
-    def teardown(self, extra_dirs_to_remove=[], extra_files_to_remove=[], outdir="."):
+    def onerror(self):
+        """Try to report error from slurm"""
+        p = PipeError(self.name)
+        p.status()
 
+    def teardown(self, extra_dirs_to_remove=[], extra_files_to_remove=[], outdir="."):
         # add a Makefile
         cleaner = OnSuccessCleaner(self.name, outdir=outdir)
         cleaner.directories_to_remove.extend(extra_dirs_to_remove)
@@ -152,6 +158,7 @@ class PipelineManagerBase:
                 deps = fin.readlines()
                 with open(".sequana/versions.txt", "w") as fout:
                     from versionix.parser import get_version
+
                     for dep in deps:
                         dep = dep.strip()
                         try:
