@@ -106,6 +106,7 @@ class SequanaManager:
         except AttributeError:
             options.from_project = False
 
+
         if options.from_project:
             possible_filenames = (
                 # from project tries to find a valid config.yaml
@@ -132,7 +133,7 @@ class SequanaManager:
         self.workdir = Path(options.workdir)
 
         # define the data path of the pipeline
-        self.datapath = self._get_package_location()
+        #self.datapath = self._get_package_location()
 
         # Set wrappers as attribute so that it may be changed by the
         # user/developer
@@ -162,58 +163,36 @@ class SequanaManager:
             return False
         return True
 
-    def _get_package_location(self):
-        import site
-
-        for site_package in site.getsitepackages():
-            site_path = Path(site_package)
-            pipeline_path = site_path / "sequana_pipelines" / self.name
-            if pipeline_path.exists():
-                return pipeline_path / "data"
-
-            # if _ is found in the name, it may be replaced by dash -
-            name = self.name.replace("_", "-")
-
-            # python egg seems deprecated, editable mode create a .pth file
-            pth_file = site_path / f"{name}.pth"
-            if not pth_file.exists():
-                # some packages have "sequana_name"
-                pth_file = site_path / f"sequana_{name}.pth"
-            try:
-                pipeline_path = Path(pth_file.read_text().rstrip()) / "sequana_pipelines" / self.name
-                if pipeline_path.exists:
-                    return pipeline_path / "data"
-            except FileNotFoundError:
-                pass
-
-            # if it does not exist, this may be a "develop" mode.
-            pipeline_path = Path(site_package) / f"sequana-{name}.egg-link"
-            if pipeline_path.exists():
-                return pipeline_path / "data"
-
-        logger.error(f"package provided ({self.name}) not installed.")
-        raise PipetoolsException
-
     def _get_package_version(self):
         try:
             ver = pkg_resources.require("sequana_{}".format(self.name))[0].version
-        except pkg_resources.DistributionNotFound:
+        except pkg_resources.DistributionNotFound: #pragma: no cover
             # check if the package exists
             ver = pkg_resources.require(self.name)[0].version
         return ver
 
     def _get_sequana_version(self):
         try:
-            ver = pkg_resources.require(f"sequana.{self.name}")[0].version
+            ver = pkg_resources.require(f"sequana")[0].version
             return ver
         except pkg_resources.DistributionNotFound:  # pragma: no cover
             return "not installed"
 
-    def _guess_scheduler(self):
-        if which("sbatch") and which("srun"):  # pragma: no cover
-            return "slurm"
+    def fill_data_options(self):
+        options = self.options
+        cfg = self.config.config
+        if options.from_project:
+            if '--input-pattern' in sys.argv:
+                cfg.input_pattern = options['input_pattern']
+            if '--input-directory' in sys.argv:
+                cfg.input_directory = os.path.abspath(options['input_directory'])
+            if '--input-readtag' in sys.argv:
+                cfg.input_readtag = options['input_readtag']
         else:
-            return "local"
+            cfg.input_pattern = options.input_pattern
+            cfg.input_readtag = options.input_readtag
+            cfg.input_directory = os.path.abspath(options.input_directory)
+
 
     def setup(self):
         """Initialise the pipeline.
@@ -407,10 +386,8 @@ class SequanaManager:
                     shutil.rmtree(self.workdir / "rules")
                     shutil.copytree(self.module.rules, self.workdir / "rules")
 
-        # the requirements (standalone) and version
-        infile = self.workdir / ".sequana" / "tools.txt"
 
-        if self.module.requirements and os.path.exists(infile):
+        if self.module.requirements and os.path.exists(self.module.requirements):
             with open(self.workdir / ".sequana" / "tools.txt", "w") as fout:
                 for x in self.module.requirements_names:
                     fout.write(f"{x}\n")
@@ -648,14 +625,3 @@ def multiple_downloads(files_to_download, timeout=3600):
 
     asyncio.run(download_all(files_to_download))
 
-
-def get_pipeline_location(pipeline_name):
-    class Opt:
-        pass
-
-    options = Opt()
-    options.workdir = "."
-    options.version = False
-    options.apptainer_prefix = ""
-    p = SequanaManager(options, pipeline_name)
-    return p._get_package_location()

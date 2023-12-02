@@ -1,10 +1,11 @@
 import pytest
+import sys
 
 from easydev import AttrDict
 
 from sequana_pipetools import SequanaManager
 from sequana_pipetools import SequanaConfig
-from sequana_pipetools.sequana_manager import get_pipeline_location
+#from sequana_pipetools.sequana_manager import get_pipeline_location
 
 import pkg_resources
 from packaging.version import parse as parse_version
@@ -48,11 +49,12 @@ def test_sequana_manager(tmpdir):
     pm.setup()
     pm.teardown()
 
-    # We can now try to do it again fro the existing project itself
+    # We can now try to do it again from the existing project itself
     dd = default_dict.copy()
     dd["from_project"] = wkdir
     dd["workdir"] = wkdir
     pm = SequanaManager(AttrDict(**dd), "fastqc")
+    pm.fill_data_options()
 
     pm.setup()
 
@@ -69,6 +71,8 @@ def test_sequana_manager(tmpdir):
     pm.config.config["requirements"] = []
     pm.teardown()
 
+    # Test the filling of InputOptions in normal mode or when using --from-project
+    pm.fill_data_options()
 
 def test_sequana_manager_wrong_input(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
@@ -99,11 +103,6 @@ def test_scheduler(tmpdir):
 
     pm = SequanaManager(AttrDict(**dd), "fastqc")
 
-    def mock_scheduler(*args, **kwargs):
-        return "slurm"
-
-    pm._guess_scheduler = mock_scheduler
-
     pm.options.profile = "slurm"
     pm.options.slurm_memory = "4000"
     pm.options.slurm_cores_per_job = 4
@@ -114,14 +113,6 @@ def test_scheduler(tmpdir):
 
     pm.setup()
     pm.teardown()
-
-
-def test_location():
-    get_pipeline_location("fastqc")
-    with pytest.raises(SystemExit):
-        get_pipeline_location("dummy")
-
-
 
 
 def test_wrong_pipeline(tmpdir):
