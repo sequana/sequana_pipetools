@@ -142,10 +142,19 @@ class ClickGeneralOptions:
     def __init__(self, caller=None):
         self.options = [
             click.option(
-                "-v", "--version", is_flag=True, callback=self.version_callback, help="Print the version and exit"
+                "--deps", is_flag=True, callback=self.deps_callback, help="Show the known dependencies of the pipeline"
             ),
             click.option(
-                "--deps", is_flag=True, callback=self.deps_callback, help="Show the known dependencies of the pipeline"
+                "--from-project",
+                "from_project",
+                type=click.Path(),
+                callback=self.from_project_callback,
+                help="""You can initiate a new analysis run from an existing project.
+                    In theory, sequana project have a hidden .sequana directory,
+                    which can be used as input. The name of the run directory itself
+                    should suffice (if .sequana is found inside). From there,
+                    the config file and the pipeline files are copied in your new
+                    working directory""",
             ),
             click.option(
                 "--level",
@@ -155,15 +164,7 @@ class ClickGeneralOptions:
                 help="logging level in INFO, DEBUG, WARNING, ERROR, CRITICAL",
             ),
             click.option(
-                "--from-project",
-                "from_project",
-                type=click.Path(),
-                help="""You can initiate a new analysis run from an existing project.
-                    In theory, sequana project have a hidden .sequana directory,
-                    which can be used as input. The name of the run directory itself
-                    should suffice (if .sequana is found inside). From there,
-                    the config file and the pipeline files are copied in your new
-                    working directory""",
+                "-v", "--version", is_flag=True, callback=self.version_callback, help="Print the version and exit"
             ),
         ]
 
@@ -173,6 +174,18 @@ class ClickGeneralOptions:
             return
         print_version(ctx.NAME)
         ctx.exit(0)
+
+    @staticmethod
+    def from_project_callback(ctx, param, value):
+        if not value:
+            return
+        else:
+            # When --from-project is called, all value of arguments are are replaced by the ones
+            # found in the config file. Therefore, users may ommit all arguments. However, some
+            # may be compulsary, so we need to reset all 'required' arguments to False
+            for option in ctx.command.params:
+                option.required = False
+            return value
 
     @staticmethod
     def deps_callback(ctx, param, value):
@@ -277,37 +290,6 @@ class ClickSnakemakeOptions:
 
         self.options = [
             click.option(
-                "--jobs",
-                "jobs",
-                default=_default_jobs,
-                show_default=True,
-                help="""Number of jobs to run at the same time (default 4 on a local
-                    computer, 40 on a SLURM scheduler). This is the --jobs options
-                    of Snakemake""",
-            ),
-            click.option(
-                "--working-directory",
-                "workdir",
-                default=self.workdir,
-                show_default=True,
-                help="""where to save the pipeline and its configuration file and
-                where the analyse can be run""",
-            ),
-            click.option(
-                "--force",
-                "force",
-                is_flag=True,
-                default=False,
-                help="""If the working directory exists, proceed anyway.""",
-            ),
-            click.option(
-                "--use-apptainer",
-                "use_apptainer",
-                is_flag=True,
-                default=False,
-                help="""If set, pipelines will download apptainer files for all external tools.""",
-            ),
-            click.option(
                 "--apptainer-prefix",
                 "apptainer_prefix",
                 default=None,
@@ -321,6 +303,37 @@ class ClickSnakemakeOptions:
                 default="",
                 show_default=True,
                 help="""provide any arguments accepted by apptainer. By default, we set -B $HOME:$HOME """,
+            ),
+            click.option(
+                "--force",
+                "force",
+                is_flag=True,
+                default=False,
+                help="""If the working directory exists, proceed anyway.""",
+            ),
+            click.option(
+                "--jobs",
+                "jobs",
+                default=_default_jobs,
+                show_default=True,
+                help="""Number of jobs to run at the same time (default 4 on a local
+                    computer, 40 on a SLURM scheduler). This is the --jobs options
+                    of Snakemake""",
+            ),
+            click.option(
+                "--use-apptainer",
+                "use_apptainer",
+                is_flag=True,
+                default=False,
+                help="""If set, pipelines will download apptainer files for all external tools.""",
+            ),
+            click.option(
+                "--working-directory",
+                "workdir",
+                default=self.workdir,
+                show_default=True,
+                help="""where to save the pipeline and its configuration file and
+                where the analyse can be run""",
             ),
         ]
 
@@ -410,6 +423,7 @@ class ClickInputOptions:
                 "--input-directory",
                 "input_directory",
                 default=self.input_directory,
+                type=click.Path(exists=True, file_okay=False),
                 # required=True,
                 show_default=True,
                 help="""Where to find the FastQ files""",
@@ -418,6 +432,7 @@ class ClickInputOptions:
                 "--input-pattern",
                 "input_pattern",
                 default=self.input_pattern,
+                type=click.STRING,
                 show_default=True,
                 help="pattern for the input FastQ files ",
             ),
@@ -430,12 +445,14 @@ class ClickInputOptions:
                     "input_readtag",
                     default="_R[12]_",
                     show_default=True,
+                    type=click.STRING,
                     help="""pattern for the paired/single end FastQ. If your files are
                     tagged with _R1_ or _R2_, please set this value to '_R[12]_'. If your
                     files are tagged with  _1 and _2, you must change this readtag
                     accordingly to '_[12]'.""",
                 )
             )
+
 
 
 class InputOptions:
@@ -491,14 +508,6 @@ class ClickKrakenOptions:
     def __init__(self, caller=None):
         self.options = [
             click.option(
-                "--skip-kraken",
-                is_flag=True,
-                default=False,
-                show_default=True,
-                help="""If provided, kraken taxonomy is performed. A database must be
-                  provided (see below). """,
-            ),
-            click.option(
                 "--kraken-databases",
                 "kraken_databases",
                 type=click.STRING,
@@ -508,6 +517,14 @@ class ClickKrakenOptions:
                     or use sequana_taxonomy --download option.
                     You may use several, in which case, an iterative taxonomy is
                     performed as explained in online sequana documentation""",
+            ),
+            click.option(
+                "--skip-kraken",
+                is_flag=True,
+                default=False,
+                show_default=True,
+                help="""If provided, kraken taxonomy is performed. A database must be
+                  provided (see below). """,
             ),
         ]
 
@@ -969,11 +986,12 @@ class ClickSlurmOptions:
 
         self.options = [
             click.option(
-                "--slurm-queue",
-                "slurm_queue",
-                default=self.queue,
+                "--profile",
+                "profile",
+                default=self.profile,
                 show_default=True,
-                help="SLURM queue to be used (biomics)",
+                type=click.Choice(["local", "slurm"]),
+                help="Create cluster (HPC) profile directory. By default, it uses local profile",
             ),
             click.option(
                 "--slurm-memory",
@@ -983,12 +1001,11 @@ class ClickSlurmOptions:
                 help="""Specify the memory required by default. (default 4G; stands for 4 Gbytes)""",
             ),
             click.option(
-                "--profile",
-                "profile",
-                default=self.profile,
+                "--slurm-queue",
+                "slurm_queue",
+                default=self.queue,
                 show_default=True,
-                type=click.Choice(["local", "slurm"]),
-                help="Create cluster (HPC) profile directory. By default, it uses local profile",
+                help="SLURM queue to be used (biomics)",
             ),
         ]
 

@@ -145,17 +145,29 @@ Python module (the last two lines is where the magic happens)::
 
         # the real stuff is here
         manager = SequanaManager(options, NAME)
-        options = manager.options
-
         manager.setup()
 
-        # Fill the config file with data and specific options
+        # just two aliases
+        options = manager.options
         cfg = manager.config.config
-        cfg.input_pattern = options.input_pattern
-        cfg.input_directory = os.path.abspath(options.input_directory)
-        cfg.general.method_choice = options.method
 
-        manager.exists(cfg.input_directory)
+
+        # fills input_data, input_directory, input_readtag
+        manager.fill_data_options()
+
+        # fill specific options. 
+        # create a function for a given option (here --method)
+        def fill_method():
+            # any extra sanity checks
+            cfg['method'] = options['method']
+
+        if options['from-project']:
+            # in --from-project, we fill the method is --method is provided only (since already pre-filled)
+            if "--method" in sys.argv
+                fill_method()
+        else:
+            # in normal, we always want to fill the user-provided option
+            fill_method()
 
         # finalise the command and save it; copy the snakemake. update the config
         # file and save it.
@@ -276,6 +288,12 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.16.2    * remove useless function get_pipeline_location, get_package_location
+            guess_scheduler from sequana_manager (not used)
+          * store sequana version correctly in info.txt Fixing #89
+          * sort click options alphabetically
+          * --from-project not funtcional (example in multitax pipeline)
+          * Click checks that input-directoyr is a directory indeed
 0.16.1    * Fix/rename error_report into onerror to be included in the Snakemake
             onerror section. added 'slurm' in slurm output log file in the 
             profile
