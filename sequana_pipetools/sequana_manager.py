@@ -439,15 +439,15 @@ class SequanaManager:
             fout.write(f"#!/bin/sh\nsnakemake -s {snakefilename} --unlock -j 1")
 
         # save environment
-
         if shutil.which("conda"):
+            print(self.colors.purple("Saving current conda environment information"))
             cmd = "conda list"
             with open(f"{self.workdir}/.sequana/env.yml", "w") as fout:
                 subprocess.call(cmd.split(), stdout=fout)
             logger.debug("Saved your conda environment into env.yml")
         else:
             with open(f"{self.workdir}/.sequana/env.yml", "w") as fout:
-                fout.write("conda not found")
+                fout.write("Conda standalone not found")
 
         if shutil.which("pip"):
             cmd = f"{sys.executable} -m pip freeze"
@@ -459,7 +459,6 @@ class SequanaManager:
                 fout.write("pip not found")
 
         # General information
-
         configuration = CustomConfig("sequana", verbose=False)
         sequana_config_path = configuration.user_config_dir
         completion = sequana_config_path + "/pipelines/{}.sh".format(self.name)

@@ -38,6 +38,7 @@ __all__ = [
     "before_pipeline",
     "init_click",
     "include_options_from",
+    "OptionEatAll"
 ]
 
 import rich_click as click
@@ -112,6 +113,53 @@ def include_options_from(cls, *args, **kwargs):
     return decorator
 
 
+# This is a recipe from https://stackoverflow.com/questions/48391777/nargs-equivalent-for-options-in-click
+# to allow command line such as
+# sequana_multitax --databases 1 2 3 
+class OptionEatAll(click.Option):
+    def __init__(self, *args, **kwargs):
+        self.save_other_options = kwargs.pop("save_other_options", True)
+        nargs = kwargs.pop("nargs", -1)
+        assert nargs == -1, "nargs, if set, must be -1 not {}".format(nargs)
+        super(OptionEatAll, self).__init__(*args, **kwargs)
+        self._previous_parser_process = None
+        self._eat_all_parser = None
+
+    def add_to_parser(self, parser, ctx):
+        def parser_process(value, state):
+            # method to hook to the parser.process
+            done = False
+            value = [value]
+            if self.save_other_options:
+                # grab everything up to the next option
+                while state.rargs and not done:
+                    for prefix in self._eat_all_parser.prefixes:
+                        if state.rargs[0].startswith(prefix):
+                            done = True
+                    if not done:
+                        value.append(state.rargs.pop(0))
+            else:
+                # grab everything remaining
+                value += state.rargs
+                state.rargs[:] = []
+            value = tuple(value)
+
+            # call the actual process
+            self._previous_parser_process(value, state)
+
+        retval = super(OptionEatAll, self).add_to_parser(parser, ctx)
+        for name in self.opts:
+            our_parser = parser._long_opt.get(name) or parser._short_opt.get(name)
+            if our_parser:
+                self._eat_all_parser = our_parser
+                self._previous_parser_process = our_parser.process
+                our_parser.process = parser_process
+                break
+        return retval
+
+
+
+
 @deprecated
 def before_pipeline(NAME):
     """A function to provide --version and --deps for all pipelines"""
@@ -136,7 +184,7 @@ class ClickGeneralOptions:
     group_name = "General"
     metadata = {
         "name": group_name,
-        "options": ["--deps", "--level", "--version", "--from-project", "--help"],
+        "options": ["--deps", "--from-project",  "--help", "--level", "--version"],
     }
 
     def __init__(self, caller=None):
@@ -262,12 +310,12 @@ class ClickSnakemakeOptions:
     metadata = {
         "name": group_name,
         "options": [
-            "--use-apptainer",
-            "--jobs",
-            "--working-directory",
-            "--force",
             "--apptainer-prefix",
             "--apptainer-args",
+            "--force",
+            "--jobs",
+            "--use-apptainer",
+            "--working-directory",
         ],
     }
 
@@ -500,8 +548,8 @@ class ClickKrakenOptions:
     metadata = {
         "name": group_name,
         "options": [
-            "--skip-kraken",
             "--kraken-databases",
+            "--skip-kraken",
         ],
     }
 
@@ -976,7 +1024,7 @@ class ClickSlurmOptions:
     group_name = "Slurm"
     metadata = {
         "name": group_name,
-        "options": ["--slurm-queue", "--slurm-memory", "--profile"],
+        "options": ["--profile", "--slurm-queue", "--slurm-memory"],
     }
 
     def __init__(self, memory="4G", queue="common", profile=None, caller=None):
