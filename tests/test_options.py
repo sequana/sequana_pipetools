@@ -8,6 +8,7 @@ from sequana_pipetools.options import (
     KrakenOptions,
     FeatureCountsOptions,
     ClickGeneralOptions,
+    OptionEatAll
 )
 
 # for test_click_general_options() to work we need to define a global variable
@@ -115,3 +116,20 @@ def test_click_general_options():
     with pytest.raises(SystemExit):
         main(["--version"])
 
+
+def test_click_option_eat_all():
+    from click.testing import CliRunner
+
+    import click
+    @click.option("--databases", "databases",
+        type=click.STRING,
+        cls=OptionEatAll,
+        #callback=check_databases
+        )
+    def main(**options):
+        pass
+    main.name = "root"
+
+    runner = CliRunner()
+    runner.invoke(main, ["--databases", "1", "2"])
+        
