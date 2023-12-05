@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 #maintainer ?#maintainer email
 [tool.poetry]
 name = "sequana_pipetools"
-version = "0.16.4"
+version = "0.16.5"
 description = "A set of tools to help building or using Sequana pipelines"
 authors = ["Sequana Team"]
 license = "BSD-3"
