@@ -636,8 +636,8 @@ class ClickTrimmingOptions:
 
         def quality(x):
             x = int(x)
-            if x < 0:
-                raise argparse.ArgumentTypeError("quality must be positive")
+            if x < 0 and x != -1:
+                click.BadParameter("quality must be positive")
             return x
 
         self.options = [
@@ -670,7 +670,7 @@ class ClickTrimmingOptions:
             ),
             click.option(
                 "--trimming-minimum-length",
-                default=20,
+                default=-1,
                 show_default=True,
                 help="""minimum number of bases required; read discarded
                     otherwise. For cutadapt, default is 20 and for fastp, 15. We use 20 for both by
@@ -683,9 +683,9 @@ class ClickTrimmingOptions:
                 show_default=True,
                 type=quality,
                 help="""Trimming quality parameter depends on the algorithm used by
-                    the software behind the scene an may vary greatly; consequently, not provide
+                    the software behind the scene and may vary greatly; consequently, we do not provide
                     a default value. Cutadapt uses 30 by default, fastp uses 15 by default. If
-                    unset, the rnaseq pipeline set the default to 30 for cutadapt and 15 for fastp""",
+                    unset, the rnaseq pipeline set the default to 30 for cutadapt and 15 for fastp. """,
             ),
             click.option(  # Cutadapt specific
                 "--trimming-cutadapt-mode",

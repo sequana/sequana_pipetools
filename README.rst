@@ -288,6 +288,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.16.4    * fix Trimming options (click) for the quality option
 0.16.3    * add class to handle multiplex entry for click.option (useful for
             multitax multiple databases)
 0.16.2    * remove useless function get_pipeline_location, get_package_location
