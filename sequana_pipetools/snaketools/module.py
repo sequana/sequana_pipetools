@@ -11,48 +11,21 @@
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import os
+import shutil
 
 import colorlog
 import easydev
+import pkg_resources
 
 from .module_finder import ModuleFinder
 
 logger = colorlog.getLogger(__name__)
 
 
-class Module:
-    """Data structure that holds metadata about a **Module**
+class Pipeline:
+    """Data structure that holds metadata about a **Sequana Pipeline**
 
-    In Sequana, we provide rules and pipelines to be used with snakemake.
-    Snakemake rules look like::
-
-        rule <name>:
-            :input: file1
-            :output: file2
-            :shell: "cp file1 file2"
-
-    A pipeline may look like::
-
-        include: "path_to_rule1"
-        include: "path_to_rule2"
-        rule all:
-            input: FINAL_FILES
-
-    Note that the pipeline includes rules by providing the path to them.
-
-    All rules can be stored in a single directory. Similarly for pipelines.
-    We decided not to use that convention. Instead, we bundle rules (and
-    pipelines) in their own directories so that other files can be stored
-    with them. We also consider that
-
-        #. if the **Snakefile** includes other **Snakefile** then
-           it is **Pipeline**.
-        #. Otherwise it is a simple **Rule**.
-
-    So, a **Module** in sequana's parlance is a directory that contains a
-    rule or a pipeline and associated files. There is currently no strict
-    conventions for rule Modules except for their own rule file. However,
-    pipeline Modules should have the following files:
+    So, a **Pipeline** in sequana's parlance is a directory that contains:
 
         - A **snakemake** file named after the directory with the extension
           **.rules**
@@ -65,31 +38,12 @@ class Module:
         - a **tools.txt** with list of expected standalones required by the pipeline
           (non-python tools).
 
-    .. note:: Developers who wish to include new rules should refer to the
-        Developer guide.
-
-    .. note:: it is important that module's name should be used to name
-        the directory and the rule/pipeline.
-
-    The **Modules** are stored in sequana/rules and sequana/pipelines
-    directories. The modules' names cannot be duplicated.
-
-    Example::
-
-        pipelines/test_pipe/test_pipe.rules
-        pipelines/test_pipe/README.rst
-        rules/rule1/rule1.rules
-        rules/rule1/README.rst
-
-    The :class:`Module` will ease the retrieval of information linked to a
+    The :class:`Pipeline` will ease the retrieval of information linked to a
     rule or pipeline. For instance if a pipeline has a config file, its path
     can be retrived easily::
 
-        m = Module("quality_control")
+        m = Pipeline("quality_control")
         m.config
-
-    This Module may be rule or pipeline, the method :meth:`is_pipeline` can
-    be used to get that information.
 
     """
 
@@ -126,13 +80,6 @@ or open a Python shell and type::
         self._requirements = None
         self._requirements_names = None
 
-    def is_pipeline(self):
-        """Return true is this module is a pipeline"""
-        if self._name.startswith("pipeline:"):
-            return True
-        else:
-            return False
-
     def _get_file(self, name):
         filename = os.sep.join((self._path, name))
         if os.path.exists(filename):
@@ -153,14 +100,9 @@ or open a Python shell and type::
         return txt
 
     def _get_version(self):
-        if "/" in self.name:
-            return self.name.split("/")[1]
-        elif self.is_pipeline():
-            import pkg_resources
 
-            name = self.name.replace("pipeline:", "")
-            ver = pkg_resources.require(f"sequana_{name}")[0].version
-            return ver
+        ver = pkg_resources.require(f"sequana_{self.name}")[0].version
+        return ver
 
     version = property(_get_version, doc="Get version")
 
@@ -248,7 +190,7 @@ or open a Python shell and type::
         if self._get_file("tools.txt"):
             self._requirements = self._get_file("tools.txt")
             return self._requirements
-        if self._get_file("requirements.txt"):
+        if self._get_file("requirements.txt"):  # pragma: no cover
             logger.warning("Warning for developer. The requirements.txt should be renamed into tools.txt")
             self._requirements = self._get_file("requirements.txt")
             return self._requirements
@@ -258,9 +200,12 @@ or open a Python shell and type::
     def _get_requirements_names(self):
         if self._requirements_names is not None:
             return self._requirements_names
-        if self.requirements is None:
+
+        # FIXME: could probably remove to enforce existence of the file
+        if self.requirements is None:  # pragma: no cover
             self._requirements_names = []
             return self._requirements_names
+
         if self.requirements:
             with open(self.requirements, "r") as fh:
                 data = fh.read()
@@ -269,20 +214,10 @@ or open a Python shell and type::
                 for this in datalist:
                     if this.startswith("-"):
                         req = this.split("-", 1)[1].strip()
-                        if req.startswith("["):
-                            req = req.replace("[", "")
-                            req = req.replace("]", "")
-                            pipelines.append(req)
-                        else:
-                            reqlist.append(req)
+                        reqlist.append(req)
                     else:
                         req = this.strip()
-                        if req.startswith("["):
-                            req = req.replace("[", "")
-                            req = req.replace("]", "")
-                            pipelines.append(req)
-                        else:
-                            reqlist.append(req)
+                        reqlist.append(req)
             self._requirements_names = reqlist
             return self._requirements_names
 
@@ -309,16 +244,16 @@ or open a Python shell and type::
 
         # Check the pipelines independently
         for pipeline in pipelines:
-            Module(pipeline).check()
+            Pipeline(pipeline).check()
 
         for req in self.requirements_names:
             # It is either a Python package or an executable
             if req.startswith("#"):
                 continue
             try:
-                easydev.shellcmd(f"which {req}")
+                shutil.which(f"{req}")
                 logger.debug(f"Found {req} executable")
-            except Exception:
+            except Exception:  # pragma: no cover
                 # is this a Python code ?
                 if len(easydev.get_dependencies(req)) == 0:
                     executable = False
@@ -330,7 +265,7 @@ or open a Python shell and type::
     def check(self, mode="warning"):
         executable, missing = self.is_executable()
 
-        if executable is False:
+        if executable is False:  # pragma: no cover
             # _ = self.is_executable()
             missing = " ".join(missing)
             txt = f"""Some executable or Python packages are not available: {missing}
@@ -352,7 +287,7 @@ Some functionalities may not work. Consider adding them with conda or set the --
         ::
 
             >>> from sequana import snaketools as sm
-            >>> m = sm.Module("variant_calling")
+            >>> m = sm.Pipeline("variant_calling")
             >>> m.md5()
             {'config': 'e23b26a2ff45fa9ddb36c40670a8a00e',
              'snakefile': '7d3917743a6b123d9861ddbbb5f3baef'}
@@ -367,7 +302,7 @@ Some functionalities may not work. Consider adding them with conda or set the --
 def _get_modules_snakefiles():
     modules = ModuleFinder()
     for name in modules.names:
-        module = Module(name)
+        module = Pipeline(name)
         filename = module.snakefile
         if filename:
             yield name, filename
@@ -377,4 +312,4 @@ def _get_modules_snakefiles():
 modules = {name: filename for name, filename in _get_modules_snakefiles()}
 
 # list of pipeline names found in the list of modules
-pipeline_names = [m for m in modules if Module(m).is_pipeline()]
+pipeline_names = [m for m in modules]

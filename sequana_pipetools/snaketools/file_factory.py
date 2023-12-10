@@ -16,6 +16,7 @@ import re
 import sys
 
 import colorlog
+
 from sequana_pipetools.misc import PipetoolsException
 
 logger = colorlog.getLogger(__name__)
@@ -50,9 +51,6 @@ class FileFactory:
 
     dirname, returns everything but the final basename in a pathname. Both
 
-
-    The **pathname** is a specific label for a file’s directory location
-    while within an operating system.
 
     .. versionchanged:: 0.8.7 attributes were recomputed at each accession. For
         small projects, this is transparent, but on novogene or large set of samples,
@@ -176,11 +174,6 @@ class FileFactory:
 
     filenames = property(_get_filenames, doc="get basename without extension (e.g., readme)")
 
-    def _get_pathnames(self):
-        return [os.path.split(filename)[0] for filename in self.realpaths]
-
-    pathnames = property(_get_pathnames, doc="path and filename (e.g., /home/user/readme")
-
     def _get_extensions(self):
         return [os.path.splitext(filename)[1] for filename in self._glob]
 
@@ -190,17 +183,6 @@ class FileFactory:
         return [basename.split(".", 1)[1] if "." in basename else "" for basename in self.basenames]
 
     all_extensions = property(_get_all_extensions, doc=" get all trailing extensions")
-
-    def _pathname(self):
-        pathname = set(self.pathnames)
-        if len(pathname) == 1:
-            return list(pathname)[0] + os.sep
-        elif len(pathname) == 0:
-            raise ValueError(f"found no pathname; no input files found in  {self.patten} ?")
-        else:
-            raise ValueError(f"found more than one pathname {pathname}.")
-
-    pathname = property(_pathname, doc="the common relative path")
 
     def __len__(self):
         return len(self.filenames)

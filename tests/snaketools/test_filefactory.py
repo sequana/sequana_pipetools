@@ -17,8 +17,6 @@ def test_file_name_factory():
         ff.filenames
         ff.realpaths
         ff.all_extensions
-        ff.pathnames
-        ff.pathname
         ff.extensions
 
     # list

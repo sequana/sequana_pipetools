@@ -1,29 +1,27 @@
 import os
+from urllib.error import URLError
 
 import pytest
 
-from sequana_pipetools import snaketools, Module, SequanaConfig
-
-from urllib.error import URLError
+from sequana_pipetools import Pipeline, SequanaConfig, snaketools
 
 from .. import test_dir
 
-
-def test_valid_config(tmpdir):
-    config = SequanaConfig(None)
-
-    s = Module("pipeline:fastqc")
-    config = SequanaConfig(s.config)
-    fh = tmpdir.join("config.yml")
-    config.save(fh)
-    config.create_draft_schema()
+# def test_valid_config(tmpdir):
+#    config = SequanaConfig(None)
+#
+#    s = Module("fastqc")
+#    config = SequanaConfig(s.config)
+#    fh = tmpdir.join("config.yml")
+#    config.save(fh)
+#    config.create_draft_schema()
 
 
 # this is a regression bug that guarantees that
 # changing an attribute is reflected in the output config file
 # when we change a value
 def test_attrdict(tmpdir):
-    s = Module("pipeline:fastqc")
+    s = Pipeline("fastqc")
     config = SequanaConfig(s.config)
 
     # This must be accessicle as an attribute
@@ -42,9 +40,8 @@ def test_attrdict(tmpdir):
     assert config2.config.general.method_choice == "XXXX"
 
 
-
 def test_sequana_config(tmpdir):
-    s = Module("pipeline:fastqc")
+    s = Pipeline("fastqc")
     config = SequanaConfig(s.config)
 
     assert config.config.get("input_pattern") == "*fastq.gz"
@@ -66,7 +63,7 @@ def test_sequana_config(tmpdir):
         config = SequanaConfig("dummy_dummy")
 
     # Test warning
-    s = Module("pipeline:fastqc")
+    s = Pipeline("fastqc")
     config = SequanaConfig(s.config)
     config._recursive_update(config._yaml_code, {"input_directory_dummy": "test"})
 
@@ -84,7 +81,7 @@ def test_sequana_config(tmpdir):
     output = tmpdir.join("test.yml")
     for pipeline in snaketools.pipeline_names:
         if "_fastqc" in pipeline:
-            config_filename = Module(pipeline)._get_config()
+            config_filename = Pipeline(pipeline)._get_config()
             cfg1 = SequanaConfig(config_filename)
 
             cfg1.save(output)
@@ -96,14 +93,14 @@ def test_sequana_config(tmpdir):
     cfg = SequanaConfig(s.config)
     cfg.config.input_directory = "~/"
     cfg.config.multiqc.config_file = "~/"
-    cfg._recursive_cleanup(cfg.config) 
+    cfg._recursive_cleanup(cfg.config)
     assert cfg.config.input_directory.startswith("/")
     assert cfg.config.multiqc.config_file.startswith("/")
 
 
 def test_check_config_with_schema():
-    schema = Module("pipeline:fastqc").schema_config
-    SequanaConfig(Module("pipeline:fastqc").config).check_config_with_schema(schema)
+    schema = Pipeline("fastqc").schema_config
+    SequanaConfig(Pipeline("fastqc").config).check_config_with_schema(schema)
 
 
 def test_check_bad_config_with_schema():
@@ -133,3 +130,10 @@ def test_check_config_with_schema_and_ext(tmpdir):
 
     cfg.config["busco"].update({"do": True, "lineage": "bacteria", "threads": ""})
     assert not cfg.check_config_with_schema(schema)
+
+
+def test_infer_schema():
+    cfg_name = os.path.join(test_dir, "data", "config.yml")
+    schema = os.path.join(test_dir, "data", "schema.yml")
+    cfg = SequanaConfig(cfg_name)
+    cfg.create_draft_schema()

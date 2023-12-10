@@ -30,7 +30,7 @@ from sequana_pipetools.misc import url2hash
 from sequana_pipetools.snaketools.profile import create_profile
 
 from .misc import Colors, PipetoolsException, print_version
-from .snaketools import Module, SequanaConfig
+from .snaketools import Pipeline, SequanaConfig
 
 logger = colorlog.getLogger(__name__)
 
@@ -89,7 +89,7 @@ class SequanaManager:
 
         # load the pipeline (to check it is possible and if it is a pipeline)
         try:
-            self.module = Module(f"pipeline:{self.name}")
+            self.module = Pipeline(f"{self.name}")
         except ValueError:
             logger.error(f"{self.name} does not seem to be installed or is not a valid pipeline")
             sys.exit(1)
@@ -105,7 +105,6 @@ class SequanaManager:
             options.from_project
         except AttributeError:
             options.from_project = False
-
 
         if options.from_project:
             possible_filenames = (
@@ -133,7 +132,7 @@ class SequanaManager:
         self.workdir = Path(options.workdir)
 
         # define the data path of the pipeline
-        #self.datapath = self._get_package_location()
+        # self.datapath = self._get_package_location()
 
         # Set wrappers as attribute so that it may be changed by the
         # user/developer
@@ -166,7 +165,7 @@ class SequanaManager:
     def _get_package_version(self):
         try:
             ver = pkg_resources.require("sequana_{}".format(self.name))[0].version
-        except pkg_resources.DistributionNotFound: #pragma: no cover
+        except pkg_resources.DistributionNotFound:  # pragma: no cover
             # check if the package exists
             ver = pkg_resources.require(self.name)[0].version
         return ver
@@ -182,17 +181,16 @@ class SequanaManager:
         options = self.options
         cfg = self.config.config
         if options.from_project:
-            if '--input-pattern' in sys.argv:
-                cfg.input_pattern = options['input_pattern']
-            if '--input-directory' in sys.argv:
-                cfg.input_directory = os.path.abspath(options['input_directory'])
-            if '--input-readtag' in sys.argv:
-                cfg.input_readtag = options['input_readtag']
+            if "--input-pattern" in sys.argv:
+                cfg.input_pattern = options["input_pattern"]
+            if "--input-directory" in sys.argv:
+                cfg.input_directory = os.path.abspath(options["input_directory"])
+            if "--input-readtag" in sys.argv:
+                cfg.input_readtag = options["input_readtag"]
         else:
             cfg.input_pattern = options.input_pattern
             cfg.input_readtag = options.input_readtag
             cfg.input_directory = os.path.abspath(options.input_directory)
-
 
     def setup(self):
         """Initialise the pipeline.
@@ -385,7 +383,6 @@ class SequanaManager:
                 if self.options.force:
                     shutil.rmtree(self.workdir / "rules")
                     shutil.copytree(self.module.rules, self.workdir / "rules")
-
 
         if self.module.requirements and os.path.exists(self.module.requirements):
             with open(self.workdir / ".sequana" / "tools.txt", "w") as fout:
@@ -623,4 +620,3 @@ def multiple_downloads(files_to_download, timeout=3600):
             await asyncio.gather(*(download(session, *data) for data in files_to_download))
 
     asyncio.run(download_all(files_to_download))
-

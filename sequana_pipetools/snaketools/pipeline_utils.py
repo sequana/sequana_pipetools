@@ -10,14 +10,17 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import os
+import shutil
+import sys
 
 import colorlog
-import easydev
 
-from .module import Module, modules
+from .module import Pipeline, modules
 
 logger = colorlog.getLogger(__name__)
+
+
+__all__ = ["Makefile", "OnSuccessCleaner", "get_pipeline_statistics", "message"]
 
 
 class Makefile:
@@ -30,6 +33,7 @@ class Makefile:
                 getattr(self, f"add_{section}")()
             except AttributeError:
                 logger.warning(f"no {section} section found in Makefile class")
+                sys.exit(1)
 
     def add_remove_done(self):
         self.text += "\nremove_done:\n\trm -f ./*/*/*.done"
@@ -42,9 +46,9 @@ class Makefile:
 
     def add_bundle(self):
         txt = "bundle:\n"
-        if easydev.cmd_exists("pigz"):
+        if shutil.which("pigz"):
             txt += "\ttar cvf - * | pigz  -p 4 > results.tar.gz\n"
-        else:
+        else:  # pragma: no cover
             txt += "\ttar cvfz results.tar.gz *\n"
         self.text += txt
 
@@ -116,8 +120,8 @@ def get_pipeline_statistics():
         df.sum(axis=0).plot(kind="barh")
 
     """
-    pipelines = sorted([m for m in modules if Module(m).is_pipeline()])
-
+    pipelines = sorted(modules)
+    # FIXME should be in pyproject as extra
     import numpy as np
     import pandas as pd
 
@@ -132,7 +136,7 @@ def get_pipeline_statistics():
     # first pass to identify the wrappers
     wrappers = set()
     for pipeline in pipelines:
-        snakefile = Module(pipeline).snakefile
+        snakefile = Pipeline(pipeline).snakefile
         wrappers.update(get_wrapper_names(snakefile))
 
     # second pass to populate the matrix
@@ -140,12 +144,11 @@ def get_pipeline_statistics():
     L, C = len(wrappers), len(pipelines)
     df = pd.DataFrame(np.zeros((L, C)), dtype=int, index=wrappers, columns=pipelines)
     for pipeline in pipelines:
-        snakefile = Module(pipeline).snakefile
+        snakefile = Pipeline(pipeline).snakefile
         wrappers = get_wrapper_names(snakefile)
         for wrapper in wrappers:
             df.loc[wrapper, pipeline] += 1
 
-    df.columns = [x.replace("pipeline:", "") for x in df.columns]
     return df
 
 

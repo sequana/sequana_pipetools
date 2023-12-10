@@ -17,6 +17,7 @@ import sys
 import colorlog
 import pkg_resources
 from easydev import get_package_location as gpl
+
 from sequana_pipetools.misc import Singleton
 
 logger = colorlog.getLogger(__name__)
@@ -34,7 +35,7 @@ class ModuleFinder(metaclass=Singleton):
 
             >>> from sequana import ModuleFinderSingleton
             >>> modnames = ModuleFinderSingleton()
-            >>> modnames.isvalid('dag')
+            >>> modnames.isvalid('fastqc')
             True
             >>> modnames.isvalid('dummy')
             False
@@ -44,77 +45,20 @@ class ModuleFinder(metaclass=Singleton):
         self._paths = {}
         self._type = {}
 
-        # scan the official path for all rules
-        self._add_rules()
-
         # scan all pipeline from sequana_pipelines namespace
         self._add_pipelines()
-
-    def _is_version(self, version, path):
-        try:
-            # if we can convert the name into an integer, we have an integer for
-            # a rule name, which is not possible
-            int(version)
-            logger.error(f"A rule name cannot be a number. Found rule named {version}")
-            sys.exit(1)
-        except ValueError:
-            pass
-
-        if "." in version:
-            if version.count(".") == 1:
-                x, y = version.split(".")
-                int(x)
-                int(y)
-            else:
-                logger.error(
-                    "A module version can only contain a single"
-                    ". character, which is used for setting module's "
-                    "version in the form x.y"
-                )
-                sys.exit(1)
-            return True
-        else:
-            return False
-
-    def _add_rules(self):
-        # FIXME remove it when rules are deprecated
-        sepjoin = os.sep.join
-        try:
-            fullpath = sepjoin([gpl("sequana"), "sequana", "rules"])
-        except pkg_resources.DistributionNotFound:
-            return
-        fullpaths = self._iglob(fullpath)
-
-        for this in fullpaths:
-            whatever, module_name, filename = this.rsplit(os.sep, 2)
-            if module_name in self._paths.keys():
-                logger.warning("Found duplicated name %s from %s" % (module_name, this) + "Overwrites previous rule ")
-
-            if self._is_version(module_name, this):
-                # the module name is the name before the version + the version
-                module_name = filename.replace(".rules", "") + "/" + module_name
-                _, version = module_name.split("/")
-                self._paths[module_name] = whatever + os.sep + version
-            else:
-                self._paths[module_name] = whatever + os.sep + module_name
 
     def _add_pipelines(self):
         try:
             import sequana_pipelines
-        except ModuleNotFoundError:
+        except ModuleNotFoundError:  # pragma: no cover
             logger.debug("sequana pipelines not installed. Please install a pipeline from github.com/sequana")
             return
 
         for ff, module_name, _ in pkgutil.iter_modules(sequana_pipelines.__path__):
-            self._paths[f"pipeline:{module_name}"] = ff.path + os.sep + module_name
+            self._paths[f"{module_name}"] = ff.path + os.sep + module_name
 
             logger.debug("Found {} pipeline".format(module_name))
-
-    def _iglob(self, path, extension="rules"):
-        from glob import iglob
-
-        matches = tuple(iglob("%s/**/*.%s" % (path, extension), recursive=True))
-        return matches
 
     def _get_names(self):
         return sorted(list(self._paths.keys()))
