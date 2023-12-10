@@ -2,7 +2,7 @@ type: map
 mapping:
   "busco":
     type: map
-    func: ext_map_optionnal
+    func: ext_map_optional
     mapping:
       "do":
         type: bool

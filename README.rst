@@ -52,7 +52,7 @@ having 80% test coverage. Adding new pipelines also necessitated the addition of
     :scale: 40%
 
     **Figure 2** v0.8 of Sequana moved the Snakemake pipelines in indepdendent
-    repositories. A `cookie cutter <https://github.com/sequana/sequana_pipeline_template>`_ 
+    repositories. A `cookie cutter <https://github.com/sequana/sequana_pipeline_template>`_
     ease the creation of scuh pipelines
 
 
@@ -63,7 +63,7 @@ However, certain tools, such as those used for user interface and input data san
 
     **Figure 3** New Sequana framework. The library contains the core and
     bioinformatics tools and is now distinct from  the pipelines. Additionally, the
-    sequana_pipetools library supplies common tools to assist in the creaton and management of all pipelines, 
+    sequana_pipetools library supplies common tools to assist in the creaton and management of all pipelines,
     such as shared parser for options.
 
 Finally, we dropped the rules/ available in Sequana to build an independent package with a set of Snakemake
@@ -73,7 +73,7 @@ wrappers. These wrappers are available on https://github.com/sequana/sequana-wra
     :scale: 40%
 
     **Figure 3** New Sequana framework 2021. The library itself with the core, the
-    bioinformatics tools is now fully independent of the pipelines. 
+    bioinformatics tools is now fully independent of the pipelines.
 
 
 Installation
@@ -117,7 +117,7 @@ Will print a short summary report with common errors (if any).
 The library is intended to help Sequana developers to design their pipelines.
 See the `Sequana organization repository for examples <https://github.com/sequana>`_.
 
-In addition to those standalones, sequana_pipetools goal is to provide utilities to help Sequana developers. 
+In addition to those standalones, sequana_pipetools goal is to provide utilities to help Sequana developers.
 We currently provide a set of Options classes that should be used to
 design the API of your pipelines. For example, the
 sequana_pipetools.options.SlurmOptions can be used as follows inside a standard
@@ -155,7 +155,7 @@ Python module (the last two lines is where the magic happens)::
         # fills input_data, input_directory, input_readtag
         manager.fill_data_options()
 
-        # fill specific options. 
+        # fill specific options.
         # create a function for a given option (here --method)
         def fill_method():
             # any extra sanity checks
@@ -175,14 +175,14 @@ Python module (the last two lines is where the magic happens)::
 
     if __name__ == "__main__":
         main()
- 
+
 
 
 Developers should look at e.g. module sequana_pipetools.options
 for the API reference and one of the official sequana pipeline (e.g.,
 https://github.com/sequana/sequana_variant_calling) to get help from examples.
 
-The Options classes provided can be used and combined to design pipelines. 
+The Options classes provided can be used and combined to design pipelines.
 
 
 How to create skeleton of a Sequana pipeline with cookiecutter
@@ -267,7 +267,7 @@ for Apptainer setup.
 What is Sequana ?
 =================
 
-**Sequana** is a versatile tool that provides 
+**Sequana** is a versatile tool that provides
 
 #. A Python library dedicated to NGS analysis (e.g., tools to visualise standard NGS formats).
 #. A set of Pipelines dedicated to NGS in the form of Snakefiles
@@ -288,6 +288,14 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.16.5    * merge completion standalone into main sequana_pipetools application
+          * add application to create schema given a config file
+          * add application to get basic stats about the pipelines
+          * add precommit and applied black/isort on all files
+          * remove some useless code
+          * update completion to use click instead of argparse
+          * Rename Module into Pipeline (remove rules so Module are only made
+            of pipelines hence the renaming)
 0.16.4    * fix Trimming options (click) for the quality option
 0.16.3    * add class to handle multiplex entry for click.option (useful for
             multitax multiple databases)
@@ -298,7 +306,7 @@ Version   Description
           * --from-project not funtcional (example in multitax pipeline)
           * Click checks that input-directoyr is a directory indeed
 0.16.1    * Fix/rename error_report into onerror to be included in the Snakemake
-            onerror section. added 'slurm' in slurm output log file in the 
+            onerror section. added 'slurm' in slurm output log file in the
             profile
 0.16.0    * scripts now use click instead of argparse
           * All Options classes have now an equivalent using click.
@@ -313,17 +321,17 @@ Version   Description
           * sequana_slurm_status removed. Use manager.error_report in pipelines
             instead
 0.15.0    * remove useless code (readme, description) related to old rules
-          * requirements.txt renamed in tools.txt to store the required tools to 
-            run a pipeline. 
+          * requirements.txt renamed in tools.txt to store the required tools to
+            run a pipeline.
           * remove copy_requirements, not used in any pipelines (replaced by code
             in main.py of the pipelines)
-          * a utility function called getmetadata that returns dictionary 
+          * a utility function called getmetadata that returns dictionary
             with name, version, wrappers version)
 0.14.1    * remove a print statement
-0.14.0    * Module now returns the list of requirements. SequanaManager 
-            creates a txt file with all standalones from the requirements. 
+0.14.0    * Module now returns the list of requirements. SequanaManager
+            creates a txt file with all standalones from the requirements.
 0.13.0    * switch to pyproject and fixes #64
-0.12.5    * automatically populater 'wrappers' in PipelineManager' based on the 
+0.12.5    * automatically populater 'wrappers' in PipelineManager' based on the
             config entry 'sequana_wrappers'.
 0.12.4    * handles sequana pipeline with underscores (e.g. pacbio_qc)
 0.12.3    * fixes singularity-args in profile

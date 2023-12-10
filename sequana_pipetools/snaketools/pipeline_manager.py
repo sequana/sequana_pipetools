@@ -16,11 +16,12 @@ import shutil
 
 import colorlog
 from deprecated import deprecated
+
 from sequana_pipetools.errors import PipeError
 from sequana_pipetools.misc import PipetoolsException
 
 from .file_factory import FastQFactory, FileFactory
-from .module import Module
+from .module import Pipeline
 from .pipeline_utils import OnSuccessCleaner, message
 from .sequana_config import SequanaConfig
 
@@ -112,7 +113,7 @@ class PipelineManagerBase:
         try:
             # check requirements if possible. This is the standalone application
             # requirements, not the files possibly provided in the config file
-            Module(self.name).check("warning")
+            Pipeline(self.name).check("warning")
         except ValueError:
             pass
 

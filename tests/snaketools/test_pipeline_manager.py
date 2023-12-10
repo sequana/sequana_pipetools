@@ -1,9 +1,10 @@
 import os
 import subprocess
 from pathlib import Path
+
 import pytest
 
-from sequana_pipetools import snaketools, SequanaConfig, Module
+from sequana_pipetools import Pipeline, SequanaConfig, snaketools
 from sequana_pipetools.misc import PipetoolsException
 
 from .. import test_dir
@@ -16,11 +17,10 @@ def test_pipeline_manager(tmpdir):
         pm = snaketools.PipelineManager("custom", cfg)
 
     # normal behaviour but no input provided:
-    config = Module("pipeline:fastqc")._get_config()
+    config = Pipeline("fastqc")._get_config()
     cfg = SequanaConfig(config)
     with pytest.raises(PipetoolsException):
         pm = snaketools.PipelineManager("custom", cfg)
-
 
     # normal behaviour
     cfg = SequanaConfig(config)
@@ -29,7 +29,6 @@ def test_pipeline_manager(tmpdir):
     pm = snaketools.PipelineManager("custom", cfg)
     assert not pm.paired
     pm.teardown()
-
 
     # here not readtag provided, so data is considered to be non-fastq related
     # or at least not paired
@@ -42,7 +41,7 @@ def test_pipeline_manager(tmpdir):
     # Test different configuration of input_directory, input_readtag,
     # input_pattern
     # Test the _R[12]_ paired
-    working_dir = tmpdir.mkdir('test_Rtag_pe')
+    working_dir = tmpdir.mkdir("test_Rtag_pe")
     cfg = SequanaConfig()
     cfgname = working_dir / "config.yaml"
     cfg.config.input_pattern = "*fastq.gz"
@@ -58,7 +57,7 @@ def test_pipeline_manager(tmpdir):
     assert pm.paired
 
     # Test the _[12]. paired
-    working_dir = tmpdir.mkdir('test_tag_pe')
+    working_dir = tmpdir.mkdir("test_tag_pe")
     cfg = SequanaConfig()
     cfgname = working_dir / "config.yaml"
     cfg.config.input_pattern = "*fastq.gz"
@@ -74,7 +73,7 @@ def test_pipeline_manager(tmpdir):
     assert pm.paired
 
     # Test the _R[12]_ single end
-    working_dir = tmpdir.mkdir('test_Rtag_se')
+    working_dir = tmpdir.mkdir("test_Rtag_se")
     cfg = SequanaConfig()
     cfgname = working_dir / "config.yaml"
     cfg.config.input_pattern = "*fastq.gz"
@@ -88,7 +87,7 @@ def test_pipeline_manager(tmpdir):
     assert not pm.paired
 
     # Test the _R[12]_ single end
-    working_dir = tmpdir.mkdir('test_tag_se')
+    working_dir = tmpdir.mkdir("test_tag_se")
     cfg = SequanaConfig()
     cfgname = working_dir / "config.yaml"
     cfg.config.input_pattern = "*fq.gz"  # wrong on purpose
@@ -107,7 +106,7 @@ def test_pipeline_manager(tmpdir):
 def test_pipeline_manager_mixed_of_files(tmpdir):
     # Test a mix of bam and fastq files (with no tags)
     cfg = SequanaConfig({})
-    cfg.config.input_directory = test_dir +os.sep + "data"
+    cfg.config.input_directory = test_dir + os.sep + "data"
     cfg.config.input_pattern = "*notag*"
     pm = snaketools.PipelineManager("test", cfg)
     assert len(pm.samples) == 2
@@ -122,18 +121,18 @@ def test_pipeline_manager_mixed_of_files(tmpdir):
 
 def test_pipeline_manager_sample_func(tmpdir):
     cfg = SequanaConfig({})
-    cfg.config.input_directory = test_dir +os.sep + "data"
+    cfg.config.input_directory = test_dir + os.sep + "data"
     cfg.config.input_pattern = "Hm*.gz"
 
     def func(filename):
-        return filename.split("/")[-1].split('.', 1)[0]
+        return filename.split("/")[-1].split(".", 1)[0]
 
     pm = snaketools.PipelineManager("test", cfg, sample_func=func)
 
     # here, note that the sample_func is too simple and will extract the first part of the filename
     # so demultiplex.bc1010.fsatq.gz returns 'demultiplex'
-    assert 'Hm2_GTGAAA_L005_R1_001' in pm.samples
-    assert 'Hm2_GTGAAA_L005_R2_001' in pm.samples
+    assert "Hm2_GTGAAA_L005_R1_001" in pm.samples
+    assert "Hm2_GTGAAA_L005_R2_001" in pm.samples
 
 
 def test_pipeline_manager_common_prefix():
@@ -144,11 +143,11 @@ def test_pipeline_manager_common_prefix():
     assert "A" in pm.samples
     assert "B" in pm.samples
     assert "mess" in pm.samples
-    pm = snaketools.PipelineManager("custom", cfg, prefixes_to_strip=['mess.'])
+    pm = snaketools.PipelineManager("custom", cfg, prefixes_to_strip=["mess."])
 
 
 def test_multiqc_clean(tmpdir):
-    working_dir = tmpdir.mkdir('multiqc')
+    working_dir = tmpdir.mkdir("multiqc")
     cfg = SequanaConfig({})
     cfg.config.input_directory = str(Path(test_dir) / "data")
     cfg.config.input_pattern = "*notag*"
@@ -159,6 +158,7 @@ def test_multiqc_clean(tmpdir):
     pm.clean_multiqc(working_dir / "multiqc.html")
     pm.teardown(outdir=working_dir)
     pm.onerror()
+
 
 def test_pipeline_manager_wrong_inputs(tmpdir):
 
@@ -171,10 +171,9 @@ def test_pipeline_manager_wrong_inputs(tmpdir):
         pm = snaketools.pipeline_manager.PipelineManager("fastqc", cfg)
         pm.getrawdata()
 
-
     # test missing input_directory
     cfg = SequanaConfig({})
-    #cfg.config.input_directory, cfg.config.input_pattern = 
+    # cfg.config.input_directory, cfg.config.input_pattern =
     cfg.config.input_pattern = "DUMMY*gz"
     with pytest.raises(PipetoolsException):
         pm = snaketools.pipeline_manager.PipelineManager("fastqc", cfg)
@@ -183,7 +182,7 @@ def test_pipeline_manager_wrong_inputs(tmpdir):
     cfg = SequanaConfig({})
     file1 = os.path.join(test_dir, "data", "Hm2_GTGAAA_L005_R1_001.fastq.gz")
     cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
-    cfg.config.input_directory =  "DUMMY"
+    cfg.config.input_directory = "DUMMY"
     with pytest.raises(PipetoolsException):
         pm = snaketools.pipeline_manager.PipelineManager("fastqc", cfg)
 
@@ -196,11 +195,11 @@ def test_directory():
     cfg.config.input_pattern = "Hm*gz"
     pm = snaketools.pipeline_manager.PipelineManagerDirectory("test", cfg)
 
+
 def test_pipeline_others():
     cfg = SequanaConfig({})
     file1 = os.path.join(test_dir, "data", "Hm2_GTGAAA_L005_R1_001.fastq.gz")
     cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
     cfg.config.input_pattern = "Hm*gz"
     pm = snaketools.pipeline_manager.PipelineManager("fastqc", cfg)
-    #pm.getrawdata()
     pm.getmetadata()

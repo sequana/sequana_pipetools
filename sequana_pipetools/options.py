@@ -18,6 +18,8 @@ import sys
 
 from deprecated import deprecated
 
+from sequana_pipetools.snaketools import Pipeline
+
 from .misc import print_version
 
 __all__ = [
@@ -38,7 +40,7 @@ __all__ = [
     "before_pipeline",
     "init_click",
     "include_options_from",
-    "OptionEatAll"
+    "OptionEatAll",
 ]
 
 import rich_click as click
@@ -96,7 +98,7 @@ def include_options_from(cls, *args, **kwargs):
         caller_module = inspect.getmodule(f)
         if caller_module and "NAME" in caller_module.__dict__:
             NAME = caller_module.__dict__["NAME"]
-        else:
+        else:  # pragma: no cover
             print("You must define NAME as your pipeline name in the module main.py ")
             sys.exit(1)
 
@@ -115,7 +117,7 @@ def include_options_from(cls, *args, **kwargs):
 
 # This is a recipe from https://stackoverflow.com/questions/48391777/nargs-equivalent-for-options-in-click
 # to allow command line such as
-# sequana_multitax --databases 1 2 3 
+# sequana_multitax --databases 1 2 3
 class OptionEatAll(click.Option):
     def __init__(self, *args, **kwargs):
         self.save_other_options = kwargs.pop("save_other_options", True)
@@ -158,8 +160,6 @@ class OptionEatAll(click.Option):
         return retval
 
 
-
-
 @deprecated
 def before_pipeline(NAME):
     """A function to provide --version and --deps for all pipelines"""
@@ -171,9 +171,8 @@ def before_pipeline(NAME):
     if "--deps" in sys.argv:
         # Means than sequana must be installed, which we assume if someone uses
         # a pipeline. so must be here and not global import
-        from .snaketools import Module
 
-        module = Module("pipeline:" + NAME)
+        module = Pipeline(NAME)
         with open(str(module.requirements), "r") as fin:
             data = fin.read()
         print("Those software will be required for the pipeline to work correctly:\n{}".format(data))
@@ -184,7 +183,7 @@ class ClickGeneralOptions:
     group_name = "General"
     metadata = {
         "name": group_name,
-        "options": ["--deps", "--from-project",  "--help", "--level", "--version"],
+        "options": ["--deps", "--from-project", "--help", "--level", "--version"],
     }
 
     def __init__(self, caller=None):
@@ -240,9 +239,7 @@ class ClickGeneralOptions:
         if not value:
             return
 
-        from .snaketools import Module
-
-        module = Module("pipeline:" + ctx.NAME)
+        module = Pipeline(ctx.NAME)
         with open(str(module.requirements), "r") as fin:
             data = fin.read()
         data = data.split()
@@ -500,7 +497,6 @@ class ClickInputOptions:
                     accordingly to '_[12]'.""",
                 )
             )
-
 
 
 class InputOptions:
@@ -805,7 +801,7 @@ class CutadaptOptions:  # pragma: no cover
     This section allows you to trim bases (--cutadapt-quality) with poor
     quality and/or remove adapters.
 
-    To remove adapters, you can provide the adapters directly as a 
+    To remove adapters, you can provide the adapters directly as a
     string (or a file) using  --cutadapt-fwd (AND --cutadapt-rev" for paired-end data).
 
     If you set the --cutadapt-adapter-choice to 'none', fwd and reverse
