@@ -288,6 +288,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.16.6    * Set default value for the option trimming to 20
+          * Fix issue https://github.com/sequana/sequana_pipetools/issues/85
 0.16.5    * merge completion standalone into main sequana_pipetools application
           * add application to create schema given a config file
           * add application to get basic stats about the pipelines

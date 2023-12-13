@@ -608,7 +608,6 @@ class ClickTrimmingOptions:
         "name": group_name,
         "options": [
             "--software-choice",
-            "--trimming-adapter-read1",
             "--trimming-minimum-length",
             "--trimming-adapter-read1",
             "--trimming-adapter-read2",
@@ -666,11 +665,10 @@ class ClickTrimmingOptions:
             ),
             click.option(
                 "--trimming-minimum-length",
-                default=-1,
+                default=20,
                 show_default=True,
                 help="""minimum number of bases required; read discarded
-                    otherwise. For cutadapt, default is 20 and for fastp, 15. We use 20 for both by
-                    default.""",
+                    otherwise. For cutadapt, default is 20 and for fastp, 15. We set it to 20.""",
             ),
             click.option(
                 "--trimming-quality",

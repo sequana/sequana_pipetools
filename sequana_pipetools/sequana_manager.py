@@ -373,7 +373,12 @@ class SequanaManager:
 
         # the multiqc if any
         if self.module.multiqc_config:
-            shutil.copy(self.module.multiqc_config, self.workdir)
+            mqc_config = self.module.multiqc_config
+            shutil.copy(mqc_config, self.workdir / ".sequana/multiqc_config.yaml")
+            try:
+                os.symlink(".sequana/multiqc_config.yaml", self.workdir / "multiqc_config.yaml")
+            except FileExistsError:  # pragma: no cover
+                pass
 
         # the rules if any
         if self.module.rules:
@@ -392,7 +397,11 @@ class SequanaManager:
         # the schema if any
         if self.module.schema_config:
             schema_name = os.path.basename(self.module.schema_config)
-            shutil.copy(self.module.schema_config, self.workdir)
+            shutil.copy(self.module.schema_config, self.workdir / ".sequana/schema.yaml")
+            try:
+                os.symlink(".sequana/schema.yaml", self.workdir / "schema.yaml")
+            except FileExistsError:  # pragma: no cover
+                pass
 
             # This is the place where we can check the entire validity of the
             # inputs based on the schema
