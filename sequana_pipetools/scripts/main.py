@@ -173,7 +173,12 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
     type=click.STRING,
     help="""Name of a pipelines for which you wish to create the completion file. Set to a valid Sequana pipeline name that must be installed""",
 )
-@click.option("--force", is_flag=True, help="""overwrite files in sequana config pipeline directory""")
+@click.option(
+    "--force",
+    is_flag=True,
+    help="""overwrite files in sequana config pipeline directory (used with
+--completion)""",
+)
 @click.option("--stats", is_flag=True, help="""Plot some stats related to the Sequana pipelines (installed)""")
 @click.option(
     "--config-to-schema",
@@ -183,7 +188,7 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
 def main(**kwargs):
     """Pipetools utilities for the Sequana project (sequana.readthedocs.io)
 
-    The pipetools package is dedcated to the developers of Sequana pipelines.
+    The pipetools package is dedicated to the developers of Sequana pipelines.
     However, Pipetools provides a set of utilities starting with the completion
     script for the different pipeline.
 
@@ -200,18 +205,23 @@ def main(**kwargs):
         click.echo(f"sequana_pipetools v{version}")
         return
     elif kwargs["completion"]:
-        if kwargs["force"] is False:
-            msg = "This will replace files in ./config/sequana/pipelines. " "Do you want to proceed y/n: "
-            choice = input(msg)
+        if kwargs["force"] is True:
+            choice = "y"
         else:
+            msg = "This action will replace files stored in ./config/sequana/pipelines. Do you want to proceed y/n: "
+            choice = input(msg)
+        if choice != "y":
+            sys.exit(0)
+
+        name = kwargs["completion"]
+        try:
+            c = ClickComplete(name)
+            c.save_completion_script()
+        except DistributionNotFound:  # pragma: no cover
+            click.echo(f"# Warning {name} could not be imported. Nothing done")
+        finally:
             click.echo("Please source the files using:: \n")
-            name = kwargs["completion"]
-            try:
-                c = ClickComplete(name)
-                c.save_completion_script()
-                click.echo("    source ~/.config/sequana/pipelines/{}.sh".format(name))
-            except DistributionNotFound:  # pragma: no cover
-                click.echo(f"# Warning {name} could not be imported. Nothing done")
+            click.echo("    source ~/.config/sequana/pipelines/{}.sh".format(name))
             click.echo("\nto activate the completion")
     elif kwargs["stats"]:
         from sequana_pipetools.snaketools.pipeline_utils import get_pipeline_statistics

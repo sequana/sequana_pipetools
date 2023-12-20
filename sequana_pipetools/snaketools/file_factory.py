@@ -332,7 +332,7 @@ class FastQFactory(FileFactory):
         if self.read_tag:
             read_tag = self.read_tag.replace("[12]", r)
 
-            # changed in v0.8.7 tricky hanbling of sample names
+            # changed in v0.8.7 tricky hanhling of sample names
             # https://github.com/sequana/sequana/issues/576
             candidates = [
                 realpath
@@ -394,7 +394,7 @@ class FastQFactory(FileFactory):
             return False
         elif R1 == R2:
             return True
-        else:
+        else:  # pragma: no cover
             logger.error("Mix of paired and single-end data sets {}".format(self.pattern))
             sys.exit(1)
 
