@@ -288,6 +288,9 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.16.7    * add missing --trimming-quality option in list of TrimmingOption
+          * set default to cutadatp if no fastp available
+          * better UI for the completion script.
 0.16.6    * Set default value for the option trimming to 20
           * Fix issue https://github.com/sequana/sequana_pipetools/issues/85
 0.16.5    * merge completion standalone into main sequana_pipetools application

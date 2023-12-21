@@ -471,7 +471,7 @@ class ClickInputOptions:
                 type=click.Path(exists=True, file_okay=False),
                 # required=True,
                 show_default=True,
-                help="""Where to find the FastQ files""",
+                help="""Where to find the input files""",
             ),
             click.option(
                 "--input-pattern",
@@ -479,7 +479,7 @@ class ClickInputOptions:
                 default=self.input_pattern,
                 type=click.STRING,
                 show_default=True,
-                help="pattern for the input FastQ files ",
+                help=f"pattern for the input files ({input_pattern})",
             ),
         ]
 
@@ -614,6 +614,7 @@ class ClickTrimmingOptions:
             "--disable-trimming",
             "--trimming-cutadapt-mode",
             "--trimming-cutadapt-options",
+            "--trimming-quality",
         ],
     }
 
@@ -627,7 +628,7 @@ class ClickTrimmingOptions:
         """
 
         self.software = software
-        self.software_default = "fastp"
+        self.software_default = "fastp" if "fastp" in software else software[0]
 
         def quality(x):
             x = int(x)

@@ -131,9 +131,6 @@ class SequanaManager:
         # the working directory
         self.workdir = Path(options.workdir)
 
-        # define the data path of the pipeline
-        # self.datapath = self._get_package_location()
-
         # Set wrappers as attribute so that it may be changed by the
         # user/developer
         self.sequana_wrappers = os.environ.get(
@@ -272,7 +269,9 @@ class SequanaManager:
         cfg = self.config.config
 
         filenames = glob.glob(cfg.input_directory + os.sep + cfg.input_pattern)
-        logger.info(f"Found {len(filenames)} files matching your input  pattern ({cfg.input_pattern})")
+        logger.info(
+            f"Found {len(filenames)} files matching your input  pattern ({cfg.input_pattern}) in {cfg.input_directory}"
+        )
 
         if len(filenames) == 0:
             logger.critical(f"Found no files with your matching pattern ({cfg.input_pattern}) in {cfg.input_directory}")
@@ -480,7 +479,7 @@ class SequanaManager:
                         msg = (
                             "The version {} of your completion file for the {} pipeline seems older than the installed"
                             " pipeline itself ({}). Please, consider updating the completion file {}"
-                            " using the following command: \n\t sequana_completion --name {}\n"
+                            " using the following command: \n\t sequana_pipetools --completion {}\n"
                             "available in the sequana_pipetools package (pip install sequana_completion)"
                         )
                         msg = msg.format(version, self.name, self._get_package_version(), completion, self.name)

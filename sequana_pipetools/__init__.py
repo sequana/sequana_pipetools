@@ -1,10 +1,15 @@
-import pkg_resources
+from importlib import metadata
 
-try:
-    version = pkg_resources.require("sequana_pipetools")[0].version
-except pkg_resources.DistributionNotFound:  # pragma: no cover
-    version = ">=0.2.0"
 
+def get_package_version(package_name):
+    try:
+        version = metadata.version(package_name)
+        return version
+    except metadata.PackageNotFoundError:
+        return f"{package_name} not found"
+
+
+version = get_package_version("sequana_pipetools")
 
 from easydev.logging_tools import Logging
 

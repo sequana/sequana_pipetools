@@ -1,18 +1,21 @@
 import argparse
-import pytest
 import sys
+
+import pytest
+
 from sequana_pipetools.options import (
-    before_pipeline,
-    TrimmingOptions,
-    SnakemakeOptions,
-    KrakenOptions,
-    FeatureCountsOptions,
     ClickGeneralOptions,
-    OptionEatAll
+    FeatureCountsOptions,
+    KrakenOptions,
+    OptionEatAll,
+    SnakemakeOptions,
+    TrimmingOptions,
+    before_pipeline,
 )
 
 # for test_click_general_options() to work we need to define a global variable
 NAME = "TEST"
+
 
 def test_misc():
 
@@ -79,6 +82,7 @@ def test_input_options():
 
 def test_general_options():
     from sequana_pipetools.options import GeneralOptions
+
     p = argparse.ArgumentParser()
     so = GeneralOptions()
     so.add_options(p)
@@ -86,19 +90,21 @@ def test_general_options():
 
 
 def test_click_general_options():
-    from sequana_pipetools.options import (
-        ClickGeneralOptions, 
-        ClickSlurmOptions, 
-        ClickSnakemakeOptions,
-        ClickFeatureCountsOptions,
-        ClickTrimmingOptions,
-        ClickKrakenOptions,
-        ClickInputOptions, 
-        include_options_from, 
-        init_click)
     import rich_click as click
 
-    init_click("TEST", groups={"test":1})
+    from sequana_pipetools.options import (
+        ClickFeatureCountsOptions,
+        ClickGeneralOptions,
+        ClickInputOptions,
+        ClickKrakenOptions,
+        ClickSlurmOptions,
+        ClickSnakemakeOptions,
+        ClickTrimmingOptions,
+        include_options_from,
+        init_click,
+    )
+
+    init_click("TEST", groups={"test": 1})
 
     @click.command()
     @include_options_from(ClickGeneralOptions)
@@ -110,26 +116,40 @@ def test_click_general_options():
     @include_options_from(ClickTrimmingOptions)
     def main(**kwargs):
         pass
+
     with pytest.raises(SystemExit):
         main(["--help"])
 
     with pytest.raises(SystemExit):
         main(["--version"])
 
+    # with pytest.raises(ValueError, SystemExit):
+    #    main(["--from-project"])
+
+    with pytest.raises(ValueError):
+        main(["--deps"])
+
 
 def test_click_option_eat_all():
-    from click.testing import CliRunner
+    import ast
 
     import click
-    @click.option("--databases", "databases",
-        type=click.STRING,
-        cls=OptionEatAll,
-        #callback=check_databases
-        )
+    from click.testing import CliRunner
+
+    def check_databases(ctx, param, value):
+        if value:
+            # click transform the input databases  (tuple) into a string
+            # we need to convert it back to a tuple before checking the databases
+            values = ast.literal_eval(value)
+            for db in values:
+                click.echo(f"{db} used")
+        return ast.literal_eval(value)
+
+    @click.option("--databases", "databases", type=click.STRING, cls=OptionEatAll, callback=check_databases)
     def main(**options):
         pass
+
     main.name = "root"
 
     runner = CliRunner()
     runner.invoke(main, ["--databases", "1", "2"])
-        

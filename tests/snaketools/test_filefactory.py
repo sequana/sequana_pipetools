@@ -35,6 +35,12 @@ def test_file_name_factory():
     ff.get_file2(ff.tags[0])
     assert len(ff) == 1
 
+    try:
+        ff = snaketools.FastQFactory(test_dir + "/data/Hm2*fastq.gz", verbose=True, read_tag="dummy[12]")
+        assert False
+    except ValueError:
+        assert True
+
 
 def test_fastqfactory():
     with pytest.raises(ValueError):
