@@ -17,8 +17,9 @@ import shutil
 import colorlog
 from deprecated import deprecated
 
-from sequana_pipetools.errors import PipeError
+from sequana_pipetools import get_package_version
 from sequana_pipetools.misc import PipetoolsException
+from sequana_pipetools.snaketools.errors import PipeError
 
 from .file_factory import FastQFactory, FileFactory
 from .module import Pipeline
@@ -170,9 +171,8 @@ class PipelineManagerBase:
 
     def get_html_summary(self, float="left", width=30):
         import pandas as pd
-        import pkg_resources
 
-        vers = pkg_resources.require("sequana_{}".format(self.name))[0].version
+        vers = get_package_version(f"sequana_{self.name}")
 
         data = {"samples": len(self.samples), "sequana_{}_version".format(self.name): vers}
         try:

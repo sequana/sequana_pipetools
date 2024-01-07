@@ -10,21 +10,22 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import glob
+from pathlib import Path
 
-from .slurm import DebugJob
+from sequana_pipetools import logger
+
+from .slurm import SlurmParsing
 
 
 class PipeError:
-    def __init__(self, name, **kwars):
-        self.name = name
+    """A factory to deal with errors"""
 
-    def status(self, slurm_directory="./"):
-        print(
-            f"An error occurred during the execution. Please fix the issue and run the script again (sh {self.name}.sh)"
-        )
+    def __init__(self, *args, **kwargs):
+        pass
 
-        filenames = glob.glob(slurm_directory + "slurm*")
-        if len(filenames):  # pragma: no cover
-            dj = DebugJob(slurm_directory)
+    def status(self, working_directory="./", logs_directory="logs"):
+        try:  # let us try to introspect the slurm files
+            dj = SlurmParsing(working_directory, logs_directory)
             print(dj)
+        except Exception as err:  # pragma: no cover
+            print(err)

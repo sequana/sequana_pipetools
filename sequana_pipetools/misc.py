@@ -13,7 +13,7 @@
 import hashlib
 import sys
 
-import pkg_resources
+from sequana_pipetools import get_package_version
 
 __all__ = ["Colors", "print_version", "error", "url2hash"]
 
@@ -88,21 +88,21 @@ def error(msg, pipeline):
 
 def print_version(name):
     try:
-        ver = pkg_resources.require("sequana_{}".format(name))[0].version
-        print("sequana_{} version: {}".format(name, ver))
+        ver = get_package_version(f"sequana_{name}")
+        print(f"sequana_{name} version: {ver}")
     except Exception as err:
         print(err)
-        print("sequana_{} version: ?".format(name))
+        print(f"sequana_{name} version: ?")
 
     try:
-        version = pkg_resources.require("sequana")[0].version
-        print("Sequana version: {}".format(version))
+        version = get_package_version(f"sequana")
+        print(f"Sequana version: {version}")
     except Exception:  # pragma: no cover
         pass
 
     try:
-        version = pkg_resources.require("sequana_pipetools")[0].version
-        print("Sequana_pipetools version: {}".format(version))
+        version = get_package_version(f"sequana_pipetools")
+        print(f"Sequana_pipetools version: {version}")
     except Exception as err:  # pragma: no cover
         print(err)
         print("Sequana_pipetools version: ?")

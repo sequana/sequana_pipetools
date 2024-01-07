@@ -10,6 +10,7 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
+import re
 import shutil
 import sys
 
@@ -125,6 +126,11 @@ def get_pipeline_statistics():
     import numpy as np
     import pandas as pd
 
+    def count_occurrences(text):
+        pattern = r"rule\s\w+:"
+        matches = re.findall(pattern, text)
+        return len(matches)
+
     def get_wrapper_names(filename):
         wrappers = set()
         with open(snakefile) as fh:
@@ -139,6 +145,17 @@ def get_pipeline_statistics():
         snakefile = Pipeline(pipeline).snakefile
         wrappers.update(get_wrapper_names(snakefile))
 
+    # first pass to identify the wrappers
+    rules = {}
+    for pipeline in pipelines:
+        snakefile = Pipeline(pipeline).snakefile
+        with open(snakefile, "r") as fin:
+            data = fin.read()
+            rules[pipeline] = count_occurrences(data)
+    print(rules)
+    rules = pd.DataFrame([rules[k] for k in sorted(rules.keys())], index=sorted(rules.keys()), dtype=int)
+    rules.columns = ["rules"]
+
     # second pass to populate the matrix
     wrappers = sorted(list(wrappers))
     L, C = len(wrappers), len(pipelines)
@@ -149,7 +166,7 @@ def get_pipeline_statistics():
         for wrapper in wrappers:
             df.loc[wrapper, pipeline] += 1
 
-    return df
+    return df, rules
 
 
 def message(mes):

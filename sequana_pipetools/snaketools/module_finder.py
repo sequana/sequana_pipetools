@@ -15,8 +15,6 @@ import pkgutil
 import sys
 
 import colorlog
-import pkg_resources
-from easydev import get_package_location as gpl
 
 from sequana_pipetools.misc import Singleton
 

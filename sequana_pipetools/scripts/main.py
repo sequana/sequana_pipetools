@@ -185,6 +185,7 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
     type=click.Path(file_okay=True, dir_okay=False),
     help="""Given a config file, this command creates a draft schema file""",
 )
+@click.option("--slurm-diag", is_flag=True, help="Scans slurm files and get summary information")
 def main(**kwargs):
     """Pipetools utilities for the Sequana project (sequana.readthedocs.io)
 
@@ -201,6 +202,7 @@ def main(**kwargs):
         sequana_pipetools --completion multitax --force
 
     """
+
     if kwargs["version"]:
         click.echo(f"sequana_pipetools v{version}")
         return
@@ -226,17 +228,24 @@ def main(**kwargs):
     elif kwargs["stats"]:
         from sequana_pipetools.snaketools.pipeline_utils import get_pipeline_statistics
 
-        df = get_pipeline_statistics()
-        click.echo("\n ==== Number of rules per pipeline")
-        click.echo(df.sum(axis=0))
-        click.echo("\n ==== Number of time a rule is used")
-        click.echo(df.sum(axis=1))
+        wrappers, rules = get_pipeline_statistics()
+        click.echo("\n ==== Number of wrappers per pipeline")
+        click.echo(wrappers.sum(axis=0))
+        click.echo("\n ==== Number of time a wrapper is used")
+        click.echo(wrappers.sum(axis=1))
+        click.echo("\n ==== Number of rules used")
+        click.echo(rules)
     elif kwargs["config_to_schema"]:
         from sequana_pipetools.snaketools.sequana_config import SequanaConfig
 
         config_file = kwargs["config_to_schema"]
         cfg = SequanaConfig(config_file)
         cfg.create_draft_schema()
+    elif kwargs["slurm_diag"]:
+        from sequana_pipetools.snaketools.errors import PipeError
+
+        p = PipeError()
+        p.status(".")
 
 
 if __name__ == "__main__":
