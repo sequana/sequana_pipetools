@@ -1,0 +1,106 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 4
+Rules claiming more threads will be scaled down.
+Provided resources: mem_mb=4000, mem_mib=6584, disk_mb=6903, disk_mib=6584
+Conda environments: ignored
+Select jobs to execute...
+
+[Sat Jan  6 02:42:28 2024]
+rule quast:
+    input: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_500.fastq.gz, H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+    output: H149_P1_200723_500/quast/quast.done
+    jobid: 0
+    reason: Forced execution
+    wildcards: sample=H149_P1_200723_500
+    threads: 4
+    resources: mem_mb=4000, mem_mib=3815, disk_mb=6903, disk_mib=6584, tmpdir=/local/scratch/tmp, partition=common, qos=normal, mem=4G, gres=
+
+
+        quast.py -e --rna-finding -t 4 H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta --nanopore /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_500.fastq.gz -o H149_P1_200723_500/quast            && touch H149_P1_200723_500/quast/quast.done
+        
+Activating singularity image /pasteur/zeus/projets/p02/Biomics/resources/condas/sequana_0.16/apptainers/847f147b6a61a6684f5106b4bc25a0c7.simg
+WARNING: Python locale settings can't be changed
+/usr/local/bin/quast.py -e --rna-finding -t 4 H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta --nanopore /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_500.fastq.gz -o H149_P1_200723_500/quast
+
+Version: 5.2.0
+
+System information:
+  OS: Linux-4.18.0-477.27.1.el8_8.x86_64-x86_64-with-glibc2.31 (linux_64)
+  Python version: 3.10.11
+  CPUs number: 96
+
+Started: 2024-01-06 02:42:30
+
+Logging to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/quast.log
+
+CWD: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate
+Main parameters: 
+  MODE: default, threads: 4, eukaryotic: true, min contig length: 500, min alignment length: 65, \
+  min alignment IDY: 95.0, ambiguity: one, min local misassembly length: 200, min extensive misassembly length: 1000
+
+Contigs:
+  Pre-processing...
+  H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta ==> H149_P1_200723_500
+
+2024-01-06 02:42:32
+Running Reads analyzer...
+  Logging to files /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/reads_stats/reads_stats.log and /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/reads_stats/reads_stats.err...
+  Pre-processing reads...
+  Running BWA...
+  Done.
+  Sorting SAM-file...
+  Analysis is finished.
+  Creating total report...
+    saved to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/reads_stats/reads_report.txt, reads_report.tsv, and reads_report.tex
+Done.
+
+2024-01-06 03:25:10
+Running Basic statistics processor...
+  Contig files: 
+    H149_P1_200723_500
+  Calculating N50 and L50...
+    H149_P1_200723_500, N50 = 787466, L50 = 12, auN = 1062323.0, Total length = 33723594, GC % = 59.65, # N's per 100 kbp =  0.00
+  Drawing Nx plot...
+    saved to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/basic_stats/Nx_plot.pdf
+  Drawing cumulative plot...
+    saved to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/basic_stats/cumulative_plot.pdf
+  Drawing GC content plot...
+    saved to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/basic_stats/GC_content_plot.pdf
+  Drawing H149_P1_200723_500 GC content plot...
+    saved to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/basic_stats/H149_P1_200723_500_GC_content_plot.pdf
+Done.
+
+NOTICE: Genes are not predicted by default. Use --gene-finding or --glimmer option to enable it.
+
+2024-01-06 03:25:13
+Running Barrnap...
+Logging to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/predicted_genes/barrnap.log...
+    Ribosomal RNA genes = 15
+    Predicted genes (GFF): /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/predicted_genes/H149_P1_200723_500.rna.gff
+Done.
+
+2024-01-06 03:25:19
+Creating large visual summaries...
+This may take a while: press Ctrl-C to skip this step..
+  1 of 2: Creating PDF with all tables and plots...
+  2 of 2: Creating Icarus viewers...
+Done
+
+2024-01-06 03:25:20
+RESULTS:
+  Text versions of total report are saved to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/report.txt, report.tsv, and report.tex
+  Text versions of transposed total report are saved to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/transposed_report.txt, transposed_report.tsv, and transposed_report.tex
+  HTML version (interactive tables and plots) is saved to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/report.html
+  PDF version (tables and plots) is saved to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/report.pdf
+  Icarus (contig browser) is saved to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/icarus.html
+  Log is saved to /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723_500/quast/quast.log
+
+Finished: 2024-01-06 03:25:20
+Elapsed time: 0:42:50.432404
+NOTICEs: 1; WARNINGs: 1; non-fatal ERRORs: 0
+
+Thank you for using QUAST!
+[Sat Jan  6 03:25:21 2024]
+Finished job 0.
+1 of 1 steps (100%) done

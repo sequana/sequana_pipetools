@@ -15,7 +15,6 @@ import shutil
 
 import colorlog
 import easydev
-import pkg_resources
 
 from .module_finder import ModuleFinder
 
@@ -100,9 +99,10 @@ or open a Python shell and type::
         return txt
 
     def _get_version(self):
+        from sequana_pipetools import get_package_version
 
-        ver = pkg_resources.require(f"sequana_{self.name}")[0].version
-        return ver
+        version = get_package_version("sequana_{self.name}")
+        return version
 
     version = property(_get_version, doc="Get version")
 

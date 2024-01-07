@@ -22,10 +22,10 @@ from urllib.request import urlretrieve
 
 import aiohttp
 import colorlog
-import pkg_resources
 from easydev import AttrDict, CustomConfig
 from tqdm.asyncio import tqdm
 
+from sequana_pipetools import get_package_version
 from sequana_pipetools.misc import url2hash
 from sequana_pipetools.snaketools.profile import create_profile
 
@@ -160,19 +160,10 @@ class SequanaManager:
         return True
 
     def _get_package_version(self):
-        try:
-            ver = pkg_resources.require("sequana_{}".format(self.name))[0].version
-        except pkg_resources.DistributionNotFound:  # pragma: no cover
-            # check if the package exists
-            ver = pkg_resources.require(self.name)[0].version
-        return ver
+        return get_package_version(f"sequana_{self.name}")
 
     def _get_sequana_version(self):
-        try:
-            ver = pkg_resources.require(f"sequana")[0].version
-            return ver
-        except pkg_resources.DistributionNotFound:  # pragma: no cover
-            return "not installed"
+        return get_package_version("sequana")
 
     def fill_data_options(self):
         options = self.options

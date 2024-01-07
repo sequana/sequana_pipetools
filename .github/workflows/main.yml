@@ -37,6 +37,7 @@ jobs:
     - name: install package itself
       run: |
          pip install poetry
+         pip install kaleido #required on github CI by plotly
          poetry install
 
     - name: testing

@@ -288,6 +288,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.16.8    * stats command add the number of rules per pipeline
+          * better slurm parsing using profile tree directory (slurm in logs/)
 0.16.7    * add missing --trimming-quality option in list of TrimmingOption
           * set default to cutadatp if no fastp available
           * better UI for the completion script.

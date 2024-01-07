@@ -1,0 +1,43 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 4
+Rules claiming more threads will be scaled down.
+Provided resources: mem_mb=16000, mem_mib=6507, disk_mb=6823, disk_mib=6507
+Conda environments: ignored
+Select jobs to execute...
+
+[Sat Jan  6 08:12:32 2024]
+rule minimap2_and_genomecov:
+    input: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_1000.fastq.gz, H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+    output: H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bam, H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bed
+    jobid: 0
+    reason: Forced execution
+    wildcards: sample=H149_P1_200723_1000
+    threads: 4
+    resources: mem_mb=16000, mem_mib=6507, disk_mb=6823, disk_mib=6507, tmpdir=/local/scratch/tmp, partition=common, qos=normal, mem=16G, gres=
+
+
+        minimap2  -t 4 -ax map-ont H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_1000.fastq.gz             | samtools sort -@ $((4 - 1)) -o H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bam            && samtools index H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bam            && samtools depth -aa H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bam > H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bed
+        
+Activating singularity image /pasteur/zeus/projets/p02/Biomics/resources/condas/sequana_0.16/apptainers/c3e4a8244ce7b65fa873ebda134fea7f.simg
+[M::mm_idx_gen::1.537*0.72] collected minimizers
+[M::mm_idx_gen::1.792*1.09] sorted minimizers
+[M::main::1.792*1.09] loaded/built the index for 98 target sequence(s)
+[M::mm_mapopt_update::1.863*1.09] mid_occ = 37
+[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 98
+[M::mm_idx_stat::1.913*1.08] distinct minimizers: 5111798 (89.08% are singletons); average occurrences: 1.236; average spacing: 5.337; total length: 33703652
+[M::worker_pipeline::117.688*3.73] mapped 54811 sequences
+[M::worker_pipeline::221.966*3.83] mapped 55404 sequences
+[M::worker_pipeline::371.283*3.73] mapped 55047 sequences
+[M::worker_pipeline::442.477*3.76] mapped 55414 sequences
+[M::worker_pipeline::546.451*3.80] mapped 55411 sequences
+[M::worker_pipeline::692.858*3.75] mapped 54689 sequences
+[M::worker_pipeline::766.288*3.77] mapped 54700 sequences
+[M::worker_pipeline::826.454*3.78] mapped 33228 sequences
+[M::main] Version: 2.24-r1122
+[M::main] CMD: minimap2 -t 4 -ax map-ont H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_1000.fastq.gz
+[M::main] Real time: 826.537 sec; CPU: 3122.557 sec; Peak RSS: 4.578 GB
+[bam_sort_core] merging from 2 files and 3 in-memory blocks...
+[Sat Jan  6 08:30:12 2024]
+Finished job 0.
+1 of 1 steps (100%) done

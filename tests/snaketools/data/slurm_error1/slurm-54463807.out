@@ -1,0 +1,488 @@
+Using profile .sequana/profile_slurm for setting default command line arguments.
+Building DAG of jobs...
+File path git+file:///pasteur/zeus/projets/p02/Biomics/resources/condas/sequana_0.16/github/sequana-wrappers/wrappers/rulegraph/environment.yaml@main contains double '/'. This is likely unintended. It can also lead to inconsistent results of the file-matching approach used by Snakemake.
+File path git+file:///pasteur/zeus/projets/p02/Biomics/resources/condas/sequana_0.16/github/sequana-wrappers/wrappers/multiqc/environment.yaml@v23.11.28 contains double '/'. This is likely unintended. It can also lead to inconsistent results of the file-matching approach used by Snakemake.
+File path git+file:///pasteur/zeus/projets/p02/Biomics/resources/condas/sequana_0.16/github/sequana-wrappers/wrappers/busco/environment.yaml@v23.11.28 contains double '/'. This is likely unintended. It can also lead to inconsistent results of the file-matching approach used by Snakemake.
+File path git+file:///pasteur/zeus/projets/p02/Biomics/resources/condas/sequana_0.16/github/sequana-wrappers/wrappers/busco/environment.yaml@v23.11.28 contains double '/'. This is likely unintended. It can also lead to inconsistent results of the file-matching approach used by Snakemake.
+File path git+file:///pasteur/zeus/projets/p02/Biomics/resources/condas/sequana_0.16/github/sequana-wrappers/wrappers/busco/environment.yaml@v23.11.28 contains double '/'. This is likely unintended. It can also lead to inconsistent results of the file-matching approach used by Snakemake.
+Using shell: /usr/bin/bash
+Provided cluster nodes: 40
+Conda environments: ignored
+Job stats:
+job                       count
+----------------------  -------
+blast                         3
+busco                         3
+create_svg                    1
+flye                          3
+lora                          1
+minimap2_and_genomecov        3
+multiqc                       1
+quast                         3
+rulegraph                     1
+seqkit_head                   3
+seqkit_sort                   3
+sequana_coverage              3
+total                        28
+
+Select jobs to execute...
+
+[Fri Jan  5 20:40:37 2024]
+localrule rulegraph:
+    input: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/lora.rules
+    output: rulegraph/rg.ann.dot
+    jobid: 2
+    reason: Missing output files: rulegraph/rg.ann.dot
+    resources: mem_mb=4000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=/local/scratch/tmp, partition=common, qos=normal, mem=4G, gres=
+
+[Fri Jan  5 20:40:37 2024]
+rule flye:
+    input: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_500.fastq.gz
+    output: H149_P1_200723_500/flye/H149_P1_200723_500.contigs.fasta
+    jobid: 9
+    reason: Missing output files: H149_P1_200723_500/flye/H149_P1_200723_500.contigs.fasta
+    wildcards: sample=H149_P1_200723_500
+    threads: 4
+    resources: mem_mb=64000, mem_mib=6522, disk_mb=6838, disk_mib=6522, tmpdir=<TBD>, partition=common, qos=normal, mem=64G, gres=
+
+
+        outdir="$(dirname "H149_P1_200723_500/flye/H149_P1_200723_500.contigs.fasta")"
+
+        flye  --nano-raw /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_500.fastq.gz --out-dir ${outdir} --threads 4             && mv ${outdir}/assembly.fasta H149_P1_200723_500/flye/H149_P1_200723_500.contigs.fasta
+        
+Submitted job 9 with external jobid 'Submitted batch job 54463808'.
+
+[Fri Jan  5 20:40:37 2024]
+rule flye:
+    input: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_1000.fastq.gz
+    output: H149_P1_200723_1000/flye/H149_P1_200723_1000.contigs.fasta
+    jobid: 12
+    reason: Missing output files: H149_P1_200723_1000/flye/H149_P1_200723_1000.contigs.fasta
+    wildcards: sample=H149_P1_200723_1000
+    threads: 4
+    resources: mem_mb=64000, mem_mib=6444, disk_mb=6757, disk_mib=6444, tmpdir=<TBD>, partition=common, qos=normal, mem=64G, gres=
+
+
+        outdir="$(dirname "H149_P1_200723_1000/flye/H149_P1_200723_1000.contigs.fasta")"
+
+        flye  --nano-raw /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_1000.fastq.gz --out-dir ${outdir} --threads 4             && mv ${outdir}/assembly.fasta H149_P1_200723_1000/flye/H149_P1_200723_1000.contigs.fasta
+        
+Submitted job 12 with external jobid 'Submitted batch job 54463809'.
+
+[Fri Jan  5 20:40:37 2024]
+rule flye:
+    input: /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz
+    output: H149_P1_200723/flye/H149_P1_200723.contigs.fasta
+    jobid: 6
+    reason: Missing output files: H149_P1_200723/flye/H149_P1_200723.contigs.fasta
+    wildcards: sample=H149_P1_200723
+    threads: 4
+    resources: mem_mb=64000, mem_mib=6550, disk_mb=6868, disk_mib=6550, tmpdir=<TBD>, partition=common, qos=normal, mem=64G, gres=
+
+
+        outdir="$(dirname "H149_P1_200723/flye/H149_P1_200723.contigs.fasta")"
+
+        flye  --nano-raw /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz --out-dir ${outdir} --threads 4             && mv ${outdir}/assembly.fasta H149_P1_200723/flye/H149_P1_200723.contigs.fasta
+        
+Submitted job 6 with external jobid 'Submitted batch job 54463810'.
+/pasteur/zeus/projets/p02/Biomics/resources/condas/sequana_0.16/bin/python3.1 /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/.snakemake/scripts/tmpal3rxj_z.wrapper.py
+cd rulegraph && snakemake -s "/pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/lora.rules" --rulegraph --nolock  > rg.dot; cd ..
+Building DAG of jobs...
+[Fri Jan  5 20:40:41 2024]
+Finished job 2.
+1 of 28 steps (4%) done
+Select jobs to execute...
+
+[Fri Jan  5 20:40:41 2024]
+localrule create_svg:
+    input: rulegraph/rg.ann.dot
+    output: .sequana/rulegraph.svg
+    jobid: 1
+    reason: Missing output files: .sequana/rulegraph.svg; Input files updated by another job: rulegraph/rg.ann.dot
+    resources: mem_mb=4000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=/local/scratch/tmp, partition=common, qos=normal, mem=4G, gres=
+
+
+        dot -Tsvg rulegraph/rg.ann.dot  -o .sequana/rulegraph.svg
+        
+Activating singularity image /pasteur/zeus/projets/p02/Biomics/resources/condas/sequana_0.16/apptainers/423bed3d162e90bd043c210525c5d23e.simg
+[Fri Jan  5 20:40:42 2024]
+Finished job 1.
+2 of 28 steps (7%) done
+Removing temporary output rulegraph/rg.ann.dot.
+[Sat Jan  6 02:42:13 2024]
+Finished job 9.
+3 of 28 steps (11%) done
+Select jobs to execute...
+
+[Sat Jan  6 02:42:13 2024]
+rule seqkit_sort:
+    input: H149_P1_200723_500/flye/H149_P1_200723_500.contigs.fasta
+    output: H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+    jobid: 8
+    reason: Missing output files: H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta; Input files updated by another job: H149_P1_200723_500/flye/H149_P1_200723_500.contigs.fasta
+    wildcards: sample=H149_P1_200723_500
+    threads: 4
+    resources: mem_mb=4000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+
+        seqkit sort --threads 4 --by-length --reverse H149_P1_200723_500/flye/H149_P1_200723_500.contigs.fasta -o H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+        
+Submitted job 8 with external jobid 'Submitted batch job 54466791'.
+[Sat Jan  6 02:42:23 2024]
+Finished job 8.
+4 of 28 steps (14%) done
+Select jobs to execute...
+
+[Sat Jan  6 02:42:23 2024]
+rule minimap2_and_genomecov:
+    input: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_500.fastq.gz, H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+    output: H149_P1_200723_500/minimap2/H149_P1_200723_500.bam, H149_P1_200723_500/minimap2/H149_P1_200723_500.bed
+    jobid: 16
+    reason: Missing output files: H149_P1_200723_500/minimap2/H149_P1_200723_500.bed; Input files updated by another job: H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+    wildcards: sample=H149_P1_200723_500
+    threads: 4
+    resources: mem_mb=4000, mem_mib=6584, disk_mb=6903, disk_mib=6584, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+
+        minimap2  -t 4 -ax map-ont H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_500.fastq.gz             | samtools sort -@ $((4 - 1)) -o H149_P1_200723_500/minimap2/H149_P1_200723_500.bam            && samtools index H149_P1_200723_500/minimap2/H149_P1_200723_500.bam            && samtools depth -aa H149_P1_200723_500/minimap2/H149_P1_200723_500.bam > H149_P1_200723_500/minimap2/H149_P1_200723_500.bed
+        
+Submitted job 16 with external jobid 'Submitted batch job 54466792'.
+
+[Sat Jan  6 02:42:23 2024]
+rule seqkit_head:
+    input: H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+    output: H149_P1_200723_500/subset_contigs/H149_P1_200723_500.subset.fasta
+    jobid: 25
+    reason: Missing output files: H149_P1_200723_500/subset_contigs/H149_P1_200723_500.subset.fasta; Input files updated by another job: H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+    wildcards: sample=H149_P1_200723_500
+    resources: mem_mb=4000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+
+        seqkit head -n 200 -o H149_P1_200723_500/subset_contigs/H149_P1_200723_500.subset.fasta H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+        
+Submitted job 25 with external jobid 'Submitted batch job 54466793'.
+
+[Sat Jan  6 02:42:23 2024]
+rule busco:
+    input: H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+    output: H149_P1_200723_500/busco
+    log: H149_P1_200723_500/logs/H149_P1_200723_500_busco.out
+    jobid: 20
+    reason: Missing output files: H149_P1_200723_500/busco; Input files updated by another job: H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+    wildcards: sample=H149_P1_200723_500
+    threads: 4
+    resources: mem_mb=4000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+Submitted job 20 with external jobid 'Submitted batch job 54466794'.
+
+[Sat Jan  6 02:42:23 2024]
+rule quast:
+    input: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_500.fastq.gz, H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+    output: H149_P1_200723_500/quast/quast.done
+    jobid: 7
+    reason: Missing output files: H149_P1_200723_500/quast/quast.done; Input files updated by another job: H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+    wildcards: sample=H149_P1_200723_500
+    threads: 4
+    resources: mem_mb=4000, mem_mib=6584, disk_mb=6903, disk_mib=6584, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+
+        quast.py -e --rna-finding -t 4 H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta --nanopore /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_500.fastq.gz -o H149_P1_200723_500/quast            && touch H149_P1_200723_500/quast/quast.done
+        
+Submitted job 7 with external jobid 'Submitted batch job 54466795'.
+[Sat Jan  6 02:42:33 2024]
+Finished job 25.
+5 of 28 steps (18%) done
+Select jobs to execute...
+
+[Sat Jan  6 02:42:33 2024]
+rule blast:
+    input: H149_P1_200723_500/subset_contigs/H149_P1_200723_500.subset.fasta
+    output: H149_P1_200723_500/blast/H149_P1_200723_500.tsv
+    jobid: 24
+    reason: Missing output files: H149_P1_200723_500/blast/H149_P1_200723_500.tsv; Input files updated by another job: H149_P1_200723_500/subset_contigs/H149_P1_200723_500.subset.fasta
+    wildcards: sample=H149_P1_200723_500
+    threads: 4
+    resources: mem_mb=12000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=<TBD>, partition=common, qos=normal, mem=12G, gres=
+
+
+        export BLASTDB=/pasteur/zeus/projets/p02/Biomics/resources/blast/
+        blastn -query H149_P1_200723_500/subset_contigs/H149_P1_200723_500.subset.fasta -db nt -evalue 1e-10 -out H149_P1_200723_500/blast/H149_P1_200723_500.tsv -num_threads 4             -max_target_seqs 5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids stitle"
+        
+Submitted job 24 with external jobid 'Submitted batch job 54466796'.
+[Sat Jan  6 02:43:33 2024]
+Error in rule minimap2_and_genomecov:
+    jobid: 16
+    input: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_500.fastq.gz, H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta
+    output: H149_P1_200723_500/minimap2/H149_P1_200723_500.bam, H149_P1_200723_500/minimap2/H149_P1_200723_500.bed
+    shell:
+        
+        minimap2  -t 4 -ax map-ont H149_P1_200723_500/sorted_contigs/H149_P1_200723_500.fasta /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_500.fastq.gz             | samtools sort -@ $((4 - 1)) -o H149_P1_200723_500/minimap2/H149_P1_200723_500.bam            && samtools index H149_P1_200723_500/minimap2/H149_P1_200723_500.bam            && samtools depth -aa H149_P1_200723_500/minimap2/H149_P1_200723_500.bam > H149_P1_200723_500/minimap2/H149_P1_200723_500.bed
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+    cluster_jobid: Submitted batch job 54466792
+
+Error executing rule minimap2_and_genomecov on cluster (jobid: 16, external: Submitted batch job 54466792, jobscript: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/.snakemake/tmp.uxjuhhze/snakejob.minimap2_and_genomecov.16.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Sat Jan  6 02:44:03 2024]
+Finished job 20.
+6 of 28 steps (21%) done
+[Sat Jan  6 02:45:43 2024]
+Finished job 6.
+7 of 28 steps (25%) done
+Select jobs to execute...
+
+[Sat Jan  6 02:45:43 2024]
+rule seqkit_sort:
+    input: H149_P1_200723/flye/H149_P1_200723.contigs.fasta
+    output: H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    jobid: 5
+    reason: Missing output files: H149_P1_200723/sorted_contigs/H149_P1_200723.fasta; Input files updated by another job: H149_P1_200723/flye/H149_P1_200723.contigs.fasta
+    wildcards: sample=H149_P1_200723
+    threads: 4
+    resources: mem_mb=4000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+
+        seqkit sort --threads 4 --by-length --reverse H149_P1_200723/flye/H149_P1_200723.contigs.fasta -o H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+        
+Submitted job 5 with external jobid 'Submitted batch job 54467138'.
+[Sat Jan  6 02:45:53 2024]
+Finished job 5.
+8 of 28 steps (29%) done
+Select jobs to execute...
+
+[Sat Jan  6 02:45:53 2024]
+rule busco:
+    input: H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    output: H149_P1_200723/busco
+    log: H149_P1_200723/logs/H149_P1_200723_busco.out
+    jobid: 19
+    reason: Missing output files: H149_P1_200723/busco; Input files updated by another job: H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    wildcards: sample=H149_P1_200723
+    threads: 4
+    resources: mem_mb=4000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+Submitted job 19 with external jobid 'Submitted batch job 54467144'.
+
+[Sat Jan  6 02:45:53 2024]
+rule quast:
+    input: /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz, H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    output: H149_P1_200723/quast/quast.done
+    jobid: 4
+    reason: Missing output files: H149_P1_200723/quast/quast.done; Input files updated by another job: H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    wildcards: sample=H149_P1_200723
+    threads: 4
+    resources: mem_mb=4000, mem_mib=6612, disk_mb=6933, disk_mib=6612, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+
+        quast.py -e --rna-finding -t 4 H149_P1_200723/sorted_contigs/H149_P1_200723.fasta --nanopore /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz -o H149_P1_200723/quast            && touch H149_P1_200723/quast/quast.done
+        
+Submitted job 4 with external jobid 'Submitted batch job 54467145'.
+
+[Sat Jan  6 02:45:53 2024]
+rule minimap2_and_genomecov:
+    input: /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz, H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    output: H149_P1_200723/minimap2/H149_P1_200723.bam, H149_P1_200723/minimap2/H149_P1_200723.bed
+    jobid: 14
+    reason: Missing output files: H149_P1_200723/minimap2/H149_P1_200723.bed; Input files updated by another job: H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    wildcards: sample=H149_P1_200723
+    threads: 4
+    resources: mem_mb=4000, mem_mib=6612, disk_mb=6933, disk_mib=6612, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+
+        minimap2  -t 4 -ax map-ont H149_P1_200723/sorted_contigs/H149_P1_200723.fasta /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz             | samtools sort -@ $((4 - 1)) -o H149_P1_200723/minimap2/H149_P1_200723.bam            && samtools index H149_P1_200723/minimap2/H149_P1_200723.bam            && samtools depth -aa H149_P1_200723/minimap2/H149_P1_200723.bam > H149_P1_200723/minimap2/H149_P1_200723.bed
+        
+Submitted job 14 with external jobid 'Submitted batch job 54467146'.
+
+[Sat Jan  6 02:45:53 2024]
+rule seqkit_head:
+    input: H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    output: H149_P1_200723/subset_contigs/H149_P1_200723.subset.fasta
+    jobid: 23
+    reason: Missing output files: H149_P1_200723/subset_contigs/H149_P1_200723.subset.fasta; Input files updated by another job: H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    wildcards: sample=H149_P1_200723
+    resources: mem_mb=4000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+
+        seqkit head -n 200 -o H149_P1_200723/subset_contigs/H149_P1_200723.subset.fasta H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+        
+Submitted job 23 with external jobid 'Submitted batch job 54467147'.
+[Sat Jan  6 02:46:33 2024]
+Finished job 23.
+9 of 28 steps (32%) done
+Select jobs to execute...
+
+[Sat Jan  6 02:46:33 2024]
+rule blast:
+    input: H149_P1_200723/subset_contigs/H149_P1_200723.subset.fasta
+    output: H149_P1_200723/blast/H149_P1_200723.tsv
+    jobid: 22
+    reason: Missing output files: H149_P1_200723/blast/H149_P1_200723.tsv; Input files updated by another job: H149_P1_200723/subset_contigs/H149_P1_200723.subset.fasta
+    wildcards: sample=H149_P1_200723
+    threads: 4
+    resources: mem_mb=12000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=<TBD>, partition=common, qos=normal, mem=12G, gres=
+
+
+        export BLASTDB=/pasteur/zeus/projets/p02/Biomics/resources/blast/
+        blastn -query H149_P1_200723/subset_contigs/H149_P1_200723.subset.fasta -db nt -evalue 1e-10 -out H149_P1_200723/blast/H149_P1_200723.tsv -num_threads 4             -max_target_seqs 5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids stitle"
+        
+Submitted job 22 with external jobid 'Submitted batch job 54467194'.
+[Sat Jan  6 02:47:23 2024]
+Finished job 19.
+10 of 28 steps (36%) done
+[Sat Jan  6 02:47:33 2024]
+Error in rule minimap2_and_genomecov:
+    jobid: 14
+    input: /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz, H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    output: H149_P1_200723/minimap2/H149_P1_200723.bam, H149_P1_200723/minimap2/H149_P1_200723.bed
+    shell:
+        
+        minimap2  -t 4 -ax map-ont H149_P1_200723/sorted_contigs/H149_P1_200723.fasta /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz             | samtools sort -@ $((4 - 1)) -o H149_P1_200723/minimap2/H149_P1_200723.bam            && samtools index H149_P1_200723/minimap2/H149_P1_200723.bam            && samtools depth -aa H149_P1_200723/minimap2/H149_P1_200723.bam > H149_P1_200723/minimap2/H149_P1_200723.bed
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+    cluster_jobid: Submitted batch job 54467146
+
+Error executing rule minimap2_and_genomecov on cluster (jobid: 14, external: Submitted batch job 54467146, jobscript: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/.snakemake/tmp.uxjuhhze/snakejob.minimap2_and_genomecov.14.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Sat Jan  6 02:47:53 2024]
+Finished job 12.
+11 of 28 steps (39%) done
+Select jobs to execute...
+
+[Sat Jan  6 02:47:53 2024]
+rule seqkit_sort:
+    input: H149_P1_200723_1000/flye/H149_P1_200723_1000.contigs.fasta
+    output: H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+    jobid: 11
+    reason: Missing output files: H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta; Input files updated by another job: H149_P1_200723_1000/flye/H149_P1_200723_1000.contigs.fasta
+    wildcards: sample=H149_P1_200723_1000
+    threads: 4
+    resources: mem_mb=4000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+
+        seqkit sort --threads 4 --by-length --reverse H149_P1_200723_1000/flye/H149_P1_200723_1000.contigs.fasta -o H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+        
+Submitted job 11 with external jobid 'Submitted batch job 54467497'.
+[Sat Jan  6 02:48:03 2024]
+Finished job 11.
+12 of 28 steps (43%) done
+Select jobs to execute...
+
+[Sat Jan  6 02:48:03 2024]
+rule quast:
+    input: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_1000.fastq.gz, H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+    output: H149_P1_200723_1000/quast/quast.done
+    jobid: 10
+    reason: Missing output files: H149_P1_200723_1000/quast/quast.done; Input files updated by another job: H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+    wildcards: sample=H149_P1_200723_1000
+    threads: 4
+    resources: mem_mb=4000, mem_mib=6507, disk_mb=6823, disk_mib=6507, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+
+        quast.py -e --rna-finding -t 4 H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta --nanopore /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_1000.fastq.gz -o H149_P1_200723_1000/quast            && touch H149_P1_200723_1000/quast/quast.done
+        
+Submitted job 10 with external jobid 'Submitted batch job 54467578'.
+
+[Sat Jan  6 02:48:04 2024]
+rule seqkit_head:
+    input: H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+    output: H149_P1_200723_1000/subset_contigs/H149_P1_200723_1000.subset.fasta
+    jobid: 27
+    reason: Missing output files: H149_P1_200723_1000/subset_contigs/H149_P1_200723_1000.subset.fasta; Input files updated by another job: H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+    wildcards: sample=H149_P1_200723_1000
+    resources: mem_mb=4000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+
+        seqkit head -n 200 -o H149_P1_200723_1000/subset_contigs/H149_P1_200723_1000.subset.fasta H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+        
+Submitted job 27 with external jobid 'Submitted batch job 54467579'.
+
+[Sat Jan  6 02:48:04 2024]
+rule busco:
+    input: H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+    output: H149_P1_200723_1000/busco
+    log: H149_P1_200723_1000/logs/H149_P1_200723_1000_busco.out
+    jobid: 21
+    reason: Missing output files: H149_P1_200723_1000/busco; Input files updated by another job: H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+    wildcards: sample=H149_P1_200723_1000
+    threads: 4
+    resources: mem_mb=4000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+Submitted job 21 with external jobid 'Submitted batch job 54467580'.
+
+[Sat Jan  6 02:48:04 2024]
+rule minimap2_and_genomecov:
+    input: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_1000.fastq.gz, H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+    output: H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bam, H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bed
+    jobid: 18
+    reason: Missing output files: H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bed; Input files updated by another job: H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+    wildcards: sample=H149_P1_200723_1000
+    threads: 4
+    resources: mem_mb=4000, mem_mib=6507, disk_mb=6823, disk_mib=6507, tmpdir=<TBD>, partition=common, qos=normal, mem=4G, gres=
+
+
+        minimap2  -t 4 -ax map-ont H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_1000.fastq.gz             | samtools sort -@ $((4 - 1)) -o H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bam            && samtools index H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bam            && samtools depth -aa H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bam > H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bed
+        
+Submitted job 18 with external jobid 'Submitted batch job 54467581'.
+[Sat Jan  6 02:48:13 2024]
+Finished job 27.
+13 of 28 steps (46%) done
+Select jobs to execute...
+
+[Sat Jan  6 02:48:13 2024]
+rule blast:
+    input: H149_P1_200723_1000/subset_contigs/H149_P1_200723_1000.subset.fasta
+    output: H149_P1_200723_1000/blast/H149_P1_200723_1000.tsv
+    jobid: 26
+    reason: Missing output files: H149_P1_200723_1000/blast/H149_P1_200723_1000.tsv; Input files updated by another job: H149_P1_200723_1000/subset_contigs/H149_P1_200723_1000.subset.fasta
+    wildcards: sample=H149_P1_200723_1000
+    threads: 4
+    resources: mem_mb=12000, mem_mib=954, disk_mb=1000, disk_mib=954, tmpdir=<TBD>, partition=common, qos=normal, mem=12G, gres=
+
+
+        export BLASTDB=/pasteur/zeus/projets/p02/Biomics/resources/blast/
+        blastn -query H149_P1_200723_1000/subset_contigs/H149_P1_200723_1000.subset.fasta -db nt -evalue 1e-10 -out H149_P1_200723_1000/blast/H149_P1_200723_1000.tsv -num_threads 4             -max_target_seqs 5 -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore staxids stitle"
+        
+Submitted job 26 with external jobid 'Submitted batch job 54467619'.
+[Sat Jan  6 02:49:34 2024]
+Finished job 21.
+14 of 28 steps (50%) done
+[Sat Jan  6 02:50:54 2024]
+Error in rule minimap2_and_genomecov:
+    jobid: 18
+    input: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_1000.fastq.gz, H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta
+    output: H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bam, H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bed
+    shell:
+        
+        minimap2  -t 4 -ax map-ont H149_P1_200723_1000/sorted_contigs/H149_P1_200723_1000.fasta /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/data/filters/H149_P1_200723_1000.fastq.gz             | samtools sort -@ $((4 - 1)) -o H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bam            && samtools index H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bam            && samtools depth -aa H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bam > H149_P1_200723_1000/minimap2/H149_P1_200723_1000.bed
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+    cluster_jobid: Submitted batch job 54467581
+
+Error executing rule minimap2_and_genomecov on cluster (jobid: 18, external: Submitted batch job 54467581, jobscript: /pasteur/zeus/projets/p02/Biomics/Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/.snakemake/tmp.uxjuhhze/snakejob.minimap2_and_genomecov.18.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Sat Jan  6 03:25:26 2024]
+Finished job 7.
+15 of 28 steps (54%) done
+[Sat Jan  6 03:29:37 2024]
+Finished job 4.
+16 of 28 steps (57%) done
+[Sat Jan  6 03:29:37 2024]
+Finished job 10.
+17 of 28 steps (61%) done
+[Sat Jan  6 04:27:51 2024]
+Finished job 22.
+18 of 28 steps (64%) done
+[Sat Jan  6 04:37:01 2024]
+Finished job 26.
+19 of 28 steps (68%) done
+[Sat Jan  6 05:13:14 2024]
+Finished job 24.
+20 of 28 steps (71%) done
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2024-01-05T204034.711065.snakemake.log
+An error occurred during the execution. Please fix the issue and run the script again (sh lora.sh)
+Found 1 slurm files to introspect. Please wait.
+################################# DEBUG REPORT #################################
+
+The analysis reached 71.0%. A total of 0 errors has been found.
+Errors are comming from rule(s): 
+
+
+################################################################################
