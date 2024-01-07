@@ -1,0 +1,46 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 4
+Rules claiming more threads will be scaled down.
+Provided resources: mem_mb=4000, mem_mib=6612, disk_mb=6933, disk_mib=6612
+Conda environments: ignored
+Select jobs to execute...
+
+[Sat Jan  6 02:46:49 2024]
+rule minimap2_and_genomecov:
+    input: /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz, H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    output: H149_P1_200723/minimap2/H149_P1_200723.bam, H149_P1_200723/minimap2/H149_P1_200723.bed
+    jobid: 0
+    reason: Forced execution
+    wildcards: sample=H149_P1_200723
+    threads: 4
+    resources: mem_mb=4000, mem_mib=3815, disk_mb=6933, disk_mib=6612, tmpdir=/local/scratch/tmp, partition=common, qos=normal, mem=4G, gres=
+
+
+        minimap2  -t 4 -ax map-ont H149_P1_200723/sorted_contigs/H149_P1_200723.fasta /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz             | samtools sort -@ $((4 - 1)) -o H149_P1_200723/minimap2/H149_P1_200723.bam            && samtools index H149_P1_200723/minimap2/H149_P1_200723.bam            && samtools depth -aa H149_P1_200723/minimap2/H149_P1_200723.bam > H149_P1_200723/minimap2/H149_P1_200723.bed
+        
+Activating singularity image /pasteur/zeus/projets/p02/Biomics/resources/condas/sequana_0.16/apptainers/c3e4a8244ce7b65fa873ebda134fea7f.simg
+[M::mm_idx_gen::1.104*0.97] collected minimizers
+[M::mm_idx_gen::1.497*1.44] sorted minimizers
+[M::main::1.497*1.44] loaded/built the index for 103 target sequence(s)
+[M::mm_mapopt_update::1.571*1.42] mid_occ = 36
+[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 103
+[M::mm_idx_stat::1.623*1.41] distinct minimizers: 5111506 (89.06% are singletons); average occurrences: 1.235; average spacing: 5.336; total length: 33694841
+/bin/bash: line 2: 3479709 Killed                  minimap2 -t 4 -ax map-ont H149_P1_200723/sorted_contigs/H149_P1_200723.fasta /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz
+     3479710 Done                    | samtools sort -@ $((4 - 1)) -o H149_P1_200723/minimap2/H149_P1_200723.bam
+[Sat Jan  6 02:47:31 2024]
+Error in rule minimap2_and_genomecov:
+    jobid: 0
+    input: /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz, H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    output: H149_P1_200723/minimap2/H149_P1_200723.bam, H149_P1_200723/minimap2/H149_P1_200723.bed
+    shell:
+        
+        minimap2  -t 4 -ax map-ont H149_P1_200723/sorted_contigs/H149_P1_200723.fasta /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz             | samtools sort -@ $((4 - 1)) -o H149_P1_200723/minimap2/H149_P1_200723.bam            && samtools index H149_P1_200723/minimap2/H149_P1_200723.bam            && samtools depth -aa H149_P1_200723/minimap2/H149_P1_200723.bam > H149_P1_200723/minimap2/H149_P1_200723.bed
+        
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Removing output files of failed job minimap2_and_genomecov since they might be corrupted:
+H149_P1_200723/minimap2/H149_P1_200723.bam
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+slurmstepd: error: Detected 1 oom_kill event in StepId=54467146.batch. Some of the step tasks have been OOM Killed.

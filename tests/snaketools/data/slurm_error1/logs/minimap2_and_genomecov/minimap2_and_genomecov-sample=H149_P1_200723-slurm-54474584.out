@@ -1,0 +1,43 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 4
+Rules claiming more threads will be scaled down.
+Provided resources: mem_mb=16000, mem_mib=6612, disk_mb=6933, disk_mib=6612
+Conda environments: ignored
+Select jobs to execute...
+
+[Sat Jan  6 08:12:45 2024]
+rule minimap2_and_genomecov:
+    input: /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz, H149_P1_200723/sorted_contigs/H149_P1_200723.fasta
+    output: H149_P1_200723/minimap2/H149_P1_200723.bam, H149_P1_200723/minimap2/H149_P1_200723.bed
+    jobid: 0
+    reason: Forced execution
+    wildcards: sample=H149_P1_200723
+    threads: 4
+    resources: mem_mb=16000, mem_mib=6612, disk_mb=6933, disk_mib=6612, tmpdir=/local/scratch/tmp, partition=common, qos=normal, mem=16G, gres=
+
+
+        minimap2  -t 4 -ax map-ont H149_P1_200723/sorted_contigs/H149_P1_200723.fasta /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz             | samtools sort -@ $((4 - 1)) -o H149_P1_200723/minimap2/H149_P1_200723.bam            && samtools index H149_P1_200723/minimap2/H149_P1_200723.bam            && samtools depth -aa H149_P1_200723/minimap2/H149_P1_200723.bam > H149_P1_200723/minimap2/H149_P1_200723.bed
+        
+Activating singularity image /pasteur/zeus/projets/p02/Biomics/resources/condas/sequana_0.16/apptainers/c3e4a8244ce7b65fa873ebda134fea7f.simg
+[M::mm_idx_gen::1.466*0.80] collected minimizers
+[M::mm_idx_gen::1.713*1.17] sorted minimizers
+[M::main::1.713*1.17] loaded/built the index for 103 target sequence(s)
+[M::mm_mapopt_update::1.784*1.16] mid_occ = 36
+[M::mm_idx_stat] kmer size: 15; skip: 10; is_hpc: 0; #seq: 103
+[M::mm_idx_stat::1.833*1.16] distinct minimizers: 5111506 (89.06% are singletons); average occurrences: 1.235; average spacing: 5.336; total length: 33694841
+[M::worker_pipeline::116.471*3.72] mapped 65230 sequences
+[M::worker_pipeline::220.260*3.82] mapped 66497 sequences
+[M::worker_pipeline::370.054*3.72] mapped 65819 sequences
+[M::worker_pipeline::437.724*3.75] mapped 66385 sequences
+[M::worker_pipeline::541.548*3.79] mapped 65589 sequences
+[M::worker_pipeline::693.729*3.74] mapped 66649 sequences
+[M::worker_pipeline::759.447*3.76] mapped 66000 sequences
+[M::worker_pipeline::830.013*3.77] mapped 54006 sequences
+[M::main] Version: 2.24-r1122
+[M::main] CMD: minimap2 -t 4 -ax map-ont H149_P1_200723/sorted_contigs/H149_P1_200723.fasta /pasteur/zeus/projets/p02/BiomicsData/2023/DryLab/B17420/20230720_1448_MN18671_FAV94301_57a76bad/nanomerge/B17420/H149_P1_200723.fastq.gz
+[M::main] Real time: 830.103 sec; CPU: 3128.051 sec; Peak RSS: 4.470 GB
+[bam_sort_core] merging from 2 files and 3 in-memory blocks...
+[Sat Jan  6 08:30:29 2024]
+Finished job 0.
+1 of 1 steps (100%) done
