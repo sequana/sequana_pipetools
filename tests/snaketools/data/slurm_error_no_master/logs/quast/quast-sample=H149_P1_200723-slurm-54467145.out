@@ -94,7 +94,7 @@ RESULTS:
   HTML version (interactive tables and plots) is saved to //Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723/quast/report.html
   PDF version (tables and plots) is saved to //Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723/quast/report.pdf
   Icarus (contig browser) is saved to //Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723/quast/icarus.html
-  Log is saved to //Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723/quast/quast.log
+  eog is saved to //Drylab/InProgress/B17420/analysis/lora_flye_filters_with_coverage_flyupdate/H149_P1_200723/quast/quast.log
 
 Finished: 2024-01-06 03:29:27
 Elapsed time: 0:42:54.840139

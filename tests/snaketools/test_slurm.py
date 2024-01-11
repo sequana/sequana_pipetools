@@ -14,3 +14,8 @@ def test_slurm():
     print(dj)
     dj
     dj._report()
+
+    dj = SlurmParsing(sharedir / "slurm_error_no_master")
+    print(dj)
+    dj
+    dj._report()
