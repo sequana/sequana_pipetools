@@ -48,35 +48,43 @@ class SlurmParsing:
     registry = {
         "oom_kill event in": "Out of memory. Consider increasing memory for the rule",
         "command not found": "Command not found. Check the missing tool is installed or use --use-apptainer",
-        "1 of 1 steps (100%) done": "Finished",
+        # "1 of 1 steps (100%) done": "Finished",
     }
 
     def __init__(self, working_directory, logs_directory="logs", pattern="*/*slurm*.out"):
 
         # get the master slurm file
         main_slurms = list(Path(working_directory).glob("slurm-*"))
-        self.master = sorted(main_slurms)[-1]
+
+        try:
+            self.master = sorted(main_slurms)[-1]
+            print(f"Found slurm master {self.master}")
+        except Exception as err:
+            self.master = None
 
         log_dir = Path(working_directory) / logs_directory
         self.slurms = sorted([f for f in log_dir.glob(pattern)])
 
+        # no sys exit (even zero) since it is used within snakemake
         N = len(self.slurms)
-        if N > 0:
-            print(f"Found {N} slurm files to introspect. Please wait.")
-        else:  # pragma: no cover
-            logger.warning(f"No {pattern} slurm files were found")
-            sys.exit(0)
-
-        # main percentage of error from master slurm
-        self.percent = self._get_percent()
-
-        # get rules with errors
-        errors = self._get_rules_with_errors()
         self.errors = []
+        self.percent = "undefined "
 
-        if len(errors):
-            for error in errors:
-                self.errors.append({"rule": error["rule"], "slurm_id": error, "hint": error})
+        if N == 0:  # pragma: no cover
+            logger.warning(f"No {pattern} slurm files were found")
+        else:  # pragma: no cover
+            print(f"Found {N} slurm files to introspect in {logs_directory}. Processing.")
+
+            # main percentage of error from master slurm
+            if self.master:
+                self.percent = self._get_percent()
+
+            # whether or not we have a master file, we can scan the logs
+            errors = self._get_rules_with_errors()
+
+            if len(errors):
+                for error in errors:
+                    self.errors.append({"rule": error["rule"], "slurm_id": error})
 
     def __repr__(self):
         return self._report()
@@ -115,14 +123,29 @@ class SlurmParsing:
 
         errors = """Error executing rule {rule:S} on cluster (jobid: {jobid:d}, external: Submitted batch job {slurm_id:d}, jobscript: {jobscript}). For error details see the cluster log and the log files of the involved rule(s)."""
 
-        with open(self.master, "r") as f:
-            data = f.read()
-            return list(parse.findall(errors, data))
+        if self.master:
+            with open(self.master, "r") as f:
+                data = f.read()
+                return list(parse.findall(errors, data))
+        else:  # we need to introspect all slurm files
+            errors = []
+            for filename in self.slurms:
+                with open(filename, "r") as fin:
+                    data = fin.read()
+                    ID = filename.name.strip(".out").split("-")[-1]
+                    rule = filename.name.split("-")[0]
+                    for k in self.registry.keys():
+                        print(k)
+                        if k in data:
+                            errors.append({"rule": rule, "slurm_id": ID})
+                            break
+            return errors
 
     def _get_error(self, filename):
+        """Find known errors with a file"""
         with open(filename, "r") as f:
             data = f.read()
             for k in self.registry.keys():
                 if k in data:
                     return self.registry[k]
-        return "\n No error found"
+        return "\n No registered error found"  # pragma: no cover

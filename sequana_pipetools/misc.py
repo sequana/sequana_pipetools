@@ -90,7 +90,7 @@ def print_version(name):
     try:
         ver = get_package_version(f"sequana_{name}")
         print(f"sequana_{name} version: {ver}")
-    except Exception as err:
+    except Exception as err:  # pragma: no cover
         print(err)
         print(f"sequana_{name} version: ?")
 

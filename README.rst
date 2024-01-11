@@ -26,16 +26,41 @@
 :Python version: Python 3.8, 3.9, 3.10, 3.11
 :Citation: Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352,  `JOSS DOI doi:10.21105/joss.00352 <http://www.doi2bib.org/bib/10.21105%2Fjoss.00352>`_
 
+Installation
+============
+
+from pypi website::
+
+    pip install sequana_pipetools
+
+No dependencies for this package except Python itself. In practice, this package
+has no interest if not used within a Sequana pipeline. It is installed automatically when you install
+a Sequana pipelines. For example::
+
+    pip install sequana_rnaseq
+    pip install sequana_fastqc
+
+See `Sequana <https://sequana.readthedocs.io>`_ for a list of pipelines ready for production.
+
+
+Targetted audience
+==================
+
+This package is intended for `Sequana <https://sequana.readthedocs.io>`_ developers seeking to integrate Snakemake pipelines into the Sequana project. Please refer below for more information. Additionally, note that as a developer, you can generate the reference documentation using Sphinx::
+
+    make html
+    browse build/html/index.html
+
 
 What is sequana_pipetools ?
 ============================
 
-**sequana_pipetools** is a collection of tools that assists with the management of `Sequana <https://sequana.readthedocs.io>`_ pipelines, which includes next-generation sequencing (NGS) pipelines like RNA-seq, variant calling, ChIP-seq, and others.
+**sequana_pipetools** is a collection of tools designed to facilitate the management of `Sequana <https://sequana.readthedocs.io>`_ pipelines, which includes next-generation sequencing (NGS) pipelines like RNA-seq, variant calling, ChIP-seq, and others.
 
-The aim of this package is to simplify the deployment of `Sequana pipelines <https://sequana.readthedocs.io>`_ by
-creating a pure Python library that includes commonly used tools for different pipelines.
+The aim of this package is to streamline the deployment of `Sequana pipelines <https://sequana.readthedocs.io>`_ by
+creating a pure Python library that includes commonly used tools for various pipelines.
 
-Previously, the Sequana framework incorporated alll bioinformatics, Snakemake rules,
+Previously, the Sequana framework incorporated all bioinformatics, Snakemake rules,
 pipelines, and pipeline management tools into a single library (Sequana) as illustrated
 in **Fig 1** below.
 
@@ -45,29 +70,30 @@ in **Fig 1** below.
     **Figure 1** Old Sequana framework will all pipelines and Sequana library in the same
     place including pipetools (this library).
 
-Whenever changes were made to the Sequana library, a thorough check of the entire library was necessary, despite
-having 80% test coverage. Adding new pipelines also necessitated the addition of new dependencies, and the process was becoming increasingly complex. To mitigate this issue, we initially made all pipelines independent, as illustrated in **Fig. 2**. This way, pipeline changes could be made without updating Sequana and vice versa, which was a significant improvment.
+Despite maintaining an 80% test coverage, whenever changes were introduced to the Sequana library, a comprehensive examination of the entire library was imperative. The complexity escalated further when incorporating new pipelines or dependencies. To address this challenge, we initially designed all pipelines to operate independently, as depicted in **Fig. 2**. This approach allowed modifications to pipelines without necessitating updates to Sequana and vice versa, resulting in a significant improvement.
+
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/old.png
     :scale: 40%
 
-    **Figure 2** v0.8 of Sequana moved the Snakemake pipelines in indepdendent
+    **Figure 2** v0.8 of Sequana moved the Snakemake pipelines in independent
     repositories. A `cookie cutter <https://github.com/sequana/sequana_pipeline_template>`_
-    ease the creation of scuh pipelines
+    ease the creation of such pipelines
 
 
-However, certain tools, such as those used for user interface and input data sanity checks, were required by all pipelines, as depicted by the pipetools box in the figure. As new pipelines were being added every month, we aimed to make the pipelines and Sequana more modular. Consequently, we created a pure Python library known as **sequana_pipetools**, as shown in **Fig. 3**, to make the pipelines even more autonomous.
+Nevertheless, certain tools, including those utilized for user interface and input data sanity checks, were essential for all pipelines, as illustrated by the pipetools box in the figure. With the continuous addition of new pipelines each month, our goal was to enhance the modularity of both the pipelines and Sequana. As a result, we developed a pure Python library named sequana_pipetools, depicted in **Fig. 3**, to further empower the autonomy of the pipelines.
+
+
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/new.png
     :scale: 40%
 
-    **Figure 3** New Sequana framework. The library contains the core and
-    bioinformatics tools and is now distinct from  the pipelines. Additionally, the
-    sequana_pipetools library supplies common tools to assist in the creaton and management of all pipelines,
-    such as shared parser for options.
+    **Figure 3** New Sequana framework. The new Sequana framework comprises the core library
+    and bioinformatics tools, which are now separate from the pipelines. Moreover, the
+    sequana_pipetools library provides essential tools for the creation and management
+    of all pipelines, including a shared parser for options
 
-Finally, we dropped the rules/ available in Sequana to build an independent package with a set of Snakemake
-wrappers. These wrappers are available on https://github.com/sequana/sequana-wrappers and have also the advantage of being tested through continuous integration.
+As a final step, we separated the rules originally available in Sequana to create an independent package featuring a collection of Snakemake wrappers. These wrappers can be accessed at https://github.com/sequana/sequana-wrappers and offer the added benefit of being rigorously tested through continuous integration.
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/wrappers.png
     :scale: 40%
@@ -76,48 +102,60 @@ wrappers. These wrappers are available on https://github.com/sequana/sequana-wra
     bioinformatics tools is now fully independent of the pipelines.
 
 
-Installation
-============
 
-from pypi website::
+Quick tour of the standalone
+============================
 
-    pip install sequana_pipetools
+The **sequana_pipetools** package provide a standalone called **sequana_pipetools**. Here is a snapshot of the user interface:
 
-No dependencies for this package except Python itself. In practice, this package
-has no interest if not used with a Sequana pipeline. So, when using it,
-you will need to install the relevant Sequana pipelines that you wish to use. For example::
+.. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/UI.png
 
-    pip install sequana_rnaseq
-    pip install sequana_fastqc
-    ...
-
-
-This package is for `Sequana <https://sequana.readthedocs.io>`_ developers.
-To get more help, go to the doc directory and build the local sphinx directory using::
-
-    make html
-    browse build/html/index.html
-
-Quick tour
-==========
-
-There are currently two standalone tools. The first one is for Linux users under
+There are currently 3-4 main application. The first one is for Linux users under
 bash to obtain completion of a sequana pipeline command line arguments::
 
-    sequana_completion --name fastqc
+    sequana_pipetools --completion fastqc
 
 The second is used to introspect slurm files to get a summary of the SLURM log
 files::
 
-    sequana_slurm_status --directory .
+    sequana_pipetools --slurm-diag
 
-Will print a short summary report with common errors (if any).
+It searches for files with pattern **slurm** in the current directory and slurm files in the ./logs directory.
+This is used within th pipeline but can be used manually as well and is useful to get a quick summary of common errors found in slurm files.
 
+The following command provides statistics about Sequana pipelines installed on your system (number of rules, wrappers
+used)::
+
+    sequana_pipetools -- stats
+
+And for developpers, a quick creation of schema file given a config file (experimental, developers would still need to edit the schema but it does 90% of the job)::
+
+    sequana_pipetools --config-to-schema config.yaml > schema.yaml
+
+For Sequana developers
+======================
 
 The library is intended to help Sequana developers to design their pipelines.
 See the `Sequana organization repository for examples <https://github.com/sequana>`_.
+In addition to the standalone shown above, **sequana_pipetools** main goal is to provide utilities to help Sequana developers.
 
-In addition to those standalones, sequana_pipetools goal is to provide utilities to help Sequana developers.
+First, let us create a pipeline
+
+Initiate a project (Sequana pipeline) with cookiecutter
+-------------------------------------------------------
+
+You can start a Sequana pipeline skeleton as follows::
+
+    pip install cookiecuter
+    cookiecutter https://github.com/sequana/sequana_pipeline_template -o . --overwrite-if-exists
+
+and then follow the instructions. You will be asked some questions such as the name of your pipeline (eg. variant), a description, keywords and the *project_slug* (just press enter).
+
+Update the main script
+-----------------------
+
+Go to sequana_pipelines/NAME and look at the main.py script.
+
 We currently provide a set of Options classes that should be used to
 design the API of your pipelines. For example, the
 sequana_pipetools.options.SlurmOptions can be used as follows inside a standard
@@ -185,18 +223,8 @@ https://github.com/sequana/sequana_variant_calling) to get help from examples.
 The Options classes provided can be used and combined to design pipelines.
 
 
-How to create skeleton of a Sequana pipeline with cookiecutter
-=================================================================
-
-You can start a Sequana pipeline skeleton as follows::
-
-    pip install cookiecuter
-    cookiecutter https://github.com/sequana/sequana_pipeline_template -o . --overwrite-if-exists
-
-and then follow the instructions. You will be asked some questions such as the name of your pipeline (eg. variant), a description, keywords and the *project_slug* (just press enter).
-
 How to use sequana pipetools within your Pipeline
-##################################################
+--------------------------------------------------
 
 For FastQ files (paired ot not), The config file should look like::
 
@@ -234,11 +262,8 @@ And your pipeline could make use of this as follows::
     manager.teardown()
 
 
-
-
-
 Setting up and Running Sequana pipelines
-=========================================
+-----------------------------------------
 
 
 When you execute a sequana pipeline, e.g.::
@@ -272,8 +297,8 @@ What is Sequana ?
 #. A Python library dedicated to NGS analysis (e.g., tools to visualise standard NGS formats).
 #. A set of Pipelines dedicated to NGS in the form of Snakefiles
    (Makefile-like with Python syntax based on snakemake framework) with more
-   than 80 re-usable rules.
-#. Standalone applications.
+   common wrappers.
+#. Standalone applications such as sequana_coverage and sequana_taxonomy.
 
 See the `sequana home page <https://sequana.readthedocs.io>`_ for details.
 
@@ -288,6 +313,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.16.9
 0.16.8    * stats command add the number of rules per pipeline
           * better slurm parsing using profile tree directory (slurm in logs/)
 0.16.7    * add missing --trimming-quality option in list of TrimmingOption
