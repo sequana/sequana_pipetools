@@ -95,17 +95,17 @@ def print_version(name):
         print(f"sequana_{name} version: ?")
 
     try:
-        version = get_package_version(f"sequana")
+        version = get_package_version("sequana")
         print(f"Sequana version: {version}")
     except Exception:  # pragma: no cover
-        pass
+        print(f"Sequana version: not found")
 
     try:
-        version = get_package_version(f"sequana_pipetools")
+        version = get_package_version("sequana_pipetools")
         print(f"Sequana_pipetools version: {version}")
     except Exception as err:  # pragma: no cover
         print(err)
-        print("Sequana_pipetools version: ?")
+        print("Sequana_pipetools version: not found")
 
     print(Colors().purple("\nHow to help ?\n- Please, consider citing us (see sequana.readthedocs.io)"))
     print(Colors().purple("- Contribute to the code or documentation"))

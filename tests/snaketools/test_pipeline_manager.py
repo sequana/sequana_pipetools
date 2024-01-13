@@ -28,7 +28,8 @@ def test_pipeline_manager(tmpdir):
     cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
     pm = snaketools.PipelineManager("custom", cfg)
     assert not pm.paired
-    pm.teardown()
+    working_dir = tmpdir.mkdir("temp")
+    pm.teardown(outdir=working_dir)
 
     # here not readtag provided, so data is considered to be non-fastq related
     # or at least not paired

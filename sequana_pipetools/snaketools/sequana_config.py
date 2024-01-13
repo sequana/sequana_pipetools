@@ -10,9 +10,7 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import json
 import os
-import shutil
 import warnings
 
 import ruamel.yaml
@@ -102,7 +100,7 @@ class SequanaConfig:
             with open(data, "r") as fh:
                 import yaml as _yaml
 
-                config = _yaml.load(fh, Loader=_yaml.FullLoader)
+                config = _yaml.safe_load(fh)
             return config
         else:
             raise FileNotFoundError(f"input string must be an existing file {data}")
@@ -186,8 +184,10 @@ class SequanaConfig:
         # add custom extensions
         with pkg_resources.path("sequana_pipetools.resources", "ext.py") as ext_name:
             extensions = [str(ext_name)]
+
         # causes issue with ruamel.yaml 0.12.13. Works for 0.15
         warnings.simplefilter("ignore", ruamel.yaml.error.UnsafeLoaderWarning)
+
         try:
             # open the config and the schema file
             with TempFile(suffix=".yaml") as fh:

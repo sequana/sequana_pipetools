@@ -174,10 +174,10 @@ class PipelineManagerBase:
 
         vers = get_package_version(f"sequana_{self.name}")
 
-        data = {"samples": len(self.samples), "sequana_{}_version".format(self.name): vers}
+        data = {"samples": len(self.samples), f"sequana_{self.name}_version": vers}
         try:
             data["paired"] = self.paired
-        except AttributeError:
+        except AttributeError:  # pragma: no cover
             pass
 
         df_general = pd.DataFrame(

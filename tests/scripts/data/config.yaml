@@ -1,0 +1,81 @@
+# ============================================================================
+# Config file for Quality Control
+# ==========================================[ Sections for the users ]========
+#
+# One of input_directory, input_pattern and input_samples must be provided
+# If input_directory provided, use it otherwise if input_pattern provided,
+# use it, otherwise use input_samples.
+# ============================================================================
+
+sequana_wrappers: "v23.11.18"
+
+input_directory: '.'
+input_pattern: '*fastq.gz'
+
+
+# See sequana_pipetools.readthedocs.io for details about these 2 options
+# common prefixes are removed. addition prefixes may be removed here
+#extra_prefixes_to_strip = []
+# in special cases, sample names can be extracted with a pattern
+#sample_pattern: '{sample}.fastq.gz'
+
+
+apptainers:
+    falco: "https://zenodo.org/record/7014954/files/falco_1.0.0.img"
+    fastqc: "https://zenodo.org/record/7923780/files/fastqc_0.12.1.img"
+    graphviz: "https://zenodo.org/record/7928262/files/graphviz_7.0.5.img"
+    multiqc: https://zenodo.org/record/10155626/files/multiqc_1.17.0.img
+
+
+##############################################################################
+# general section
+#
+# Choose one of the standard method to perform QC of your fastq data
+#
+general:
+    method_choice: fastqc
+
+##############################################################################
+# FastQC section
+#
+# :Parameters:
+#
+# - options: string with any valid FastQC options
+fastqc:
+    options: ''
+    threads: 4
+    resources:
+        mem: 8G
+
+##############################################################################
+# Falco section
+#
+# :Parameters:
+#
+# - options: string with any valid FastQC options
+falco:
+    options: ''
+    threads: 4
+    resources:
+        mem: 8G
+
+##############################################################################
+#
+#
+# - options: any multiqc options accepted. Note that if you use --comments, 
+#   it will be appended to the existing --comments added inside sequana. 
+#   By default, -p (create pictures) and -f (for overwritting) are used. 
+# - indir: The input multiqc (default is local).
+multiqc:
+    do: true
+    options: -p -f
+    input_directory: "."
+    modules: fastqc    # falco is not set; the fastqc module works for falco
+    config_file: 
+    resources:
+        mem: 8G
+
+plotting_and_stats:
+    resources:
+        mem: 8G
+

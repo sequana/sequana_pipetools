@@ -12,7 +12,6 @@
 ##############################################################################
 import os
 import pkgutil
-import sys
 
 import colorlog
 
