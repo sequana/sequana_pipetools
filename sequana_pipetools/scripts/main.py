@@ -18,6 +18,10 @@ import rich_click as click
 from pkg_resources import DistributionNotFound
 
 from sequana_pipetools import version
+from sequana_pipetools.misc import url2hash
+from sequana_pipetools.snaketools.errors import PipeError
+from sequana_pipetools.snaketools.pipeline_utils import get_pipeline_statistics
+from sequana_pipetools.snaketools.sequana_config import SequanaConfig
 
 click.rich_click.USE_MARKDOWN = True
 click.rich_click.SHOW_METAVARS_COLUMN = False
@@ -186,6 +190,7 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
     help="""Given a config file, this command creates a draft schema file""",
 )
 @click.option("--slurm-diag", is_flag=True, help="Scans slurm files and get summary information")
+@click.option("--url2hash", type=click.STRING, help="For developers. Convert a URL to hash mame. ")
 def main(**kwargs):
     """Pipetools utilities for the Sequana project (sequana.readthedocs.io)
 
@@ -206,13 +211,16 @@ def main(**kwargs):
     if kwargs["version"]:
         click.echo(f"sequana_pipetools v{version}")
         return
+    elif kwargs["url2hash"]:
+        click.echo(url2hash(kwargs["url2hash"]))
+
     elif kwargs["completion"]:
         if kwargs["force"] is True:
             choice = "y"
-        else:
+        else:  # pragma: no cover
             msg = "This action will replace files stored in ./config/sequana/pipelines. Do you want to proceed y/n: "
             choice = input(msg)
-        if choice != "y":
+        if choice != "y":  # pragma: no cover
             sys.exit(0)
 
         name = kwargs["completion"]
@@ -226,8 +234,6 @@ def main(**kwargs):
             click.echo("    source ~/.config/sequana/pipelines/{}.sh".format(name))
             click.echo("\nto activate the completion")
     elif kwargs["stats"]:
-        from sequana_pipetools.snaketools.pipeline_utils import get_pipeline_statistics
-
         wrappers, rules = get_pipeline_statistics()
         click.echo("\n ==== Number of wrappers per pipeline")
         click.echo(wrappers.sum(axis=0))
@@ -236,14 +242,10 @@ def main(**kwargs):
         click.echo("\n ==== Number of rules used")
         click.echo(rules)
     elif kwargs["config_to_schema"]:
-        from sequana_pipetools.snaketools.sequana_config import SequanaConfig
-
         config_file = kwargs["config_to_schema"]
         cfg = SequanaConfig(config_file)
         cfg.create_draft_schema()
     elif kwargs["slurm_diag"]:
-        from sequana_pipetools.snaketools.errors import PipeError
-
         p = PipeError()
         p.status(".")
 

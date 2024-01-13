@@ -10,9 +10,6 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import os
-import re
-import sys
 from pathlib import Path
 
 import colorlog

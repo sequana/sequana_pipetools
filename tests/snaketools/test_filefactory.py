@@ -41,6 +41,13 @@ def test_file_name_factory():
     except ValueError:
         assert True
 
+    try:
+        ff = snaketools.FastQFactory("*dummy___not_possible", verbose=True, read_tag="")
+
+        assert False
+    except ValueError:
+        assert True
+
 
 def test_fastqfactory():
     with pytest.raises(ValueError):

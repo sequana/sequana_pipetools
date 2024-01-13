@@ -12,9 +12,8 @@
 ##############################################################################
 from pathlib import Path
 
-from sequana_pipetools import logger
-
-from .slurm import SlurmParsing
+from sequana_pipetools.options import guess_scheduler
+from sequana_pipetools.snaketools.slurm import SlurmParsing
 
 
 class PipeError:
@@ -24,8 +23,12 @@ class PipeError:
         pass
 
     def status(self, working_directory="./", logs_directory="logs"):
-        try:  # let us try to introspect the slurm files
-            dj = SlurmParsing(working_directory, logs_directory)
-            print(dj)
-        except Exception as err:  # pragma: no cover
-            print(err)
+
+        if guess_scheduler == "slurm":
+            try:  # let us try to introspect the slurm files
+                dj = SlurmParsing(working_directory, logs_directory)
+                print(dj)
+            except Exception as err:  # pragma: no cover
+                print(err)
+        else:
+            pass

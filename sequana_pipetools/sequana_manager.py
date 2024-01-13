@@ -18,7 +18,6 @@ import subprocess
 import sys
 from pathlib import Path
 from shutil import which
-from urllib.request import urlretrieve
 
 import aiohttp
 import colorlog
@@ -29,7 +28,7 @@ from sequana_pipetools import get_package_version
 from sequana_pipetools.misc import url2hash
 from sequana_pipetools.snaketools.profile import create_profile
 
-from .misc import Colors, PipetoolsException, print_version
+from .misc import Colors, PipetoolsException
 from .snaketools import Pipeline, SequanaConfig
 
 logger = colorlog.getLogger(__name__)
@@ -77,7 +76,7 @@ class SequanaManager:
         # have been defined yet.
         try:
             logger.setLevel(options.level)
-        except AttributeError:
+        except AttributeError:  # pragma: no cover
             logger.warning("Your pipeline does not have a level option.")
             options.level = "INFO"
 
@@ -450,7 +449,7 @@ class SequanaManager:
             with open(f"{self.workdir}/.sequana/pip.yml", "w") as fout:
                 subprocess.call(cmd.split(), stdout=fout)
             logger.debug("Saved your pip environment into pip.txt (conda not found)")
-        else:
+        else:  # pragma: no cover
             with open(f"{self.workdir}/.sequana/pip.yml", "w") as fout:
                 fout.write("pip not found")
 

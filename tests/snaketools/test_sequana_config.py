@@ -7,14 +7,14 @@ from sequana_pipetools import Pipeline, SequanaConfig, snaketools
 
 from .. import test_dir
 
-# def test_valid_config(tmpdir):
-#    config = SequanaConfig(None)
-#
-#    s = Module("fastqc")
-#    config = SequanaConfig(s.config)
-#    fh = tmpdir.join("config.yml")
-#    config.save(fh)
-#    config.create_draft_schema()
+
+def test_valid_config(tmpdir):
+
+    s = Pipeline("fastqc")
+    config = SequanaConfig(s.config)
+    fh = tmpdir.join("config.yml")
+    config.save(fh)
+    config.create_draft_schema()
 
 
 # this is a regression bug that guarantees that

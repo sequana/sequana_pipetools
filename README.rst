@@ -313,6 +313,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.17.0    * Remove deprecated options and deprecated functions. More tests.
 0.16.9    * Fix slurm sys exit (replaced by print)
           * upadte doc
           * more tests
