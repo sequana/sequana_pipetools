@@ -12,7 +12,6 @@
 ##############################################################################
 from pathlib import Path
 
-from sequana_pipetools.options import guess_scheduler
 from sequana_pipetools.snaketools.slurm import SlurmParsing
 
 
@@ -24,11 +23,10 @@ class PipeError:
 
     def status(self, working_directory="./", logs_directory="logs"):
 
-        if guess_scheduler == "slurm":
-            try:  # let us try to introspect the slurm files
-                dj = SlurmParsing(working_directory, logs_directory)
-                print(dj)
-            except Exception as err:  # pragma: no cover
-                print(err)
-        else:
-            pass
+        # we allows slurm to be detected even though we are not on a cluster
+        # this allows users to debug slurm job through NFS mounting
+        try:  # let us try to introspect the slurm files
+            dj = SlurmParsing(working_directory, logs_directory)
+            print(dj)
+        except Exception as err:  # pragma: no cover
+            print(err)

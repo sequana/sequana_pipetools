@@ -11,6 +11,7 @@
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import asyncio
+import datetime
 import glob
 import os
 import shutil
@@ -241,7 +242,7 @@ class SequanaManager:
         # Now we create the directory to store the config/pipeline
         if self.workdir.exists():
             if self.options.force:
-                logger.warning(f"Path {self.workdir} exists already but you set --force to overwrite it")
+                logger.warning(f"\u2757 Path {self.workdir} exists already but you set --force to overwrite it")
             else:  # pragma: no cover
                 logger.error(f"Output path {self.workdir} exists already. Use --force to overwrite")
                 sys.exit()
@@ -260,11 +261,13 @@ class SequanaManager:
 
         filenames = glob.glob(cfg.input_directory + os.sep + cfg.input_pattern)
         logger.info(
-            f"Found {len(filenames)} files matching your input  pattern ({cfg.input_pattern}) in {cfg.input_directory}"
+            f"\u2705 Found {len(filenames)} files matching your input  pattern ({cfg.input_pattern}) in {cfg.input_directory}"
         )
 
         if len(filenames) == 0:
-            logger.critical(f"Found no files with your matching pattern ({cfg.input_pattern}) in {cfg.input_directory}")
+            logger.critical(
+                f"\u2757 Found no files with your matching pattern ({cfg.input_pattern}) in {cfg.input_directory}"
+            )
             if "*" not in cfg.input_pattern and "?" not in cfg.input_pattern:
                 logger.critical("No wildcard used in your input pattern, please use a * or ? character")
             if stop_on_error:
@@ -426,6 +429,9 @@ class SequanaManager:
             fout.write(f"# sequana_pipetools version: {version}\n")
             fout.write(f"# sequana_{self.name} version: {self._get_package_version()}\n")
             fout.write(f"# sequana version: {self._get_sequana_version()}\n")
+
+            fout.write(f"# python version: {sys.version.split()[0]}\n")
+            fout.write(f"# Date: {datetime.datetime.now()}\n")
             cmd1 = os.path.basename(sys.argv[0])
             fout.write(" ".join([cmd1] + sys.argv[1:]))
 

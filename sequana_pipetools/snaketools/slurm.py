@@ -89,7 +89,7 @@ class SlurmParsing:
     def _report(self):
         N = len(self.errors)
         message = "#" * 33 + " DEBUG REPORT " + "#" * 33 + "\n\n"
-        message += f"The analysis reached {self.percent}%. A total of {N} errors has been found.\n"
+        message += f"The analysis reached {self.percent}. A total of {N} error(s) has been found.\n"
         message += f"Errors are comming from rule(s): {','.join(set([e['rule'] for e in self.errors]))}\n\n"
 
         for e in self.errors:
@@ -112,8 +112,11 @@ class SlurmParsing:
         with open(self.master, "r") as f:
             data = f.read()
             last_percent_parse = [x for x in parse.findall(step_percent, data)]
-
-        return last_percent_parse[-1]["percent"]
+            if last_percent_parse:
+                pct = last_percent_parse[-1]["percent"]
+                pct = f"{pct}%"
+            else:
+                return "undefined status"
 
     def _get_rules_with_errors(self):
         """Return name and log files of rules which returned an error.,"""
@@ -132,7 +135,6 @@ class SlurmParsing:
                     ID = filename.name.strip(".out").split("-")[-1]
                     rule = filename.name.split("-")[0]
                     for k in self.registry.keys():
-                        print(k)
                         if k in data:
                             errors.append({"rule": rule, "slurm_id": ID})
                             break

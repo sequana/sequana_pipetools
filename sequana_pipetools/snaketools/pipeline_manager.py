@@ -15,7 +15,6 @@ import os
 import shutil
 
 import colorlog
-from deprecated import deprecated
 
 from sequana_pipetools import get_package_version
 from sequana_pipetools.misc import PipetoolsException
@@ -23,7 +22,7 @@ from sequana_pipetools.snaketools.errors import PipeError
 
 from .file_factory import FastQFactory, FileFactory
 from .module import Pipeline
-from .pipeline_utils import OnSuccessCleaner, message
+from .pipeline_utils import OnSuccessCleaner
 from .sequana_config import SequanaConfig
 
 logger = colorlog.getLogger(__name__)
@@ -94,10 +93,6 @@ class PipelineManagerBase:
                 " sample names as keys and the corresponding location as values."
             )
         return lambda wildcards: self.samples[wildcards.sample]
-
-    @deprecated(version="1.0", reason="will be removed in v1.0. Update your pipelines.")
-    def message(self, msg):  # pragma: no cover
-        message(msg)
 
     def setup(self, namespace=None, mode="error"):
         """

@@ -246,6 +246,7 @@ def main(**kwargs):
         cfg = SequanaConfig(config_file)
         cfg.create_draft_schema()
     elif kwargs["slurm_diag"]:
+        click.echo("Looking for slurm files")
         p = PipeError()
         p.status(".")
 
