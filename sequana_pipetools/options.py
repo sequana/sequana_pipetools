@@ -250,18 +250,6 @@ class ClickSnakemakeOptions:
 
         _default_jobs = 40 if guess_scheduler() == "slurm" else 4
 
-        if "--use-singularity" in sys.argv:  # pragma: no cover
-            print("--use-singularity is deprecated, use --use-apptainer instead.")
-            sys.exit(1)
-
-        if "--singularity-prefix" in sys.argv:  # pragma: no cover
-            print("--singularity-prefix is deprecated, use --apptainer-prefix instead.")
-            sys.exit(1)
-
-        if "--singularity-args" in sys.argv:  # pragma: no cover
-            print("--singularity-args is deprecated, use --apptainer-args instead.")
-            sys.exit(1)
-
         self.options = [
             click.option(
                 "--apptainer-prefix",

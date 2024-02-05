@@ -313,6 +313,9 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.17.1    * remove the --use-singulariry (replaced by --use-apptainer in
+            previous release)
+          * slight updates on logging and slight update on slurm module
 0.17.0    * Remove deprecated options and deprecated functions. More tests.
 0.16.9    * Fix slurm sys exit (replaced by print)
           * upadte doc
