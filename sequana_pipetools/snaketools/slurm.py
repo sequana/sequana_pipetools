@@ -90,7 +90,8 @@ class SlurmParsing:
         N = len(self.errors)
         message = "#" * 33 + " DEBUG REPORT " + "#" * 33 + "\n\n"
         message += f"The analysis reached {self.percent}. A total of {N} error(s) has been found.\n"
-        message += f"Errors are comming from rule(s): {','.join(set([e['rule'] for e in self.errors]))}\n\n"
+        if N > 0:
+            message += f"Errors are comming from rule(s): {','.join(set([e['rule'] for e in self.errors]))}\n\n"
 
         for e in self.errors:
             ID = e["slurm_id"]["slurm_id"]
