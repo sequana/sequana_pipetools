@@ -313,6 +313,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.17.2    * simpler logging
 0.17.1    * remove the --use-singulariry (replaced by --use-apptainer in
             previous release)
           * slight updates on logging and slight update on slurm module

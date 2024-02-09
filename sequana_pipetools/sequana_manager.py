@@ -533,7 +533,7 @@ class SequanaManager:
         Snakefile.
 
         """
-        logger.info(f"You set --use-apptainer. Downloading containers into {self.apptainer_prefix}")
+        logger.info(f"Container mode is on. Downloading containers in {self.apptainer_prefix}")
         # first get the urls in the main snakefile
         urls = self._get_section_content(self.module.snakefile, "container:")
         urls = [x for x in urls if x.startswith("http")]
@@ -583,8 +583,10 @@ class SequanaManager:
             except FileExistsError:
                 pass
 
+            container = url.split("/")[-1]
+            imagedir = Path(outfile).parent
             if os.path.exists(outfile):
-                logger.info(f"Found corresponding image of {url} in {outfile}")
+                logger.info(f"\u2705 Found container {container} in {imagedir}")
             else:
                 files_to_download.append((url, outfile, count))
                 count += 1
