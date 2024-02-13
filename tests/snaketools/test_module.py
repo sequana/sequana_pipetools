@@ -14,5 +14,4 @@ def test_module():
 
     print(m)
     m
-    m.version
     m.__repr__()

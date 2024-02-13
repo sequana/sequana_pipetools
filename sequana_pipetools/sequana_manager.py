@@ -482,7 +482,7 @@ class SequanaManager:
                         logger.info(msg)
 
         else:
-            logger.info("A completion if possible with sequana_completion --name {}".format(self.name))
+            logger.info(f"Note that completion is possible with sequana_pipetools --completion{self.name}")
 
     def _get_section_content(self, filename, section_name):
         """searching for a given section (e.g. container)
