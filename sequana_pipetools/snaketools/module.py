@@ -91,20 +91,11 @@ or open a Python shell and type::
         _str += "Schema for config file: %s\n" % self.schema_config
         _str += "Multiqc config file: %s\n" % self.multiqc_config
         _str += "tools file: %s\n" % self.requirements
-        _str += "version: %s\n" % self.version
         return _str
 
     def __str__(self):
         txt = "Rule **" + self.name
         return txt
-
-    def _get_version(self):
-        from sequana_pipetools import get_package_version
-
-        version = get_package_version("sequana_{self.name}")
-        return version
-
-    version = property(_get_version, doc="Get version")
 
     def _get_path(self):
         return self._path
@@ -165,11 +156,6 @@ or open a Python shell and type::
             if self._snakefile:
                 return self._snakefile
 
-        # find with version
-        if self.version:
-            name, _ = self.name.split("/")
-            name = os.sep.join((self._path, f"{name}.rules"))
-            self._snakefile = name
         return self._snakefile
 
     snakefile = property(_get_snakefile, doc="full path to the Snakefile file of the module")

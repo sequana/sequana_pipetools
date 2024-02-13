@@ -313,6 +313,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+0.17.3    * remove useless code and fix a requirement
 0.17.2    * simpler logging
 0.17.1    * remove the --use-singulariry (replaced by --use-apptainer in
             previous release)
@@ -367,40 +368,24 @@ Version   Description
             in main.py of the pipelines)
           * a utility function called getmetadata that returns dictionary
             with name, version, wrappers version)
-0.14.1    * remove a print statement
-0.14.0    * Module now returns the list of requirements. SequanaManager
+0.14.X    * Module now returns the list of requirements. SequanaManager
             creates a txt file with all standalones from the requirements.
 0.13.0    * switch to pyproject and fixes #64
-0.12.5    * automatically populater 'wrappers' in PipelineManager' based on the
+0.12.X    * automatically populater 'wrappers' in PipelineManager' based on the
             config entry 'sequana_wrappers'.
-0.12.4    * handles sequana pipeline with underscores (e.g. pacbio_qc)
-0.12.3    * fixes singularity-args in profile
-0.12.2    * Fix the singularity arguments by (i) adding -e and (ii) bind the
+          * Fix the singularity arguments by (i) adding -e and (ii) bind the
             /home. Indeed, snakemake sets --home to the current directory.
             Somehow the /home is lost. Removed deprecated function
-0.12.1    * fix regression bug
-0.12.0    * factorise hash function to have url2hash easily accessible
-          * Use pth file to retrieve data dir in editable mode
+          * factorise hash function to have url2hash easily accessible
           * remove harcoded bind path for apptainer. Uses env variable instead
-          * Fixes singularity-prefix path in shell script if not absolute
-0.11.1    * fix regression, add codacy badge, applied black, remove
+0.11.X    * fix regression, add codacy badge, applied black, remove
             init_pipeline deprecated function.
-0.11.0    * More robust code to check pip executable.
-0.10.2    * Fixes https://github.com/sequana/sequana_pipetools/issues/49
+0.10.X    * Fixes https://github.com/sequana/sequana_pipetools/issues/49
             that properly sets the apptainer prefix in defualt mode
-0.10.1    * any python module can implement a Sequana pipeline.
-0.10.0    * incorporate the sequana_start_template from sequana and refactorise
-            the scripts into scripts/
-0.9.6     * hotfix on apptainer to be back compatible if no apptainers section
-            is found in the config file.
-0.9.5     * replaced singularity word by apptainer (--use-aptainer instead of
+0.9.X     * replaced singularity word by apptainer (--use-aptainer instead of
             --use-singularity)
-0.9.4     * If timeout occurs while singularity is downloaded, catch the error
-            remove truncated file.
-0.9.3     * hotfix missing import when checking sequana version
           * add config2schema utility function for developers
-0.9.2     * Udate asynchronous downloads to use aiohttp
-0.9.1     * Ability to download automatically singularity images (as URLs) if
+          * Ability to download automatically singularity images (as URLs) if
             set in the  pipelines (container field). add the --use-singularity
             option in all pipelines (and --singualrity-prefix)
 0.9.0     * **MAJOR update/Aug 2022**
@@ -410,55 +395,24 @@ Version   Description
             removed). The way input files are handled was also cleanup.
             Fixes https://github.com/sequana/sequana_pipetools/issues/37
             and also files starting with common prefixes
-0.8.1     * Better schema validation
-0.8.0     * removed 'required_binaries' attribute in module.py (not used)
-          * removed 'copy_requirements' in sequana_config and fixed the one
-            in the sequana_manager
-          * switch from distutils to packaging
-          * More tests reaching >90%
-0.7.6     * simplify the setup() method in pipeline manager
-0.7.5     * can set a SEQUANA_WRAPPERS env variable to use local wrappers
-0.7.4     * switch biomics to biomicspole for the slurm queue (internal change)
-0.7.3     * add schema pipeline manager directory & fix attrdict error with yaml
-0.7.2     * allows pipeline and rules to have the same name
-0.7.1     * Fix the --from-project option
-0.7.0     * Set the --wrapper-prefix to point to the  sequana-wrappers github
-0.6.3     * Fix SequanaConfig file
-0.6.2     * Fix script creation to include wrapper and take new snakemake
-            syntax into account
-0.6.1     * update schema handling
-0.6.0     * Move all modules related to pipelines rom sequana into
-            sequana_pipetools; This release should now be the entry point for
-            all Sequana pipelines (no need to import sequana itself).
-0.5.3     * feature removed in sequana to deal with adapter removal and
+0.8.X     * Better schema validation. switch from distutils to packaging
+0.7.X     * simplify the setup() method in pipeline manager
+            can set a SEQUANA_WRAPPERS env variable to use local wrappers
+            add schema pipeline manager directory & fix attrdict error with yaml
+          * Set the --wrapper-prefix to point to the  sequana-wrappers github
+0.6.X     * Fix SequanaConfig file to include wrapper
+            and take new snakemake syntax into account. update schema handling
+          * Move all modules related to pipelines from sequana into
+            sequana_pipetools
+0.5.X     * feature removed in sequana to deal with adapter removal and
             changes updated in the package (removed the 'design' option
-            from the cutadapt rules and needed)
-          * Improve TrimmingOptions to provide specific list of tools
-            and a default trimming tool
-0.5.2     * add TrimmingOptions class intended at replacing CutadaptOptions
-          * to avoid extra spaces, add '-o nospace' in all completion files
-0.5.1     * fix typo
-0.5.0     * add new module called error to be added in onerror sections of all
-            pipelines. Usual test update. Pin to stable version
-0.4.3     * add MANIFEST to include missing requirements.txt
-0.4.2     * add FeatureCounts options
-0.4.1     * add slurm status utility (sequana_slurm_status)
+            from the cutadapt rules and needed); add TrimmingOptions.
+0.4.X     * add FeatureCounts options and slurm status utility
 0.4.0     * stable version
-0.3.1     * comment the prin_newest_version, which is too slow
-0.3.0     * stable release
-0.2.6     * previous new feature led to overhead of a few seconds with --help
-            in this version, we include it only when using --version
-0.2.5     * include newest_version feature
-0.2.4     * completion can now handle multiple directories/files properly
-          * better doc and more tests
-0.2.3     * fix completion to avoir 2 scripts to overwrite each other
-0.2.2     * add a deprecated warning + before_pipeline function
-0.2.1     * add --from-project option to import existing config file
-          * remove --paired-data option
-0.2.0     add content from sequana.pipeline_common to handle all kind of
-          options in the argparse of all pipelines. This is independent of
-          sequana to speed up the --version and --help calls
-0.1.2     add version of the pipeline in the output completion file
-0.1.1     release bug fix
-0.1.0     creation of the package
+0.3.X     * first stable release
+0.2.X     * completion can now handle multiple directories/files properly
+            better doc and more tests; add --from-project option to import
+            existing config file; remove --paired-data option; add content
+            from sequana.pipeline_common
+0.1.X     * software creation
 ========= ======================================================================

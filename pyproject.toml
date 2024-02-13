@@ -6,7 +6,7 @@ build-backend = "poetry.core.masonry.api"
 #maintainer ?#maintainer email
 [tool.poetry]
 name = "sequana_pipetools"
-version = "0.17.2"
+version = "0.17.3"
 description = "A set of tools to help building or using Sequana pipelines"
 authors = ["Sequana Team"]
 license = "BSD-3"
@@ -43,7 +43,7 @@ importlib_resources = ">=5.4.0"
 pyyaml = ">=1.3"
 aiohttp = ">=3.8.4"
 tqdm = ">=4.65"
-charset-normalizer = "^2"
+charset-normalizer = ">=2"
 versionix = ">=0.2.0"
 rich-click = "^1.7.1"
 
