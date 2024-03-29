@@ -15,7 +15,6 @@ import os
 import sys
 
 import rich_click as click
-from pkg_resources import DistributionNotFound
 
 from sequana_pipetools import version
 from sequana_pipetools.misc import url2hash
@@ -227,7 +226,7 @@ def main(**kwargs):
         try:
             c = ClickComplete(name)
             c.save_completion_script()
-        except DistributionNotFound:  # pragma: no cover
+        except Exception:  # pragma: no cover
             click.echo(f"# Warning {name} could not be imported. Nothing done")
         finally:
             click.echo("Please source the files using:: \n")

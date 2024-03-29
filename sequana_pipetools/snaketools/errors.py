@@ -23,6 +23,8 @@ class PipeError:
 
     def status(self, working_directory="./", logs_directory="logs"):
 
+        print("\n\u274C one or several errors were detected. Please check carefully the above message, or the logs/ directory (for HPC/cluster usage). In the later case, some hints may be provided here below. " )
+
         # we allows slurm to be detected even though we are not on a cluster
         # this allows users to debug slurm job through NFS mounting
         try:  # let us try to introspect the slurm files

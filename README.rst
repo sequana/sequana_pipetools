@@ -276,15 +276,15 @@ of the sequana wrappers and will use the official sequana github repository by d
 (https://github.com/sequana/sequana-wrappers). This may be overwritten. For instance, you may use a local clone. To do
 so, you will need to create an environment variable::
 
-    export SEQUANA_WRAPPERS="git+file:///home/user/github/sequana-wrappers
+    export SEQUANA_WRAPPERS="git+file:///home/user/github/sequana-wrappers"
 
 If you decide to use singularity/apptainer, one common error on a cluster is that non-standard paths are not found. You can bind them using the -B option but a more general set up is to create thos environment variable::
 
-    export SINGULARITY_BINDPATH="  /path_to_bind"
+    export SINGULARITY_BINDPATH="/path_to_bind"
 
 for Singularity setup, or ::
 
-    export APPTAINER_BINDPATH=" /path_to_bind"
+    export APPTAINER_BINDPATH="/path_to_bind"
 
 for Apptainer setup.
 

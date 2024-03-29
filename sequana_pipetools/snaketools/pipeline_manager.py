@@ -139,8 +139,12 @@ class PipelineManagerBase:
 
     def onerror(self):
         """Try to report error from slurm"""
-        p = PipeError(self.name)
-        p.status()
+        try:
+            p = PipeError(self.name)
+            p.status()
+            print(f"\nIf you encoutered an error using sequana_{self.name}, please copy paste the above message and create a New Issue on https://github.com/sequana/{self.name}/issues")
+        except Exception as err:
+            print
 
     def teardown(self, extra_dirs_to_remove=[], extra_files_to_remove=[], outdir="."):
         # add a Makefile
@@ -163,6 +167,11 @@ class PipelineManagerBase:
                         except (KeyError, SystemExit):
                             version = "unknown"
                         fout.write(f"{dep}\t{version}\n")
+
+        if os.path.exists("summary.html"):
+            print("\u2705 Another successful analysis. Open summary.html in your browser. Have fun.")
+        else:
+            print("\u2705 Another successful analysis. Have fun.")
 
     def get_html_summary(self, float="left", width=30):
         import pandas as pd
@@ -252,7 +261,7 @@ class PipelineManager(PipelineManagerBase):
     a so-called read-tag to identify the first and second file. Traditionnally, e.g.,
     with illumina sequencers the read tag are _R1_ and _R2_ or a trailing _1 and _2
     Note that samples names have sometimes this tag included. Consider e.g.
-    sample_replicate_1_R1_.fastq.gz or sample_replicate_1_1.fastq.gz then you can imagine that
+    `sample_replicate_1_R1_.fastq.gz` or `sample_replicate_1_1.fastq.gz` then you can imagine that
     it is tricky to handle.
 
     The sample names are extracted by cutting filenames on the first dot that is encoutered

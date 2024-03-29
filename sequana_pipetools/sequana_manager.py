@@ -138,7 +138,10 @@ class SequanaManager:
         )
 
         if self.options.apptainer_prefix:  # pragma: no cover
-            self.apptainer_prefix = self.options.apptainer_prefix
+            self.apptainer_prefix = Path(self.options.apptainer_prefix).resolve()
+            if self.apptainer_prefix.exists() is False:
+                logger.error(f"{self.apptainer_prefix} does not exist")
+                sys.exit(1)
             self.local_apptainers = False
         else:  # pragma: no cover
             self.apptainer_prefix = os.environ.get("SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/.sequana/apptainers")
@@ -218,12 +221,7 @@ class SequanaManager:
             if self.local_apptainers:
                 self.command += " --singularity-prefix .sequana/apptainers"
             else:
-                if Path(self.apptainer_prefix).is_absolute():
-                    self.command += f" --singularity-prefix {self.apptainer_prefix} "
-                else:
-                    # if we set prefix to e.g. ./images then in the pipeline/script.sh,
-                    # the prefix is also ./images whereas it should be ../images
-                    self.command += f" --singularity-prefix ../{self.apptainer_prefix} "
+                self.command += f" --singularity-prefix {self.apptainer_prefix} "
 
         # set up core/jobs options
         if self.options.profile == "local":
