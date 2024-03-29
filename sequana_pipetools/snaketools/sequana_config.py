@@ -18,10 +18,10 @@ from easydev import AttrDict, TempFile
 from pykwalify.core import Core, CoreError, SchemaError
 
 try:
-    import importlib.resources as pkg_resources
+    import importlib.resources as resources
 except ImportError:  # pragma: no cover
     # Try backported to PY<37 `importlib_resources`.
-    import importlib_resources as pkg_resources
+    import importlib_resources as resources
 
 import colorlog
 
@@ -182,8 +182,12 @@ class SequanaConfig:
 
         """
         # add custom extensions
-        with pkg_resources.path("sequana_pipetools.resources", "ext.py") as ext_name:
+        try:
+            ext_name = resources.files("sequana_pipetools.resources").joinpath("ext.py")
             extensions = [str(ext_name)]
+        except AttributeError:
+            with resources.path("sequana_pipetools.resources", "ext.py") as ext_name:
+                extensions = [str(ext_name)]
 
         # causes issue with ruamel.yaml 0.12.13. Works for 0.15
         warnings.simplefilter("ignore", ruamel.yaml.error.UnsafeLoaderWarning)

@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - dev
-  workflow_dispatch:      
+  workflow_dispatch:
   pull_request:
     branches-ignore: []
   schedule:
