@@ -13,16 +13,16 @@ from pathlib import Path
 def create_profile(workdir: Path, profile: str, **kwargs) -> str:
     """Create profile config in working directory."""
     try:
-        slurm_file = resources.files("sequana_pipetools.resources").joinpath(f"{profile}.yaml")
-        with open(slurm_file, "r") as fin:
-            slurm_text = fin.read()
-            slurl_text = slurm_text.format(**kwargs)
+        profile_file = resources.files("sequana_pipetools.resources").joinpath(f"{profile}.yaml")
+        with open(profile_file, "r") as fin:
+            profile_text = fin.read()
+            profile_text = profile_text.format(**kwargs)
     except AttributeError:
         # python 3.8 support for back compatibility
-        with resources.path("sequana_pipetools.resources", f"{profile}.yaml") as slurm_file:
-            slurm_text = slurm_file.read_text().format(**kwargs)
+        with resources.path("sequana_pipetools.resources", f"{profile}.yaml") as profile_file:
+            profile_text = profile_file.read_text().format(**kwargs)
 
     outfile = workdir / f".sequana/profile_{profile}" / "config.yaml"
     outfile.parent.mkdir(parents=True, exist_ok=True)
-    outfile.write_text(slurm_text)
+    outfile.write_text(profile_text)
     return f".sequana/profile_{profile}"
