@@ -313,6 +313,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.0.1     * hot fix in the profile creation (regression)
+1.0.0     * Stable release
 0.17.3    * remove useless code and fix a requirement
 0.17.2    * simpler logging
 0.17.1    * remove the --use-singulariry (replaced by --use-apptainer in
