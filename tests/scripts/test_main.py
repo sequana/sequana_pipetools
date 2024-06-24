@@ -1,4 +1,5 @@
 import sys
+import os
 
 from click.testing import CliRunner
 
@@ -55,3 +56,12 @@ def test_slurm_diag():
     runner = CliRunner()
     results = runner.invoke(main, ["--slurm-diag"])
     assert results.exit_code == 0
+
+
+def test_dot2png():
+    runner = CliRunner()
+    dotfile = os.path.join(test_dir, "..", "data", "test_dag.dot")
+    results = runner.invoke(main, ["--dot2png", dotfile])
+    assert results.exit_code == 0
+
+

@@ -35,6 +35,11 @@ class DOTParser:
 
         dot -Tsvg test.ann.dot -o test.svg
 
+    Even simpler, given your dot file, you can use the sequana_pipetools standalone
+    as follows::
+
+        sequana_pipetools --dot2png input.dot
+
     .. plot::
 
         from sequana import sequana_data
@@ -58,7 +63,7 @@ class DOTParser:
         """
         self.filename = filename
         self.re_index = re.compile(r"(\d+)\[")
-        self.re_name = re.compile(r'label = "(\w+)"')
+        self.re_name = re.compile(r'label = "([\w\n\s,.!?-_:]+)"')
         self.re_arrow = re.compile(r"(\d+) -> (\d+)")
 
     def add_urls(self, output_filename=None, mapper={}, title=None):
