@@ -318,7 +318,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
-1.0.2     * add the dot2png command
+1.0.2     * add the dot2png command. pin docutils <0.21 due to pip error
 1.0.1     * hot fix in the profile creation (regression)
 1.0.0     * Stable release
 0.17.3    * remove useless code and fix a requirement
