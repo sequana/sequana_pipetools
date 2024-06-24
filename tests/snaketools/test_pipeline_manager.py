@@ -197,6 +197,7 @@ def test_directory():
     pm = snaketools.pipeline_manager.PipelineManagerDirectory("test", cfg)
 
 
+
 def test_pipeline_others():
     cfg = SequanaConfig({})
     file1 = os.path.join(test_dir, "data", "Hm2_GTGAAA_L005_R1_001.fastq.gz")
@@ -204,3 +205,4 @@ def test_pipeline_others():
     cfg.config.input_pattern = "Hm*gz"
     pm = snaketools.pipeline_manager.PipelineManager("fastqc", cfg)
     pm.getmetadata()
+    pm.get_html_summary()

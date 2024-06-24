@@ -132,6 +132,11 @@ And for developpers, a quick creation of schema file given a config file (experi
 
     sequana_pipetools --config-to-schema config.yaml > schema.yaml
 
+You can also convert the dot file into a nice PNG file using::
+
+    sequana_pipetools --dot2png dag.dot
+
+
 For Sequana developers
 ======================
 
@@ -313,6 +318,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.0.2     * add the dot2png command. pin docutils <0.21 due to pip error
 1.0.1     * hot fix in the profile creation (regression)
 1.0.0     * Stable release
 0.17.3    * remove useless code and fix a requirement

@@ -143,7 +143,7 @@ class PipelineManagerBase:
             p = PipeError(self.name)
             p.status()
             print(f"\nIf you encoutered an error using sequana_{self.name}, please copy paste the above message and create a New Issue on https://github.com/sequana/{self.name}/issues")
-        except Exception as err:
+        except Exception as err: #pragma: no cover
             print
 
     def teardown(self, extra_dirs_to_remove=[], extra_files_to_remove=[], outdir="."):
