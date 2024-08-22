@@ -185,7 +185,7 @@ class SequanaConfig:
         try:
             ext_name = resources.files("sequana_pipetools.resources").joinpath("ext.py")
             extensions = [str(ext_name)]
-        except AttributeError:
+        except AttributeError: #pragma: no cover
             with resources.path("sequana_pipetools.resources", "ext.py") as ext_name:
                 extensions = [str(ext_name)]
 

@@ -17,7 +17,7 @@ def create_profile(workdir: Path, profile: str, **kwargs) -> str:
         with open(profile_file, "r") as fin:
             profile_text = fin.read()
             profile_text = profile_text.format(**kwargs)
-    except AttributeError:
+    except AttributeError: #pragma: no cover
         # python 3.8 support for back compatibility
         with resources.path("sequana_pipetools.resources", f"{profile}.yaml") as profile_file:
             profile_text = profile_file.read_text().format(**kwargs)
