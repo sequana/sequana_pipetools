@@ -172,6 +172,7 @@ class PipelineManagerBase:
             print("\u2705 Another successful analysis. Open summary.html in your browser. Have fun.")
         else:
             print("\u2705 Another successful analysis. Have fun.")
+        print("\u2705 Please consider citing us would you use Sequana in your research. See https://sequana.readthedocs.io or cite: \n\n\tCokelaer et al. Sequana': a Set of Snakemake NGS pipelines, (2007) JOSS 2(16)")
 
     def get_html_summary(self, float="left", width=30):
         import pandas as pd

@@ -198,7 +198,7 @@ class ClickGeneralOptions:
         if not value:
             return
         else:
-            # When --from-project is called, all value of arguments are are replaced by the ones
+            # When --from-project is called, all value of arguments are replaced by the ones
             # found in the config file. Therefore, users may ommit all arguments. However, some
             # may be compulsary, so we need to reset all 'required' arguments to False
             for option in ctx.command.params:

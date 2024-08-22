@@ -13,14 +13,14 @@ version = get_package_version("sequana_pipetools")
 
 from easydev.logging_tools import Logging
 
-logger = Logging("sequana_pipetools", "WARNING")
+logger = Logging("sequana_pipetools", "WARNING", "cyan")
 # To keep the inheritance/propagation of levels. Logging from easydev will do
 # the formatting only.
 import colorlog
 
 logger = colorlog.getLogger(logger.name)
 
-from .misc import url2hash
+from .misc import url2hash, levenshtein_distance
 from .sequana_manager import SequanaManager  # , get_pipeline_location
 from .snaketools import (
     Pipeline,

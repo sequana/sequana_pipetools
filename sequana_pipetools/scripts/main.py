@@ -227,15 +227,16 @@ def main(**kwargs):
             subprocess.call(cmd.split())
 
     elif kwargs["completion"]:
+        name = kwargs["completion"]
+
         if kwargs["force"] is True:
             choice = "y"
         else:  # pragma: no cover
-            msg = "This action will replace files stored in ./config/sequana/pipelines. Do you want to proceed y/n: "
+            msg = f"This action will replace the {name}.sh file stored in ~/.config/sequana/pipelines. Do you want to proceed y/n: "
             choice = input(msg)
         if choice != "y":  # pragma: no cover
             sys.exit(0)
 
-        name = kwargs["completion"]
         try:
             c = ClickComplete(name)
             c.save_completion_script()
@@ -244,7 +245,7 @@ def main(**kwargs):
         finally:
             click.echo("Please source the files using:: \n")
             click.echo("    source ~/.config/sequana/pipelines/{}.sh".format(name))
-            click.echo("\nto activate the completion")
+            click.echo("\nto activate the completion. Add the line above in your environement")
     elif kwargs["stats"]:
         wrappers, rules = get_pipeline_statistics()
         click.echo("\n ==== Number of wrappers per pipeline")

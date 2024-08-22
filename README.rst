@@ -110,7 +110,7 @@ The **sequana_pipetools** package provide a standalone called **sequana_pipetool
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/UI.png
 
-There are currently 3-4 main application. The first one is for Linux users under
+There are several applications. The first one is for Linux users under
 bash to obtain completion of a sequana pipeline command line arguments::
 
     sequana_pipetools --completion fastqc
@@ -126,7 +126,7 @@ This is used within th pipeline but can be used manually as well and is useful t
 The following command provides statistics about Sequana pipelines installed on your system (number of rules, wrappers
 used)::
 
-    sequana_pipetools -- stats
+    sequana_pipetools --stats
 
 And for developpers, a quick creation of schema file given a config file (experimental, developers would still need to edit the schema but it does 90% of the job)::
 
@@ -283,15 +283,14 @@ so, you will need to create an environment variable::
 
     export SEQUANA_WRAPPERS="git+file:///home/user/github/sequana-wrappers"
 
-If you decide to use singularity/apptainer, one common error on a cluster is that non-standard paths are not found. You can bind them using the -B option but a more general set up is to create thos environment variable::
+If you decide to use singularity/apptainer, one common error on a cluster is that non-standard paths are not found. You can bind them using the -B option but a more general set up is to create this environment variable::
 
     export SINGULARITY_BINDPATH="/path_to_bind"
 
-for Singularity setup, or ::
+for Apptainer setup ::
 
     export APPTAINER_BINDPATH="/path_to_bind"
 
-for Apptainer setup.
 
 
 What is Sequana ?
@@ -318,6 +317,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.0.3     * add levenshtein function. some typo corrections.
 1.0.2     * add the dot2png command. pin docutils <0.21 due to pip error
 1.0.1     * hot fix in the profile creation (regression)
 1.0.0     * Stable release

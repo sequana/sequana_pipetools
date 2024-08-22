@@ -1,4 +1,10 @@
-from sequana_pipetools.misc import Colors, print_version, error, url2hash
+from sequana_pipetools.misc import Colors, print_version, error, url2hash, levenshtein_distance
+
+
+
+def test_levenshtein():
+    assert levenshtein_distance("kitten", "sitting") == 3
+    assert levenshtein_distance("flaw", "lawn") == 2
 
 
 def test_url2hash():

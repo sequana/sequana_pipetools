@@ -15,8 +15,57 @@ import sys
 
 from sequana_pipetools import get_package_version
 
-__all__ = ["Colors", "print_version", "error", "url2hash"]
+__all__ = ["Colors", "print_version", "error", "url2hash", "levenshtein_distance"]
 
+
+def levenshtein_distance(token1: str, token2: str) -> int:
+    """Computes the Levenshtein distance between two strings using dynamic programming.
+
+    The Levenshtein distance is a measure of the minimum number of single-character edits
+    (insertions, deletions, or substitutions) required to change one word into the other.
+
+    :param str token1: The first input string.
+    :param str token2: The second input string.
+    :return: Levenshtein distance between the two input strings.
+
+    Example::
+
+        >>> levenshtein_distance("kitten", "sitting")
+        3
+        >>> levenshtein_distance("flaw", "lawn")
+        2
+
+    Notes:
+    - The function uses a 2D list to store the distances, which requires O(m * n) space,
+      where m and n are the lengths of the input strings.
+    - The time complexity is O(m * n) since each cell of the matrix is filled once.
+
+    """
+    len1, len2 = len(token1), len(token2)
+
+    # Initialize the matrix with zeros
+    distances = [[0 for _ in range(len2 + 1)] for _ in range(len1 + 1)]
+
+    # Fill the first row and column
+    for t1 in range(len1 + 1):
+        distances[t1][0] = t1
+
+    for t2 in range(len2 + 1):
+        distances[0][t2] = t2
+
+    # Compute the Levenshtein distance
+    for t1 in range(1, len1 + 1):
+        for t2 in range(1, len2 + 1):
+            if token1[t1 - 1] == token2[t2 - 1]:
+                distances[t1][t2] = distances[t1 - 1][t2 - 1]
+            else:
+                distances[t1][t2] = min(
+                    distances[t1][t2 - 1],  # Insertion
+                    distances[t1 - 1][t2],  # Deletion
+                    distances[t1 - 1][t2 - 1]  # Substitution
+                ) + 1
+
+    return distances[len1][len2]
 
 def url2hash(url):
     md5hash = hashlib.md5()
