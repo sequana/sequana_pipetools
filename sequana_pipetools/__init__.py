@@ -20,7 +20,7 @@ import colorlog
 
 logger = colorlog.getLogger(logger.name)
 
-from .misc import url2hash, levenshtein_distance
+from .misc import download_and_extract_tar_gz, levenshtein_distance, url2hash
 from .sequana_manager import SequanaManager  # , get_pipeline_location
 from .snaketools import (
     Pipeline,

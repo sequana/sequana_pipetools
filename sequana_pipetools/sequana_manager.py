@@ -473,8 +473,7 @@ class SequanaManager:
                         msg = (
                             "The version {} of your completion file for the {} pipeline seems older than the installed"
                             " pipeline itself ({}). Please, consider updating the completion file {}"
-                            " using the following command: \n\t sequana_pipetools --completion {}\n"
-                            "available in the sequana_pipetools package (pip install sequana_completion)"
+                            " using the following command: \n\t sequana_pipetools --completion {}\n\n"
                         )
                         msg = msg.format(version, self.name, self._get_package_version(), completion, self.name)
                         logger.info(msg)

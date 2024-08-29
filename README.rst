@@ -65,7 +65,6 @@ pipelines, and pipeline management tools into a single library (Sequana) as illu
 in **Fig 1** below.
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/veryold.png
-    :scale: 40%
 
     **Figure 1** Old Sequana framework will all pipelines and Sequana library in the same
     place including pipetools (this library).
@@ -74,7 +73,6 @@ Despite maintaining an 80% test coverage, whenever changes were introduced to th
 
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/old.png
-    :scale: 40%
 
     **Figure 2** v0.8 of Sequana moved the Snakemake pipelines in independent
     repositories. A `cookie cutter <https://github.com/sequana/sequana_pipeline_template>`_
@@ -86,7 +84,6 @@ Nevertheless, certain tools, including those utilized for user interface and inp
 
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/new.png
-    :scale: 40%
 
     **Figure 3** New Sequana framework. The new Sequana framework comprises the core library
     and bioinformatics tools, which are now separate from the pipelines. Moreover, the
@@ -96,7 +93,6 @@ Nevertheless, certain tools, including those utilized for user interface and inp
 As a final step, we separated the rules originally available in Sequana to create an independent package featuring a collection of Snakemake wrappers. These wrappers can be accessed at https://github.com/sequana/sequana-wrappers and offer the added benefit of being rigorously tested through continuous integration.
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/wrappers.png
-    :scale: 40%
 
     **Figure 3** New Sequana framework 2021. The library itself with the core, the
     bioinformatics tools is now fully independent of the pipelines.
@@ -202,9 +198,9 @@ Python module (the last two lines is where the magic happens)::
         # create a function for a given option (here --method)
         def fill_method():
             # any extra sanity checks
-            cfg['method'] = options['method']
+            cfg["method"] = options["method"]
 
-        if options['from-project']:
+        if options["from-project"]:
             # in --from-project, we fill the method is --method is provided only (since already pre-filled)
             if "--method" in sys.argv
                 fill_method()
@@ -235,9 +231,9 @@ For FastQ files (paired ot not), The config file should look like::
 
     sequana_wrappers: "v0.15.1"
 
-    input_directory: '.'
+    input_directory: "."
     input_readtag: "_R[12]_"
-    input_pattern: '*fastq.gz'
+    input_pattern: "*fastq.gz"
 
 
     apptainers:
@@ -317,6 +313,7 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.0.4     * add utility function to download and untar a tar.gz file
 1.0.3     * add levenshtein function. some typo corrections.
 1.0.2     * add the dot2png command. pin docutils <0.21 due to pip error
 1.0.1     * hot fix in the profile creation (regression)
@@ -355,7 +352,7 @@ Version   Description
           * --from-project not funtcional (example in multitax pipeline)
           * Click checks that input-directoyr is a directory indeed
 0.16.1    * Fix/rename error_report into onerror to be included in the Snakemake
-            onerror section. added 'slurm' in slurm output log file in the
+            onerror section. added *slurm* in slurm output log file in the
             profile
 0.16.0    * scripts now use click instead of argparse
           * All Options classes have now an equivalent using click.
@@ -379,8 +376,8 @@ Version   Description
 0.14.X    * Module now returns the list of requirements. SequanaManager
             creates a txt file with all standalones from the requirements.
 0.13.0    * switch to pyproject and fixes #64
-0.12.X    * automatically populater 'wrappers' in PipelineManager' based on the
-            config entry 'sequana_wrappers'.
+0.12.X    * automatically populater *wrappers* in PipelineManager based on the
+            config entry *sequana_wrappers*.
           * Fix the singularity arguments by (i) adding -e and (ii) bind the
             /home. Indeed, snakemake sets --home to the current directory.
             Somehow the /home is lost. Removed deprecated function
@@ -413,7 +410,7 @@ Version   Description
           * Move all modules related to pipelines from sequana into
             sequana_pipetools
 0.5.X     * feature removed in sequana to deal with adapter removal and
-            changes updated in the package (removed the 'design' option
+            changes updated in the package (removed the *design* option
             from the cutadapt rules and needed); add TrimmingOptions.
 0.4.X     * add FeatureCounts options and slurm status utility
 0.4.0     * stable version
