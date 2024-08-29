@@ -1,5 +1,17 @@
-from sequana_pipetools.misc import Colors, print_version, error, url2hash, levenshtein_distance
+from sequana_pipetools.misc import (
+    Colors,
+    download_and_extract_tar_gz,
+    error,
+    levenshtein_distance,
+    print_version,
+    url2hash,
+)
 
+
+def test_download_and_extract_tar_gz(tmpdir):
+
+    url = "https://github.com/sequana/sequana_pipetools/archive/refs/tags/v1.0.3.tar.gz"
+    download_and_extract_tar_gz(url, tmpdir)
 
 
 def test_levenshtein():
@@ -9,7 +21,7 @@ def test_levenshtein():
 
 def test_url2hash():
     md5 = url2hash("https://zenodo.org/record/7822910/files/samtools_1.17_minimap2_2.24.0.img")
-    assert md5 == 'c3e4a8244ce7b65fa873ebda134fea7f'
+    assert md5 == "c3e4a8244ce7b65fa873ebda134fea7f"
 
 
 def test_colors():

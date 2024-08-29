@@ -11,11 +11,70 @@
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import hashlib
+import os
 import sys
+import tarfile
+
+import colorlog
+import requests
+from tqdm import tqdm
 
 from sequana_pipetools import get_package_version
 
-__all__ = ["Colors", "print_version", "error", "url2hash", "levenshtein_distance"]
+logger = colorlog.getLogger(__name__)
+
+
+__all__ = ["Colors", "print_version", "error", "url2hash", "levenshtein_distance", "download_and_extract_tar_gz"]
+
+
+def download_and_extract_tar_gz(url, extract_to):
+    """
+    Downloads a .tar.gz file from a given URL and extracts it to the specified directory.
+
+    :param url: URL of the .tar.gz file
+    :param extract_to: Directory where the contents will be extracted
+    """
+    # Get the file name from the URL
+    filename = url.split("/")[-1]
+    file_path = os.path.join(extract_to, filename)
+
+    # create the directory
+    os.makedirs(extract_to, exist_ok=True)
+
+    # Download the file
+    logger.info(f"Downloading {filename}...")
+    response = requests.get(url, stream=True)
+    response.raise_for_status()  # Raise an exception for HTTP errors
+    total_size = int(response.headers.get("content-length", 0))
+
+    # Write the downloaded content to a file
+    # Download with a progress bar
+    with open(file_path, "wb") as file, tqdm(
+        desc=f"Downloading {filename}",
+        total=total_size,
+        unit="B",
+        unit_scale=True,
+        unit_divisor=1024,
+    ) as bar:
+        for chunk in response.iter_content(chunk_size=8192):
+            file.write(chunk)
+            bar.update(len(chunk))
+
+    logger.info(f"Downloaded {filename} to {file_path}")
+
+    # Extract the tar.gz file
+    if tarfile.is_tarfile(file_path):
+        logger.info(f"Extracting {filename}...")
+
+        with tarfile.open(file_path, "r:gz") as tar:
+            tar.extractall(path=extract_to)
+        logger.info(f"Extracted to {extract_to}")
+    else:
+        logger.info(f"{file_path} is not a valid tar.gz file.")
+
+    # Optionally, you can delete the .tar.gz file after extraction
+    os.remove(file_path)
+    logger.info("Process completed.")
 
 
 def levenshtein_distance(token1: str, token2: str) -> int:
@@ -59,13 +118,17 @@ def levenshtein_distance(token1: str, token2: str) -> int:
             if token1[t1 - 1] == token2[t2 - 1]:
                 distances[t1][t2] = distances[t1 - 1][t2 - 1]
             else:
-                distances[t1][t2] = min(
-                    distances[t1][t2 - 1],  # Insertion
-                    distances[t1 - 1][t2],  # Deletion
-                    distances[t1 - 1][t2 - 1]  # Substitution
-                ) + 1
+                distances[t1][t2] = (
+                    min(
+                        distances[t1][t2 - 1],  # Insertion
+                        distances[t1 - 1][t2],  # Deletion
+                        distances[t1 - 1][t2 - 1],  # Substitution
+                    )
+                    + 1
+                )
 
     return distances[len1][len2]
+
 
 def url2hash(url):
     md5hash = hashlib.md5()
