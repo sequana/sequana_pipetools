@@ -19,6 +19,7 @@ import colorlog
 from sequana_pipetools import get_package_version
 from sequana_pipetools.misc import PipetoolsException
 from sequana_pipetools.snaketools.errors import PipeError
+from sequana_pipetools.snaketools.slurm import SlurmStats
 
 from .file_factory import FastQFactory, FileFactory
 from .module import Pipeline
@@ -142,8 +143,10 @@ class PipelineManagerBase:
         try:
             p = PipeError(self.name)
             p.status()
-            print(f"\nIf you encoutered an error using sequana_{self.name}, please copy paste the above message and create a New Issue on https://github.com/sequana/{self.name}/issues")
-        except Exception as err: #pragma: no cover
+            print(
+                f"\nIf you encoutered an error using sequana_{self.name}, please copy paste the above message and create a New Issue on https://github.com/sequana/{self.name}/issues"
+            )
+        except Exception as err:  # pragma: no cover
             print
 
     def teardown(self, extra_dirs_to_remove=[], extra_files_to_remove=[], outdir="."):
@@ -154,10 +157,11 @@ class PipelineManagerBase:
         cleaner.add_makefile()
 
         # create the version file given the requirements
-        if os.path.exists(".sequana/tools.txt"):
-            with open(".sequana/tools.txt", "r") as fin:
+
+        if os.path.exists(f"{outdir}/.sequana/tools.txt"):
+            with open(f"{outdir}/.sequana/tools.txt", "r") as fin:
                 deps = fin.readlines()
-                with open(".sequana/versions.txt", "w") as fout:
+                with open(f"{outdir}/.sequana/versions.txt", "w") as fout:
                     from versionix.parser import get_version
 
                     for dep in deps:
@@ -172,7 +176,16 @@ class PipelineManagerBase:
             print("\u2705 Another successful analysis. Open summary.html in your browser. Have fun.")
         else:
             print("\u2705 Another successful analysis. Have fun.")
-        print("\u2705 Please consider citing us would you use Sequana in your research. See https://sequana.readthedocs.io or cite: \n\n\tCokelaer et al. Sequana': a Set of Snakemake NGS pipelines, (2007) JOSS 2(16)")
+        print(
+            "\u2705 Please consider citing us would you use Sequana in your research. See https://sequana.readthedocs.io or cite: \n\n\tCokelaer et al. Sequana': a Set of Snakemake NGS pipelines, (2007) JOSS 2(16)"
+        )
+
+        # for HPC with slurm only
+        try:
+            slurm_stats = SlurmStats(outdir)
+            slurm_stats.to_csv(f"{outdir}.sequana/slurm_stats.txt")
+        except Exception:
+            pass
 
     def get_html_summary(self, float="left", width=30):
         import pandas as pd

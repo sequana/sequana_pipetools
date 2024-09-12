@@ -42,7 +42,7 @@ def download_and_extract_tar_gz(url, extract_to):
     os.makedirs(extract_to, exist_ok=True)
 
     # Download the file
-    logger.info(f"Downloading {filename}...")
+    logger.info(f"Downloaded {filename} to {file_path}")
     response = requests.get(url, stream=True)
     response.raise_for_status()  # Raise an exception for HTTP errors
     total_size = int(response.headers.get("content-length", 0))
@@ -60,21 +60,15 @@ def download_and_extract_tar_gz(url, extract_to):
             file.write(chunk)
             bar.update(len(chunk))
 
-    logger.info(f"Downloaded {filename} to {file_path}")
-
     # Extract the tar.gz file
     if tarfile.is_tarfile(file_path):
-        logger.info(f"Extracting {filename}...")
-
         with tarfile.open(file_path, "r:gz") as tar:
             tar.extractall(path=extract_to)
-        logger.info(f"Extracted to {extract_to}")
     else:
-        logger.info(f"{file_path} is not a valid tar.gz file.")
+        logger.warning(f"{file_path} is not a valid tar.gz file.")
 
     # Optionally, you can delete the .tar.gz file after extraction
     os.remove(file_path)
-    logger.info("Process completed.")
 
 
 def levenshtein_distance(token1: str, token2: str) -> int:
