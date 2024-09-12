@@ -10,6 +10,8 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
+import re
+import subprocess
 from pathlib import Path
 
 import colorlog
@@ -17,8 +19,102 @@ import parse
 
 logger = colorlog.getLogger(__name__)
 
+__all__ = ["SlurmStats", "SlurmParsing"]
 
-class SlurmParsing:
+
+class SlurmData:
+    def __init__(self, working_directory, logs_directory="logs", pattern="*/*slurm*.out"):
+
+        # get the master slurm file
+        main_slurms = list(Path(working_directory).glob("slurm-*"))
+
+        try:
+            self.master = sorted(main_slurms)[-1]
+            print(f"Found slurm master {self.master}")
+        except Exception as err:
+            self.master = None
+
+        log_dir = Path(working_directory) / logs_directory
+        self.slurms = sorted([f for f in log_dir.glob(pattern)])
+
+
+# not tested because requires sacct command
+class SlurmStats(SlurmData):  # pragma: nocover
+    def __init__(self, working_directory, logs_directory="logs", pattern="*/*slurm*.out"):
+        super(SlurmStats, self).__init__(working_directory, logs_directory, pattern)
+
+        results = []
+        logger.info(f"Introspecting {len(self.slurms)} slurm files")
+        for filename in self.slurms:
+
+            ID = filename.name.split("-slurm-")[-1].replace(".out", "")
+            task = filename.name.split("-")[0]
+
+            # get slurm ID
+            cmd = f"sacct -j {ID} --format maxRSS,AllocCPUS,Elapsed,CPUTime"
+            call = subprocess.run(cmd.split(), stdout=subprocess.PIPE)
+            if call.returncode == 0:
+                jobinfo = self._parse_sacct_output(call.stdout.decode())
+                results.append([task] + jobinfo)
+            else:
+                print(cmd)
+
+        self.results = results
+        self.columns = ["task", "memory_gb", "thread", "time", "cpu_time"]
+
+    def to_csv(self, outfile):
+        with open(outfile, "w") as fout:
+            fout.write(",".join(self.columns))
+            for result in self.results:
+                fout.write(",".join([str(x) for x in result]))
+
+    def _parse_sacct_output(self, output):
+        """Function to parse sacct output
+
+        The output is suppose to have 4 entries in this order:
+        MaxRSS  AllocCPUS    Elapsed    CPUTime and solely used by :class:`~SlurmStats`
+
+        """
+        # Split the output into lines and remove the header
+        lines = output.strip().split("\n")[2:]
+
+        # Initialize a list to store the values of interest
+        job_info = []
+
+        # Regex to match the values
+        value_regex = re.compile(r"(\S+)?\s+(\d+)\s+(\d{2}:\d{2}:\d{2})\s+(\d{2}:\d{2}:\d{2})")
+
+        for i, line in enumerate(lines):
+            match = value_regex.search(line)
+            if match:
+                # Extract values from regex groups
+                maxrss = match.group(1) if match.group(1) else "0K"  # Handle empty MaxRSS case
+                alloccpus = int(match.group(2))
+                elapsed = match.group(3)
+                cputime = match.group(4)
+
+                # Only keep the second line (main job)
+                if i == 1:
+                    # Convert MaxRSS from KB to GB
+                    maxrss_gb = self._kb_to_gb(maxrss)
+                    # Append parsed values to the job_info list
+                    job_info = [maxrss_gb, alloccpus, elapsed, cputime]
+                    break
+
+        # Return the list of job information
+        return job_info
+
+    def _kb_to_gb(self, kb_str):
+        # Remove the 'K' and convert to float
+        kb = float(kb_str.replace("K", ""))
+
+        # Convert kilobytes to gigabytes (1 GB = 1024^2 KB)
+        gb = kb / (1024**2)
+
+        return round(gb, 6)  # Round to six decimal places for precision
+
+
+class SlurmParsing(SlurmData):
     """Helper for sequana jobs debugging on slurm cluster.
 
     Assumptions:
@@ -49,18 +145,7 @@ class SlurmParsing:
     }
 
     def __init__(self, working_directory, logs_directory="logs", pattern="*/*slurm*.out"):
-
-        # get the master slurm file
-        main_slurms = list(Path(working_directory).glob("slurm-*"))
-
-        try:
-            self.master = sorted(main_slurms)[-1]
-            print(f"Found slurm master {self.master}")
-        except Exception as err:
-            self.master = None
-
-        log_dir = Path(working_directory) / logs_directory
-        self.slurms = sorted([f for f in log_dir.glob(pattern)])
+        super(SlurmParsing, self).__init__(working_directory, logs_directory, pattern)
 
         # no sys exit (even zero) since it is used within snakemake
         N = len(self.slurms)

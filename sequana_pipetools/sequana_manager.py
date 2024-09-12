@@ -417,7 +417,7 @@ class SequanaManager:
             msg += "cd {}; sbatch {}.sh\n\n".format(self.workdir, self.name)
         else:
             msg += "cd {}; sh {}.sh\n\n".format(self.workdir, self.name)
-        msg += f"You may tune extra parameters related to snakemake in {self.workdir}/{self.name}/.sequana/profile_{self.options.profile}"
+        msg += f"You may tune extra parameters related to snakemake in {self.workdir}/.sequana/profile_{self.options.profile}"
         print(self.colors.purple(msg))
 
         # Save an info.txt with the command used

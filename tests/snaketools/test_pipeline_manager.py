@@ -29,7 +29,14 @@ def test_pipeline_manager(tmpdir):
     pm = snaketools.PipelineManager("custom", cfg)
     assert not pm.paired
     working_dir = tmpdir.mkdir("temp")
-    pm.teardown(outdir=working_dir)
+
+    # when using the pipelie manager, it does not create .sequana, tools, etc
+    # this is created by the sequana_pipetools.sequana_manager
+    (working_dir / ".sequana").mkdir()
+    ff = Path(working_dir / ".sequana" / "tools.txt")
+    ff.touch()
+    ff = Path(working_dir / ".sequana" / "version.txt")
+    ff.touch()
 
     # here not readtag provided, so data is considered to be non-fastq related
     # or at least not paired
@@ -195,7 +202,6 @@ def test_directory():
     cfg.config.input_directory, cfg.config.input_pattern = os.path.split(file1)
     cfg.config.input_pattern = "Hm*gz"
     pm = snaketools.pipeline_manager.PipelineManagerDirectory("test", cfg)
-
 
 
 def test_pipeline_others():
