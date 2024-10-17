@@ -45,6 +45,19 @@ def test_parse_sacct_output(mock_sacct_output):
     assert job_info == [0.252117, 1, "00:00:24", "00:00:24"]
 
 
+def test_parse_sacct_output_generic():
+    slurm_stats = SlurmStats(working_directory=".", logs_directory="logs")
+    mock_sacct_output = """
+    MaxRSS  AllocCPUS    Elapsed    CPUTime
+---------- ---------- ---------- ----------
+                    4   06:07:19 1-00:29:16
+ 18410.50M          4   06:07:19 1-00:29:16
+         0          4   06:07:19 1-00:29:16
+"""
+    job_info = slurm_stats._parse_sacct_output(mock_sacct_output)
+    assert job_info == [17.979004, 4, "06:07:19", "1-00:29:16"]
+
+
 @patch("subprocess.run")
 def test_slurm_stats_with_mocked_sacct(mock_run, mock_sacct_output, tmpdir):
     # Mock the subprocess.run method
