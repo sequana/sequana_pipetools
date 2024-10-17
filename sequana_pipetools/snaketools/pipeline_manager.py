@@ -183,7 +183,7 @@ class PipelineManagerBase:
         # for HPC with slurm only
         try:
             slurm_stats = SlurmStats(outdir)
-            slurm_stats.to_csv(f"{outdir}.sequana/slurm_stats.txt")
+            slurm_stats.to_csv(f"{outdir}/.sequana/slurm_stats.txt")
         except Exception:
             pass
 

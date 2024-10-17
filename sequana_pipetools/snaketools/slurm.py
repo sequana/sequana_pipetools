@@ -64,9 +64,9 @@ class SlurmStats(SlurmData):  # pragma: nocover
 
     def to_csv(self, outfile):
         with open(outfile, "w") as fout:
-            fout.write(",".join(self.columns))
+            fout.write(",".join(self.columns) + "\n")
             for result in self.results:
-                fout.write(",".join([str(x) for x in result]))
+                fout.write(",".join([str(x) for x in result]) + "\n")
 
     def _parse_sacct_output(self, output):
         """Function to parse sacct output
@@ -82,7 +82,7 @@ class SlurmStats(SlurmData):  # pragma: nocover
         job_info = []
 
         # Regex to match the values
-        value_regex = re.compile(r"(\S+)?\s+(\d+)\s+(\d{2}:\d{2}:\d{2})\s+(\d{2}:\d{2}:\d{2})")
+        value_regex = re.compile(r"(\S+)?\s+(\d+)\s+((?:\d+-)?\d{2}:\d{2}:\d{2})\s+((?:\d+-)?\d{2}:\d{2}:\d{2})")
 
         for i, line in enumerate(lines):
             match = value_regex.search(line)
@@ -96,7 +96,7 @@ class SlurmStats(SlurmData):  # pragma: nocover
                 # Only keep the second line (main job)
                 if i == 1:
                     # Convert MaxRSS from KB to GB
-                    maxrss_gb = self._kb_to_gb(maxrss)
+                    maxrss_gb = self._convert_memory_to_gb(maxrss)
                     # Append parsed values to the job_info list
                     job_info = [maxrss_gb, alloccpus, elapsed, cputime]
                     break
@@ -104,14 +104,19 @@ class SlurmStats(SlurmData):  # pragma: nocover
         # Return the list of job information
         return job_info
 
-    def _kb_to_gb(self, kb_str):
-        # Remove the 'K' and convert to float
-        kb = float(kb_str.replace("K", ""))
+    def _convert_memory_to_gb(self, memory_str):
+        """Convert memory string to gigabytes (GB).
 
-        # Convert kilobytes to gigabytes (1 GB = 1024^2 KB)
-        gb = kb / (1024**2)
+        Handles memory units in kilobytes (K), megabytes (M), gigabytes (G), and terabytes (T).
+        """
+        units = {"K": 1 / (1024**2), "M": 1 / 1024, "G": 1, "T": 1024}
 
-        return round(gb, 6)  # Round to six decimal places for precision
+        match = re.match(r"(\d+(?:\.\d+)?)([KMGT])?", memory_str)
+        if match:
+            value = float(match.group(1))
+            unit = match.group(2) if match.group(2) else "K"  # Default to KB if no unit is specified
+            return round(value * units[unit], 6)
+        return 0.0  # Return 0 GB if parsing fails
 
 
 class SlurmParsing(SlurmData):
