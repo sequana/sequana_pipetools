@@ -215,7 +215,9 @@ class ClickGeneralOptions:
             data = fin.read()
         data = data.split()
         data = "\n".join(sorted(data))
-        click.echo(f"Those software will be required for the pipeline to work correctly:\n\n{data}\n")
+        click.echo(
+            f"sequana_{ctx.NAME} will need one or more of these software to work correctly. We recommend you to use --apptainer option so that you do not need to install them manually:\n\n{data}\n"
+        )
         ctx.exit(0)
 
 
@@ -302,11 +304,17 @@ class ClickSnakemakeOptions:
 
 class ClickInputOptions:
     group_name = "Data"
-    metadata = {"name": group_name, "options": ["--input-directory", "--input-pattern", "--input-readtag"]}
+    metadata = {
+        "name": group_name,
+        "options": ["--input-directory", "--input-pattern", "--input-readtag", "--exclude-pattern"],
+    }
 
-    def __init__(self, input_directory=".", input_pattern="*fastq.gz", add_input_readtag=True, caller=None):
+    def __init__(
+        self, input_directory=".", input_pattern="*fastq.gz", add_input_readtag=True, caller=None, exclude_pattern=None
+    ):
         self.input_directory = input_directory
         self.input_pattern = input_pattern
+        self.exclude_pattern = exclude_pattern
         self.add_input_readtag = add_input_readtag
 
         self.options = [
@@ -326,6 +334,14 @@ class ClickInputOptions:
                 type=click.STRING,
                 show_default=True,
                 help=f"pattern for the input files ({input_pattern})",
+            ),
+            click.option(
+                "--exclude-pattern",
+                "exclude_pattern",
+                default=self.exclude_pattern,
+                type=click.STRING,
+                show_default=True,
+                help=f"pattern for excluding input files ({exclude_pattern})",
             ),
         ]
 

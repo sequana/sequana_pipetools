@@ -157,7 +157,6 @@ class PipelineManagerBase:
         cleaner.add_makefile()
 
         # create the version file given the requirements
-
         if os.path.exists(f"{outdir}/.sequana/tools.txt"):
             with open(f"{outdir}/.sequana/tools.txt", "r") as fin:
                 deps = fin.readlines()
@@ -254,6 +253,10 @@ class PipelineManager(PipelineManagerBase):
         - input_readtag: "_R[12]_"
         - input_pattern: "*.fastq.gz"
 
+    and optional option:
+
+        - exclude_pattern:
+
     You may omit the input_readtag, which is not required for non-paired data. For instance for
     pacbio and nanopore files, there are not paired and the read tag is not required. Instead, if
     you are dealing with Illumina/MGI data sets, you must provide this field IF AND ONLY IF you want
@@ -342,6 +345,7 @@ class PipelineManager(PipelineManagerBase):
         sample_func=None,
         extra_prefixes_to_strip=[],
         sample_pattern=None,
+        exclude_pattern=None,
         **kwargs,
     ):
         """.. rubric:: Constructor
@@ -371,6 +375,7 @@ class PipelineManager(PipelineManagerBase):
         # can be provided in the config file or arguments
         self.sample_pattern = cfg.config.get("sample_pattern", sample_pattern)
         self.extra_prefixes_to_strip = cfg.config.get("extra_prefixes_to_strip", extra_prefixes_to_strip)
+        self.exclude_pattern = cfg.config.get("exclude_pattern", exclude_pattern)
 
         # if input_directory is not filled, the input_pattern, if valid, will be used instead and must
         # be provided anyway.
@@ -446,6 +451,7 @@ class PipelineManager(PipelineManagerBase):
             read_tag=read_tag,
             extra_prefixes_to_strip=self.extra_prefixes_to_strip,
             sample_pattern=self.sample_pattern,
+            exclude_pattern=self.exclude_pattern,
         )
 
         # check whether it is paired or not. This is just to raise an error when
@@ -470,7 +476,10 @@ class PipelineManager(PipelineManagerBase):
 
     def _get_any_files(self, pattern):
         self.ff = FileFactory(
-            pattern, extra_prefixes_to_strip=self.extra_prefixes_to_strip, sample_pattern=self.sample_pattern
+            pattern,
+            extra_prefixes_to_strip=self.extra_prefixes_to_strip,
+            sample_pattern=self.sample_pattern,
+            exclude_pattern=self.exclude_pattern,
         )
 
         # samples contains a correspondance between the sample name and the
