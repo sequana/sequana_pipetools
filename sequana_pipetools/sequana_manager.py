@@ -178,8 +178,11 @@ class SequanaManager:
                 cfg.input_directory = os.path.abspath(options["input_directory"])
             if "--input-readtag" in sys.argv:
                 cfg.input_readtag = options["input_readtag"]
+            if "--exclude-pattern" in sys.argv:
+                cfg.exclude_pattern = options["exclude_pattern"]
         else:
             cfg.input_pattern = options.input_pattern
+            cfg.exclude_pattern = options.exclude_pattern
             cfg.input_readtag = options.input_readtag
             cfg.input_directory = os.path.abspath(options.input_directory)
 
@@ -258,6 +261,10 @@ class SequanaManager:
         cfg = self.config.config
 
         filenames = glob.glob(cfg.input_directory + os.sep + cfg.input_pattern)
+
+        # this code is just informative. Actual run is snaketools.pipeline_manager
+        if cfg.get("exclude_pattern", None) and cfg.get("exclude_pattern"):
+            filenames = [x for x in filenames if cfg.get("exclude_pattern") not in x.split("/")[-1]]
         logger.info(
             f"\u2705 Found {len(filenames)} files matching your input  pattern ({cfg.input_pattern}) in {cfg.input_directory}"
         )

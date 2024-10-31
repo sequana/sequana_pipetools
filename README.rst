@@ -313,6 +313,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.1.0     * add exclude_pattern in input data section
+1.0.6     * add py3.12, slight updates wrt slurm
 1.0.5     * introspect slurm files to extract stats
 1.0.4     * add utility function to download and untar a tar.gz file
 1.0.3     * add levenshtein function. some typo corrections.

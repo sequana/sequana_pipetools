@@ -71,7 +71,7 @@ class FileFactory:
 
     """
 
-    def __init__(self, pattern, extra_prefixes_to_strip=[], sample_pattern=None, **kwargs):
+    def __init__(self, pattern, extra_prefixes_to_strip=[], sample_pattern=None, exclude_pattern=None, **kwargs):
         """.. rubric:: Constructor
 
         :param pattern: can be a filename, list of filenames, or a global
@@ -92,6 +92,7 @@ class FileFactory:
         self.pattern = pattern
         self.extra_prefixes_to_strip = extra_prefixes_to_strip
         self.sample_pattern = sample_pattern
+        self.exclude_pattern = exclude_pattern
 
         try:
             if os.path.exists(pattern):
@@ -107,6 +108,10 @@ class FileFactory:
 
         # remove directories if they exist
         self._glob = [x for x in self._glob if not os.path.isdir(x)]
+
+        # remove candidates that have the exclude pattern
+        if self.exclude_pattern:  # pragma: no cover
+            self._glob = [x for x in self._glob if not self.exclude_pattern in x]
 
     def _get_realpaths(self):
         return [os.path.realpath(filename) for filename in self._glob]
@@ -156,7 +161,7 @@ class FileFactory:
 
                 if filename.startswith(prefix) and filename.endswith(suffix):
                     res = res[len(prefix) : len(res) - len(suffix)]
-                else:
+                else:  # pragma: no cover
                     raise PipetoolsException(f"Your sample pattern does not match the filename {filename}")
             else:
                 res = filename[:]
@@ -246,6 +251,7 @@ class FastQFactory(FileFactory):
         read_tag="_R[12]_",
         extra_prefixes_to_strip=[],
         sample_pattern=None,
+        exclude_pattern=None,
         **kwargs,
     ):
         r""".. rubric:: Constructor
@@ -267,7 +273,10 @@ class FastQFactory(FileFactory):
             and your sample will be only 'A'.
         """
         super(FastQFactory, self).__init__(
-            pattern, extra_prefixes_to_strip=extra_prefixes_to_strip, sample_pattern=sample_pattern
+            pattern,
+            extra_prefixes_to_strip=extra_prefixes_to_strip,
+            sample_pattern=sample_pattern,
+            exclude_pattern=exclude_pattern,
         )
 
         self.read_tag = read_tag
