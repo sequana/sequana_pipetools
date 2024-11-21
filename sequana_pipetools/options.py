@@ -216,7 +216,7 @@ class ClickGeneralOptions:
         data = data.split()
         data = "\n".join(sorted(data))
         click.echo(
-            f"sequana_{ctx.NAME} will need one or more of these software to work correctly. We recommend you to use --apptainer option so that you do not need to install them manually:\n\n{data}\n"
+            f"sequana_{ctx.NAME} will need one or more of these software to work correctly. We recommend you to use --use-apptainer and --apptainer-prefix options so that you do not need to install them manually:\n\n{data}\n"
         )
         ctx.exit(0)
 

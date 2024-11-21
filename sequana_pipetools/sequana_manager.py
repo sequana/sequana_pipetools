@@ -309,7 +309,7 @@ class SequanaManager:
         self.config.save(self.workdir / f".sequana/{config_name}")
         try:
             os.symlink(f".sequana/{config_name}", f"{self.workdir}/{config_name}")
-        except FileExistsError:  # pragma: no cover
+        except (FileExistsError, PermissionError):  # pragma: no cover
             pass
 
         # the final command
