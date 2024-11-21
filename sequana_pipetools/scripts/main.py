@@ -12,25 +12,27 @@
 ##############################################################################
 import importlib
 import os
+import subprocess
 import sys
 import tempfile
-import subprocess
 
 import rich_click as click
 
 from sequana_pipetools import version
 from sequana_pipetools.misc import url2hash
+from sequana_pipetools.snaketools.dot_parser import DOTParser
 from sequana_pipetools.snaketools.errors import PipeError
 from sequana_pipetools.snaketools.pipeline_utils import get_pipeline_statistics
 from sequana_pipetools.snaketools.sequana_config import SequanaConfig
-from sequana_pipetools.snaketools.dot_parser import DOTParser
 
 click.rich_click.USE_MARKDOWN = True
 click.rich_click.SHOW_METAVARS_COLUMN = False
 click.rich_click.APPEND_METAVARS_HELP = True
 click.rich_click.STYLE_ERRORS_SUGGESTION = "magenta italic"
 click.rich_click.SHOW_ARGUMENTS = True
-click.rich_click.FOOTER_TEXT = "Authors: Thomas Cokelaer, Dimitri Desvillechabrol -- http://github.com/sequana/sequana_pipetools"
+click.rich_click.FOOTER_TEXT = (
+    "Authors: Thomas Cokelaer, Dimitri Desvillechabrol -- http://github.com/sequana/sequana_pipetools"
+)
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
@@ -174,7 +176,9 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
 
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--version", is_flag=True)
-@click.option("--dot2png", type=click.STRING, help="convert the input.dot into PNG file. Output name is called INPUT.sequana.png")
+@click.option(
+    "--dot2png", type=click.STRING, help="convert the input.dot into PNG file. Output name is called INPUT.sequana.png"
+)
 @click.option(
     "--completion",
     type=click.STRING,
@@ -194,6 +198,11 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
 )
 @click.option("--slurm-diag", is_flag=True, help="Scans slurm files and get summary information")
 @click.option("--url2hash", type=click.STRING, help="For developers. Convert a URL to hash mame. ")
+@click.option(
+    "--init-new-pipeline",
+    is_flag=True,
+    help="Give name of new pipeline and this will create full structure for a new sequana pipeline",
+)
 def main(**kwargs):
     """Pipetools utilities for the Sequana project (sequana.readthedocs.io)
 
@@ -216,7 +225,7 @@ def main(**kwargs):
         return
     elif kwargs["url2hash"]:
         click.echo(url2hash(kwargs["url2hash"]))
-    elif kwargs['dot2png']:
+    elif kwargs["dot2png"]:
         name = kwargs["dot2png"]
         assert name.endswith(".dot")
         outname = name.replace(".dot", ".sequana.png")
@@ -262,7 +271,10 @@ def main(**kwargs):
         click.echo("Looking for slurm files")
         p = PipeError()
         p.status(".")
+    elif kwargs["init_new_pipeline"]:  # pragma: no cover
+        cmd = "cookiecutter https://github.com/sequana/sequana_pipeline_template -o . --overwrite-if-exists"
+        subprocess.run(cmd.split(), capture_output=False)
 
 
 if __name__ == "__main__":
-    main() #pragma: no cover
+    main()  # pragma: no cover

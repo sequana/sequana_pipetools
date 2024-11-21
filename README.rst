@@ -147,8 +147,7 @@ Initiate a project (Sequana pipeline) with cookiecutter
 
 You can start a Sequana pipeline skeleton as follows::
 
-    pip install cookiecuter
-    cookiecutter https://github.com/sequana/sequana_pipeline_template -o . --overwrite-if-exists
+    sequana_pipetools --init-new-pipeline
 
 and then follow the instructions. You will be asked some questions such as the name of your pipeline (eg. variant), a description, keywords and the *project_slug* (just press enter).
 
@@ -313,6 +312,10 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.1.1     * symlink creation on apptainers skipped if permission error (file
+            is probably already present and created by another users e.g.
+            the admin system)
+          * add --init-new-pipeline argument in sequana_pipetools standalone
 1.1.0     * add exclude_pattern in input data section
 1.0.6     * add py3.12, slight updates wrt slurm
 1.0.5     * introspect slurm files to extract stats
