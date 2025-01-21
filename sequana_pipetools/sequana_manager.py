@@ -26,7 +26,7 @@ from easydev import AttrDict, CustomConfig
 from tqdm.asyncio import tqdm
 
 from sequana_pipetools import get_package_version
-from sequana_pipetools.misc import url2hash
+from sequana_pipetools.misc import get_url_file_size, url2hash
 from sequana_pipetools.snaketools.profile import create_profile
 
 from .misc import Colors, PipetoolsException
@@ -568,6 +568,7 @@ class SequanaManager:
 
         count = 0
         files_to_download = []
+        total_size = 0
 
         # define the URLs and the output filename.
         for url in urls:
@@ -584,7 +585,7 @@ class SequanaManager:
 
             try:
                 Path(linkfile).symlink_to(f"{name}")
-            except FileExistsError:
+            except (FileExistsError, PermissionError):  # pragma: no cover
                 pass
 
             container = url.split("/")[-1]
@@ -595,6 +596,11 @@ class SequanaManager:
                 files_to_download.append((url, outfile, count))
                 count += 1
                 logger.info(f"Preparing {url} for download")
+
+            total_size += get_url_file_size(url)
+        total_size /= 1024 * 1024
+        total_size = round(total_size)
+        logger.info(f"Total container size (Mb): {total_size}")
 
         try:  # try an asynchrone downloads
             multiple_downloads(files_to_download)

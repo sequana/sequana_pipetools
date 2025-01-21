@@ -16,18 +16,23 @@
 .. image:: https://app.codacy.com/project/badge/Grade/9031e4e4213e4e57a876fd5b792b5003
    :target: https://app.codacy.com/gh/sequana/sequana_pipetools/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
 
+.. image:: https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11-blue
+    :target: https://www.python.org/
+    :alt: Python versions
+
 .. image:: http://joss.theoj.org/papers/10.21105/joss.00352/status.svg
    :target: http://joss.theoj.org/papers/10.21105/joss.00352
    :alt: JOSS (journal of open source software) DOI
 
+
+
 :Overview: A set of tools to help building or using Sequana pipelines
 :Status: Production
 :Issues: Please fill a report on `github <https://github.com/sequana/sequana_pipetools/issues>`__
-:Python version: Python 3.8, 3.9, 3.10, 3.11
 :Citation: Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352,  `JOSS DOI doi:10.21105/joss.00352 <http://www.doi2bib.org/bib/10.21105%2Fjoss.00352>`_
 
-Installation
-============
+🔧 Installation
+===============
 
 from pypi website::
 
@@ -312,6 +317,8 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.2.0     * update to be compatible with poetry 2.0
+          * print container size when initiating a pipeline
 1.1.1     * symlink creation on apptainers skipped if permission error (file
             is probably already present and created by another users e.g.
             the admin system)
@@ -427,3 +434,8 @@ Version   Description
             from sequana.pipeline_common
 0.1.X     * software creation
 ========= ======================================================================
+
+
+## 🗨️ Contacts <a name="contacts"></a>
+
+For questions, feel free to reach out to the maintainers through GitHub.

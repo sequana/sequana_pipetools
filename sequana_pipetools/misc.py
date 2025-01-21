@@ -124,6 +124,19 @@ def levenshtein_distance(token1: str, token2: str) -> int:
     return distances[len1][len2]
 
 
+def get_url_file_size(url):
+    try:
+        response = requests.head(url, allow_redirects=True)
+        if response.status_code == 200 and "Content-Length" in response.headers:
+            return int(response.headers["Content-Length"])
+        else:
+            logger.warning(f"Unable to retrieve file size from {url}. Status code:", response.status_code)
+            return 0
+    except requests.RequestException as e:
+        logger.warning(f"Unable to retrieve file size from {url}:", e)
+        return 0
+
+
 def url2hash(url):
     md5hash = hashlib.md5()
     md5hash.update(url.encode())
