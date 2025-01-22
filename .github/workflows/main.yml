@@ -17,7 +17,7 @@ jobs:
     strategy:
       max-parallel: 5
       matrix:
-        python: [3.8, 3.9,'3.10', '3.11']
+        python: [3.9,'3.10', '3.11']
       fail-fast: false
 
 
@@ -43,8 +43,7 @@ jobs:
     - name: install package itself
       run: |
          pip install poetry
-         pip install kaleido #required on github CI by plotly
-         poetry install
+         poetry install --with dev
 
     - name: testing
       run: |
