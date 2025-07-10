@@ -140,8 +140,8 @@ class SequanaManager:
         if self.options.apptainer_prefix:  # pragma: no cover
             self.apptainer_prefix = Path(self.options.apptainer_prefix).resolve()
             if self.apptainer_prefix.exists() is False:
-                logger.error(f"{self.apptainer_prefix} does not exist")
-                sys.exit(1)
+                logger.warning(f"Creating {self.apptainer_prefix} to store containers (does not exist)")
+                os.makedirs(self.apptainer_prefix)
             self.local_apptainers = False
         else:  # pragma: no cover
             self.apptainer_prefix = os.environ.get("SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/.sequana/apptainers")
