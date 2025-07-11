@@ -255,17 +255,12 @@ or open a Python shell and type::
             # _ = self.is_executable()
             missing = " ".join(missing)
             txt = f"""Some executable or Python packages are not available: {missing}
-Some functionalities may not work. Consider adding them with conda or set the --use-apptainer options.
+Some functionalities may not work. Consider using apptainer by setting a host directory with --apptainer-prefix
 
             """
 
             if mode == "warning":
                 logger.critical(txt)
-            elif mode == "error":  # pragma: no cover
-                txt += "you may want to use \n conda install {missing};"
-                for this in missing:
-                    txt += "- %s\n" % this
-                raise ValueError(txt)
 
     def md5(self):
         """return md5 of snakefile and its default configuration file

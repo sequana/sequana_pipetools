@@ -139,9 +139,11 @@ class SequanaManager:
 
         if self.options.apptainer_prefix:  # pragma: no cover
             self.apptainer_prefix = Path(self.options.apptainer_prefix).resolve()
+            self.options.use_apptainer = True
+
             if self.apptainer_prefix.exists() is False:
-                logger.error(f"{self.apptainer_prefix} does not exist")
-                sys.exit(1)
+                logger.warning(f"Creating {self.apptainer_prefix} to store containers (does not exist)")
+                os.makedirs(self.apptainer_prefix)
             self.local_apptainers = False
         else:  # pragma: no cover
             self.apptainer_prefix = os.environ.get("SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/.sequana/apptainers")
@@ -444,22 +446,11 @@ class SequanaManager:
         with open(self.workdir / "unlock.sh", "w") as fout:
             fout.write(f"#!/bin/sh\nsnakemake -s {snakefilename} --unlock -j 1")
 
-        # save environment
-        if shutil.which("conda"):
-            print(self.colors.purple("Saving current conda environment information"))
-            cmd = "conda list"
-            with open(f"{self.workdir}/.sequana/env.yml", "w") as fout:
-                subprocess.call(cmd.split(), stdout=fout)
-            logger.debug("Saved your conda environment into env.yml")
-        else:
-            with open(f"{self.workdir}/.sequana/env.yml", "w") as fout:
-                fout.write("Conda standalone not found")
-
         if shutil.which("pip"):
             cmd = f"{sys.executable} -m pip freeze"
             with open(f"{self.workdir}/.sequana/pip.yml", "w") as fout:
                 subprocess.call(cmd.split(), stdout=fout)
-            logger.debug("Saved your pip environment into pip.txt (conda not found)")
+            logger.debug("Saved your pip environment into pip.txt")
         else:  # pragma: no cover
             with open(f"{self.workdir}/.sequana/pip.yml", "w") as fout:
                 fout.write("pip not found")

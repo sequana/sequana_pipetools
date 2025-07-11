@@ -18,7 +18,7 @@ __all__ = ["sequana_epilog"]
 
 
 sequana_epilog = Colors().purple(
-"""\U00002139\U0000FE0F  To use completion, type 'sequana_pipetools --completion NAME'
+    """\U00002139\U0000FE0F  To use completion, type 'sequana_pipetools --completion {name}'
 
 \u2705 If you use or like the Sequana project,
 please consider citing us (visit sequana.readthedocs.io for details) or use this
@@ -33,8 +33,8 @@ Open Source Software, 2(16), 352, JOSS DOI doi:10.21105/joss.00352
 
 sequana_prolog = """Welcome to Sequana project (https://sequana.readthedocs.io)
 
-This script prepares the pipeline sequana_{name}. It stores the pipeline and its 
-configuration file in the requested working directory ({name} by default). 
+This script prepares the pipeline sequana_{name}. It stores the pipeline and its
+configuration file in the requested working directory ({name} by default).
 Please check out the documentation carefully. In case of issues, please report
 on https://github.com/sequana/sequana/issues or https://github.com/sequana/{name}/issues
 

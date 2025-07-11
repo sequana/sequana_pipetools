@@ -67,6 +67,7 @@ def init_click(NAME, groups={}):
 
     """
     click.rich_click.HEADER_TEXT = sequana_prolog.format(name=NAME)
+    click.rich_click.FOOTER_TEXT = sequana_epilog.format(name=NAME)
     click.rich_click.OPTION_GROUPS[f"sequana_{NAME}"] = []
 
     click.rich_context.RichContext.NAME = NAME

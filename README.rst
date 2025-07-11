@@ -317,6 +317,9 @@ Changelog
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.2.1     * create apptainer directory if it does not exist
+          * --use-apptainer set to True internally is --apptainer-prefix is used
+          * do not store conda env anymore since we are using containers
 1.2.0     * update to be compatible with poetry 2.0
           * print container size when initiating a pipeline
 1.1.1     * symlink creation on apptainers skipped if permission error (file
