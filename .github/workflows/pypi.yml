@@ -1,5 +1,5 @@
 name: Publish to PyPI
-on: 
+on:
   workflow_dispatch:
   push:
     tags:
@@ -8,15 +8,15 @@ on:
 jobs:
   build-n-publish:
     name: Build and publish to PyPI and TestPyPI
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@main
-    - name: Set up Python 3.10
+    - name: Set up Python '3.11'
       uses: actions/setup-python@v2
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
-    - name: Install package 
+    - name: Install package
       run: |
           pip install build poetry
 
@@ -24,7 +24,7 @@ jobs:
       run: |
           rm -rf dist;
           poetry build
- 
+
     - name: Publish distribution to Test PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
