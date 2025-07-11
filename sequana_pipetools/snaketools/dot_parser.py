@@ -53,7 +53,7 @@ class DOTParser:
 
     """
 
-    _name_to_drops = {"dag", "conda", "rulegraph", "copy_multiple_files"}
+    _name_to_drops = {"dag", "rulegraph", "copy_multiple_files"}
 
     def __init__(self, filename):
         """.. rubric:: constructor
