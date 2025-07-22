@@ -317,6 +317,7 @@ Changelog :memo:
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.2.2     * download sequana-wrapper-lite and automatically fill config file.
 1.2.1     * create apptainer directory if it does not exist
           * --use-apptainer set to True internally is --apptainer-prefix is used
           * do not store conda env anymore since we are using containers
