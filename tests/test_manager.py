@@ -1,16 +1,12 @@
-import pytest
 import sys
 
+import pytest
 from easydev import AttrDict
 
-from sequana_pipetools import SequanaManager
-from sequana_pipetools import SequanaConfig
-#from sequana_pipetools.sequana_manager import get_pipeline_location
-
-
+from sequana_pipetools import SequanaConfig, SequanaManager
+from sequana_pipetools.sequana_manager import Wrapper
 
 from . import test_dir
-
 
 default_dict = {
     "version": False,
@@ -21,6 +17,12 @@ default_dict = {
     "profile": "local",
     "force": True,
 }
+
+
+def test_wrapper():
+    w = Wrapper()
+    w.repo_path
+    w.prefixed_path
 
 
 def test_pipeline_manager():
@@ -71,6 +73,7 @@ def test_sequana_manager(tmpdir):
 
     # Test the filling of InputOptions in normal mode or when using --from-project
     pm.fill_data_options()
+
 
 def test_sequana_manager_wrong_input(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
@@ -148,6 +151,7 @@ def test_copy_requirements(tmpdir):
     pm.config.config.input_directory = f"{test_dir}/data/"
     pm.config.config.input_pattern = "Hm2*gz"
     pm.config.config.input_readtag = "_R[12]_"
+    pm.config.config.exclude_pattern = "DIMMY"
     pm.config.config.sequana_wrappers = "v0.15.1"
     pm.config.config.requirements = requirements
     pm.setup()
@@ -162,7 +166,7 @@ def test_pipeline_parse_containers(tmpdir):
     pm = SequanaManager(dd, "fastqc")
     # fastqc uses 3 apptainers:
 
-    len(pm._get_section_content(pm.module.snakefile, "container:")) in [2, 3,4]
+    len(pm._get_section_content(pm.module.snakefile, "container:")) in [2, 3, 4]
 
 
 def test_multiple_downloads(tmpdir):

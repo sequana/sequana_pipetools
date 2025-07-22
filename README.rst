@@ -48,8 +48,8 @@ a Sequana pipelines. For example::
 See `Sequana <https://sequana.readthedocs.io>`_ for a list of pipelines ready for production.
 
 
-Targetted audience
-==================
+:dart: Targetted audience
+==========================
 
 This package is intended for `Sequana <https://sequana.readthedocs.io>`_ developers seeking to integrate Snakemake pipelines into the Sequana project. Please refer below for more information. Additionally, note that as a developer, you can generate the reference documentation using Sphinx::
 
@@ -57,8 +57,8 @@ This package is intended for `Sequana <https://sequana.readthedocs.io>`_ develop
     browse build/html/index.html
 
 
-What is sequana_pipetools ?
-============================
+:question: What is sequana_pipetools ?
+======================================
 
 **sequana_pipetools** is a collection of tools designed to facilitate the management of `Sequana <https://sequana.readthedocs.io>`_ pipelines, which includes next-generation sequencing (NGS) pipelines like RNA-seq, variant calling, ChIP-seq, and others.
 
@@ -311,8 +311,8 @@ To join the project, please let us know on `github <https://github.com/sequana/s
 
 
 
-Changelog
-=========
+Changelog :memo:
+================
 
 ========= ======================================================================
 Version   Description
@@ -439,6 +439,5 @@ Version   Description
 ========= ======================================================================
 
 
-## 🗨️ Contacts <a name="contacts"></a>
-
-For questions, feel free to reach out to the maintainers through GitHub.
+:left_speech_bubble: Contacts <a name="contacts"></a>
+:question: Feel free to [open an issue](https://github.com/sequana/sequana_pipetools/issues)

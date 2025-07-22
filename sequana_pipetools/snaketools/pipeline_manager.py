@@ -486,9 +486,9 @@ class PipelineManager(PipelineManagerBase):
         # real filename location.
         self.samples = {tag: fl for tag, fl in zip(self.ff.filenames, self.ff.realpaths)}
 
-    def getrawdata(self):
+    def getrawdata(self, name="sample"):
         """Return list of raw data
 
         This function contains a wildcard to each of the samples found by the manager.
         """
-        return lambda wildcards: self.samples[wildcards.sample]
+        return lambda wildcards: self.samples[getattr(wildcards, name)]
