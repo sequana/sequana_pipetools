@@ -35,6 +35,40 @@ from .snaketools import Pipeline, SequanaConfig
 logger = colorlog.getLogger(__name__)
 
 
+class Wrapper:
+    def __init__(self):
+        # The .config/sequana is going to be created by the SequanaManager
+        self._path = Path.home() / ".config" / "sequana" / "wrappers"
+
+    def _get_path(self):
+        return self._path
+
+    repo_path = property(_get_path)
+
+    def _get_prefixed_path(self):
+        return f"git+file://{str(self._path)}"
+
+    prefixed_path = property(_get_prefixed_path)
+
+    def clone(self):  # pragma: no cover
+        if not self.repo_path.exists():
+            logger.warning(f"Cloning sequana-wrappers-lite into {self.repo_path}")
+            self.repo_path.parent.mkdir(parents=True, exist_ok=True)
+            result = subprocess.run(
+                ["git", "clone", "https://github.com/sequana/sequana-wrappers-lite.git", str(self.repo_path)],
+                capture_output=True,
+                text=True,
+            )
+            logger.debug(result.stdout)
+            logger.debug(result.stderr)
+        else:
+            logger.info(f"Updating sequana-wrappers-lite into {self.repo_path}")
+            self.repo_path.parent.mkdir(parents=True, exist_ok=True)
+            result = subprocess.run(["git", "pull"], cwd=self.repo_path, capture_output=True, text=True)
+            logger.debug(result.stdout)
+            logger.debug(result.stderr)
+
+
 class SequanaManager:
     def __init__(self, options, name="undefined"):
         """
@@ -136,6 +170,10 @@ class SequanaManager:
         self.sequana_wrappers = os.environ.get(
             "SEQUANA_WRAPPERS", "https://raw.githubusercontent.com/sequana/sequana-wrappers/"
         )
+
+        wrapper_factory = Wrapper()
+        wrapper_factory.clone()
+        self.sequana_wrappers = wrapper_factory.prefixed_path
 
         if self.options.apptainer_prefix:  # pragma: no cover
             self.apptainer_prefix = Path(self.options.apptainer_prefix).resolve()
