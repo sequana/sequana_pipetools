@@ -397,6 +397,21 @@ class SequanaManager:
         command = f"#!/bin/bash\nsnakemake -s {snakefilename} --profile {profile_dir}"
         command_file.write_text(command)
 
+        # create a runme.sh (easier for end-user ?)
+        command_file = self.workdir / "runme.sh"
+        command_file.write_text(command)
+
+        # README
+        command_file = self.workdir / "README"
+        command_file.write_text(
+            f"Execute runme.sh or {self.name}.sh. If you interrrupt a run, you may need to unlock the directory. Execute unlock.sh. For fine tuning, edit config.yaml (pipeline-related) or profile_config.yaml (snakemake-related). "
+        )
+
+        try:
+            os.symlink(Path(profile_dir) / "config.yaml", self.workdir / "profile_config.yaml")
+        except FileExistsError:  # pragma: no cover
+            pass
+
         # the snakefile
         shutil.copy(self.module.snakefile, self.workdir / ".sequana")
         try:
@@ -481,8 +496,8 @@ class SequanaManager:
             fout.write(" ".join([cmd1] + sys.argv[1:]))
 
         # Save unlock.sh
-        with open(self.workdir / "unlock.sh", "w") as fout:
-            fout.write(f"#!/bin/sh\nsnakemake -s {snakefilename} --unlock -j 1")
+        script = f"#!/bin/sh\nsnakemake -s {snakefilename} --unlock -j 1"
+        (self.workdir / "unlock.sh").write_text(script)
 
         if shutil.which("pip"):
             cmd = f"{sys.executable} -m pip freeze"
@@ -627,6 +642,7 @@ class SequanaManager:
                 logger.info(f"Preparing {url} for download")
 
             total_size += get_url_file_size(url)
+
         total_size /= 1024 * 1024
         total_size = round(total_size)
         logger.info(f"Total container size (Mb): {total_size}")
