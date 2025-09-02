@@ -38,9 +38,7 @@ from pypi website::
 
     pip install sequana_pipetools
 
-No dependencies for this package except Python itself. In practice, this package
-has no interest if not used within a Sequana pipeline. It is installed automatically when you install
-a Sequana pipelines. For example::
+No dependencies for this package except Python packages. In practice, this package has no interest if not used within a Sequana pipeline. It is installed automatically when you install a Sequana pipelines. For example::
 
     pip install sequana_rnaseq
     pip install sequana_fastqc
@@ -53,6 +51,8 @@ See `Sequana <https://sequana.readthedocs.io>`_ for a list of pipelines ready fo
 
 This package is intended for `Sequana <https://sequana.readthedocs.io>`_ developers seeking to integrate Snakemake pipelines into the Sequana project. Please refer below for more information. Additionally, note that as a developer, you can generate the reference documentation using Sphinx::
 
+    git clone https://github.com/sequana/sequana_pipetools
+    cd html
     make html
     browse build/html/index.html
 
@@ -111,8 +111,15 @@ The **sequana_pipetools** package provide a standalone called **sequana_pipetool
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/UI.png
 
-There are several applications. The first one is for Linux users under
-bash to obtain completion of a sequana pipeline command line arguments::
+There are several applications. The main one is used to initiate pipeline skeleton and tree structure automatically
+using::
+
+    sequana_pipetools --init-new-pipeline
+
+See below for more details.
+
+Then, we provide some utilities. For instance, for Linux users, under
+bash shell, you can setup the completion of a sequana pipeline command line arguments::
 
     sequana_pipetools --completion fastqc
 
@@ -317,6 +324,7 @@ Changelog :memo:
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.3.0     * create symlink to the profile
 1.2.2     * download sequana-wrapper-lite and automatically fill config file.
 1.2.1     * create apptainer directory if it does not exist
           * --use-apptainer set to True internally is --apptainer-prefix is used
@@ -328,22 +336,13 @@ Version   Description
             the admin system)
           * add --init-new-pipeline argument in sequana_pipetools standalone
 1.1.0     * add exclude_pattern in input data section
-1.0.6     * add py3.12, slight updates wrt slurm
-1.0.5     * introspect slurm files to extract stats
-1.0.4     * add utility function to download and untar a tar.gz file
-1.0.3     * add levenshtein function. some typo corrections.
-1.0.2     * add the dot2png command. pin docutils <0.21 due to pip error
-1.0.1     * hot fix in the profile creation (regression)
+1.0.X     * add py3.12, introspect slurm files to extract stats, add dot2png
+            utility, function to download and untar a tar.gz file, levenshtein
+            pin docutils <0.21 due to pip error
 1.0.0     * Stable release
-0.17.3    * remove useless code and fix a requirement
-0.17.2    * simpler logging
-0.17.1    * remove the --use-singulariry (replaced by --use-apptainer in
-            previous release)
-          * slight updates on logging and slight update on slurm module
-0.17.0    * Remove deprecated options and deprecated functions. More tests.
+0.17.X    * remove useless code, simpler logging, remove the
+            --use-singulariry option (replaced by --use-apptainer)
 0.16.9    * Fix slurm sys exit (replaced by print)
-          * upadte doc
-          * more tests
 0.16.8    * stats command add the number of rules per pipeline
           * better slurm parsing using profile tree directory (slurm in logs/)
 0.16.7    * add missing --trimming-quality option in list of TrimmingOption
@@ -378,12 +377,10 @@ Version   Description
           * --run-mode removed and replaced by --profile options. Profiles are
             used and stored withub .sequana/profiles
           * Remove --slurm-cores-per-job redundant with resources from snakemake
-          * Way a main.py is coded fully refactored and simplified as described
-            in the README
           * cluster_config are now deprecated in favor of profile
           * sequana_slurm_status removed. Use manager.error_report in pipelines
             instead
-0.15.0    * remove useless code (readme, description) related to old rules
+0.15.X    * remove useless code (readme, description) related to old rules
           * requirements.txt renamed in tools.txt to store the required tools to
             run a pipeline.
           * remove copy_requirements, not used in any pipelines (replaced by code
