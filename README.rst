@@ -324,6 +324,7 @@ Changelog :memo:
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.3.1     * add fish completion for all pipelines
 1.3.0     * create symlink to the profile
 1.2.2     * download sequana-wrapper-lite and automatically fill config file.
 1.2.1     * create apptainer directory if it does not exist

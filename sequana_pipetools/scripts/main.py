@@ -84,6 +84,21 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
 
     pipeline_name = property(_get_pipeline_name, _set_pipeline_name)
 
+    def save_fish_completion(self):
+        out = []
+        for action in self._actions:
+            opt = action.opts[0]
+            if action.type.name == "choice":
+                choices = " ".join(action.type.choices)
+                out.append(f"complete -c sequana_{self.pipeline_name} -l {opt[2:]} -a '{choices}'")
+            elif action.type.name == "path":
+                out.append(f"complete -c sequana_{self.pipeline_name} -l {opt[2:]} -r -a '(ls -d */)'")
+            else:
+                out.append(f"complete -c sequana_{self.pipeline_name} -l {opt[2:]}")
+
+        with open(f"{self.config_path}/{self.pipeline_name}.fish", "w") as f:
+            f.write("\n".join(out))
+
     def save_completion_script(self):
         config_path = self.config_path
         pipeline_name = self.pipeline_name
@@ -241,7 +256,7 @@ def main(**kwargs):
         if kwargs["force"] is True:
             choice = "y"
         else:  # pragma: no cover
-            msg = f"This action will replace the {name}.sh file stored in ~/.config/sequana/pipelines. Do you want to proceed y/n: "
+            msg = f"This action will replace the {name}.sh and {name}.fish files stored in ~/.config/sequana/pipelines. Do you want to proceed y/n: "
             choice = input(msg)
         if choice != "y":  # pragma: no cover
             sys.exit(0)
@@ -249,12 +264,15 @@ def main(**kwargs):
         try:
             c = ClickComplete(name)
             c.save_completion_script()
+            c.save_fish_completion()
         except Exception:  # pragma: no cover
             click.echo(f"# Warning {name} could not be imported. Nothing done")
         finally:
-            click.echo("Please source the files using:: \n")
-            click.echo("    source ~/.config/sequana/pipelines/{}.sh".format(name))
-            click.echo("\nto activate the completion. Add the line above in your environement")
+            click.echo("Please follow those instructions: \n")
+            click.echo("Bash:\n\tsource ~/.config/sequana/pipelines/ripseq.bash")
+            click.echo("        #Add the line above in your .bashrc environment if needed\n")
+            click.echo("Fish:\n\tsource ~/.config/sequana/pipelines/ripseq.fish")
+            click.echo("        #Add the line above in your .fishrc environment if needed\n")
     elif kwargs["stats"]:
         wrappers, rules = get_pipeline_statistics()
         click.echo("\n ==== Number of wrappers per pipeline")
