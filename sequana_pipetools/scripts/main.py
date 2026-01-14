@@ -256,7 +256,7 @@ def main(**kwargs):
         if kwargs["force"] is True:
             choice = "y"
         else:  # pragma: no cover
-            msg = f"This action will replace the {name}.sh file stored in ~/.config/sequana/pipelines and ripseq.fish in ~/.config/fish/completions/. Do you want to proceed y/n: "
+            msg = f"This action will replace the {name}.sh and {name}.fish files stored in ~/.config/sequana/pipelines. Do you want to proceed y/n: "
             choice = input(msg)
         if choice != "y":  # pragma: no cover
             sys.exit(0)
@@ -271,7 +271,7 @@ def main(**kwargs):
             click.echo("Please follow those instructions: \n")
             click.echo("Bash:\n\tsource ~/.config/sequana/pipelines/ripseq.bash")
             click.echo("        #Add the line above in your .bashrc environment if needed\n")
-            click.echo("Bash:\n\tsource ~/.config/fish/completions/ripseq.fish")
+            click.echo("Fish:\n\tsource ~/.config/sequana/pipelines/ripseq.fish")
             click.echo("        #Add the line above in your .fishrc environment if needed\n")
     elif kwargs["stats"]:
         wrappers, rules = get_pipeline_statistics()
