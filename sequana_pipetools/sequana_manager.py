@@ -641,7 +641,7 @@ class SequanaManager:
                 count += 1
                 logger.info(f"Preparing {url} for download")
 
-            total_size += get_url_file_size(url)
+            total_size += Path(outfile).stat().st_size
 
         total_size /= 1024 * 1024
         total_size = round(total_size)
