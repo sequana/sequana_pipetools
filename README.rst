@@ -16,6 +16,9 @@
 .. image:: https://app.codacy.com/project/badge/Grade/9031e4e4213e4e57a876fd5b792b5003
    :target: https://app.codacy.com/gh/sequana/sequana_pipetools/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.6818254.svg
+   :target: https://doi.org/10.5281/zenodo.6818254
+
 .. image:: https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11-blue
     :target: https://www.python.org/
     :alt: Python versions
