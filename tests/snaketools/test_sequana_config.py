@@ -137,3 +137,18 @@ def test_infer_schema():
     schema = os.path.join(test_dir, "data", "schema.yml")
     cfg = SequanaConfig(cfg_name)
     cfg.create_draft_schema()
+
+
+def test_long_value_no_line_wrap(tmpdir):
+    # Long values (e.g. paths to databases) should not be wrapped with
+    # unexpected line breaks when saved.
+    long_path = "/very/long/path/to/a/database/" + "subdir/" * 20 + "file.db"
+    cfg = SequanaConfig({"database_path": long_path})
+    output = str(tmpdir.join("config.yml"))
+    cfg.save(output)
+
+    with open(output) as fh:
+        content = fh.read()
+
+    # The long path should appear on a single line, not wrapped
+    assert long_path in content

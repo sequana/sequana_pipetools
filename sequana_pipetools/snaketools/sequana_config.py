@@ -116,6 +116,7 @@ class SequanaConfig:
         yaml.default_style = ""
         yaml.indent = 4
         yaml.block_seq_indent = 4
+        yaml.width = 1024
 
         with open(filename, "w") as fh:
             yaml.dump(self._yaml_code, fh)
