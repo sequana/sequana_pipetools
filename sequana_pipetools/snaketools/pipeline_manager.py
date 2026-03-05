@@ -191,7 +191,6 @@ class PipelineManagerBase:
 
         vers = get_package_version(f"sequana_{self.name}")
 
-        print("#####################")
         data = {"samples": len(self.samples), f"sequana_{self.name}_version": vers}
         try:
             data["paired"] = self.paired
