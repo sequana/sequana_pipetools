@@ -202,19 +202,8 @@ class PipelineManagerBase:
             index=["summary"],
         )
 
-        from sequana.utils.datatables_js import DataTable
-
-        datatable = DataTable(df_general.T, "general", index=True)
-        datatable.datatable.datatable_options = {
-            "paging": "false",
-            "bFilter": "false",
-            "bInfo": "false",
-            "header": "false",
-            "bSort": "true",
-        }
-        js = datatable.create_javascript_function()
-        htmltable = datatable.create_datatable(style="width: 20%; float:left")
-        contents = """<div style="float:{}; width:{}%">{}</div>""".format(float, width, js + htmltable)
+        htmltable = df_general.T.to_html()
+        contents = """<div style="float:{}; width:{}%">{}</div>""".format(float, width, htmltable)
         return contents
 
 
