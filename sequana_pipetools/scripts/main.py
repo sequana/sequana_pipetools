@@ -269,9 +269,9 @@ def main(**kwargs):
             click.echo(f"# Warning {name} could not be imported. Nothing done")
         finally:
             click.echo("Please follow those instructions: \n")
-            click.echo("Bash:\n\tsource ~/.config/sequana/pipelines/ripseq.bash")
+            click.echo(f"Bash:\n\tsource ~/.config/sequana/pipelines/{name}.sh")
             click.echo("        #Add the line above in your .bashrc environment if needed\n")
-            click.echo("Fish:\n\tsource ~/.config/sequana/pipelines/ripseq.fish")
+            click.echo(f"Fish:\n\tsource ~/.config/sequana/pipelines/{name}.fish")
             click.echo("        #Add the line above in your .fishrc environment if needed\n")
     elif kwargs["stats"]:
         wrappers, rules = get_pipeline_statistics()
