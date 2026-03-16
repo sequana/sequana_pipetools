@@ -1,9 +1,8 @@
 import sys
 
 import pytest
-from easydev import AttrDict
 
-from sequana_pipetools import SequanaConfig, SequanaManager
+from sequana_pipetools import AttrDict, SequanaConfig, SequanaManager
 from sequana_pipetools.sequana_manager import Wrapper
 
 from . import test_dir
@@ -11,7 +10,6 @@ from . import test_dir
 default_dict = {
     "version": False,
     "level": "INFO",
-    "use_apptainer": False,
     "apptainer_prefix": "",
     "jobs": 1,
     "profile": "local",
@@ -162,7 +160,6 @@ def test_pipeline_parse_containers(tmpdir):
     wkdir = tmpdir.mkdir("wkdir")
     dd = default_dict.copy()
     dd["workdir"] = wkdir
-    dd["use_apptainer"]
     pm = SequanaManager(dd, "fastqc")
     # fastqc uses 3 apptainers:
 

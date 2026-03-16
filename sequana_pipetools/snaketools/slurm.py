@@ -145,7 +145,7 @@ class SlurmParsing(SlurmData):
 
     registry = {
         "oom_kill event in": "Out of memory. Consider increasing memory for the rule",
-        "command not found": "Command not found. Check the missing tool is installed or use --use-apptainer",
+        "command not found": "Command not found. Check the missing tool is installed or use --apptainer-prefix to enable containers.",
         # "1 of 1 steps (100%) done": "Finished",
     }
 

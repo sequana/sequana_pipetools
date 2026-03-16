@@ -1,4 +1,4 @@
-Sequana_pipetools documentation 
+Sequana_pipetools documentation
 ########################################
 
 
@@ -10,6 +10,3 @@ Sequana_pipetools documentation
 .. toctree::
 
     references
-
-
-

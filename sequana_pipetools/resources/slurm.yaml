@@ -13,7 +13,7 @@ default-resources:
   - qos={qos}
   - mem={memory}
   - gres=''
-keep-going: True
+keep-going: {keep_going}
 printshellcmds: True
 jobs: {jobs}
 wrapper-prefix: {wrappers}

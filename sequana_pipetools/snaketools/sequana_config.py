@@ -11,11 +11,13 @@
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import os
+import tempfile
 import warnings
 
 import ruamel.yaml
-from easydev import AttrDict, TempFile
 from pykwalify.core import Core, CoreError, SchemaError
+
+from sequana_pipetools.misc import AttrDict
 
 try:
     import importlib.resources as resources
@@ -186,7 +188,7 @@ class SequanaConfig:
         try:
             ext_name = resources.files("sequana_pipetools.resources").joinpath("ext.py")
             extensions = [str(ext_name)]
-        except AttributeError: #pragma: no cover
+        except AttributeError:  # pragma: no cover
             with resources.path("sequana_pipetools.resources", "ext.py") as ext_name:
                 extensions = [str(ext_name)]
 
@@ -195,15 +197,19 @@ class SequanaConfig:
 
         try:
             # open the config and the schema file
-            with TempFile(suffix=".yaml") as fh:
-                self.save(fh.name)
+            with tempfile.NamedTemporaryFile(suffix=".yaml", delete=False) as fh:
+                tmp_name = fh.name
+            try:
+                self.save(tmp_name)
                 c = Core(
-                    source_file=fh.name,
+                    source_file=tmp_name,
                     schema_files=[schemafile],
                     extensions=extensions,
                 )
                 c.validate()
                 return True
+            finally:
+                os.unlink(tmp_name)
         except (SchemaError, CoreError) as err:
             logger.warning(err.msg)
             return False

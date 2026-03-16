@@ -12,6 +12,7 @@
 ##############################################################################
 import importlib
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -33,6 +34,20 @@ click.rich_click.SHOW_ARGUMENTS = True
 click.rich_click.FOOTER_TEXT = (
     "Authors: Thomas Cokelaer, Dimitri Desvillechabrol -- http://github.com/sequana/sequana_pipetools"
 )
+click.rich_click.OPTION_GROUPS["sequana_pipetools"] = [
+    {
+        "name": "Diagnostics",
+        "options": ["--diagnose", "--slurm-diag", "--workdir", "--provider", "--model"],
+    },
+    {
+        "name": "Pipeline Builder",
+        "options": ["--init-new-pipeline", "--config-to-schema"],
+    },
+    {
+        "name": "Completion",
+        "options": ["--completion", "--overwrite"],
+    },
+]
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
 
@@ -87,14 +102,24 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
     def save_fish_completion(self):
         out = []
         for action in self._actions:
-            opt = action.opts[0]
-            if action.type.name == "choice":
-                choices = " ".join(action.type.choices)
-                out.append(f"complete -c sequana_{self.pipeline_name} -l {opt[2:]} -a '{choices}'")
-            elif action.type.name == "path":
-                out.append(f"complete -c sequana_{self.pipeline_name} -l {opt[2:]} -r -a '(ls -d */)'")
+            # Prefer long options (--foo); fall back to short (-f)
+            long_opts = [o for o in action.opts if o.startswith("--")]
+            short_opts = [o for o in action.opts if o.startswith("-") and not o.startswith("--")]
+            if long_opts:
+                flag = f"-l {long_opts[0][2:]}"
+            elif short_opts:
+                flag = f"-s {short_opts[0][1:]}"
             else:
-                out.append(f"complete -c sequana_{self.pipeline_name} -l {opt[2:]}")
+                continue  # skip options with no recognisable flag
+
+            type_name = action.type.name if action.type is not None else "string"
+            if type_name == "choice":
+                choices = " ".join(action.type.choices)
+                out.append(f"complete -c sequana_{self.pipeline_name} {flag} -f -a '{choices}'")
+            elif type_name == "path":
+                out.append(f"complete -c sequana_{self.pipeline_name} {flag} -r -a '(ls -d */)'")
+            else:
+                out.append(f"complete -c sequana_{self.pipeline_name} {flag}")
 
         with open(f"{self.config_path}/{self.pipeline_name}.fish", "w") as f:
             f.write("\n".join(out))
@@ -189,6 +214,29 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
         return data
 
 
+_PLAIN_EXPLANATION_RE = re.compile(
+    r"(?:#{1,3}\s*|^\*\*)?Plain\s+Explanation[:\*#\s]*\*?\*?\s*\n(.*?)(?=\n#{1,3}\s|\n\*\*[A-Z]|\Z)",
+    re.IGNORECASE | re.DOTALL | re.MULTILINE,
+)
+
+
+def _print_diagnosis(result: str) -> None:
+    """Print the LLM diagnosis, pulling the Plain Explanation into a Rich panel."""
+    from rich.console import Console
+    from rich.panel import Panel
+
+    console = Console()
+    m = _PLAIN_EXPLANATION_RE.search(result)
+    if m:
+        plain_text = m.group(1).strip()
+        console.print(Panel(plain_text, title="💡 Plain Explanation", border_style="bold cyan", padding=(1, 2)))
+        # print the rest without the Plain Explanation section
+        rest = result[: m.start()] + result[m.end() :]
+        click.echo(rest.strip())
+    else:
+        click.echo(result)
+
+
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--version", is_flag=True)
 @click.option(
@@ -200,9 +248,9 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
     help="""Name of a pipelines for which you wish to create the completion file. Set to a valid Sequana pipeline name that must be installed""",
 )
 @click.option(
-    "--force",
+    "--overwrite",
     is_flag=True,
-    help="""overwrite files in sequana config pipeline directory (used with
+    help="""Overwrite files in sequana config pipeline directory (used with
 --completion)""",
 )
 @click.option("--stats", is_flag=True, help="""Plot some stats related to the Sequana pipelines (installed)""")
@@ -217,6 +265,30 @@ complete -o nospace -o default -F _mycomplete_{pipeline_name} sequana_{pipeline_
     "--init-new-pipeline",
     is_flag=True,
     help="Give name of new pipeline and this will create full structure for a new sequana pipeline",
+)
+@click.option(
+    "--diagnose",
+    is_flag=True,
+    help="Diagnose pipeline errors using an LLM (see --provider). Run from the pipeline working directory.",
+)
+@click.option(
+    "--workdir",
+    default=".",
+    show_default=True,
+    type=click.Path(file_okay=False),
+    help="Pipeline working directory for --diagnose.",
+)
+@click.option(
+    "--provider",
+    default="mistral",
+    show_default=True,
+    type=click.Choice(["mistral", "openai"], case_sensitive=False),
+    help="LLM provider for --diagnose. 'mistral' has a free tier (MISTRAL_API_KEY); 'openai' requires a paid account (OPENAI_API_KEY).",
+)
+@click.option(
+    "--model",
+    default=None,
+    help="Model name for --diagnose. Defaults to mistral-small-latest (mistral) or gpt-4o-mini (openai).",
 )
 def main(**kwargs):
     """Pipetools utilities for the Sequana project (sequana.readthedocs.io)
@@ -235,6 +307,10 @@ def main(**kwargs):
 
     """
 
+    if not any(kwargs.values()):
+        click.echo(click.get_current_context().get_help())
+        return
+
     if kwargs["version"]:
         click.echo(f"sequana_pipetools v{version}")
         return
@@ -242,7 +318,8 @@ def main(**kwargs):
         click.echo(url2hash(kwargs["url2hash"]))
     elif kwargs["dot2png"]:
         name = kwargs["dot2png"]
-        assert name.endswith(".dot")
+        if not name.endswith(".dot"):
+            raise ValueError(f"Input file must have a .dot extension, got: {name}")
         outname = name.replace(".dot", ".sequana.png")
         with tempfile.NamedTemporaryFile(mode="w") as fout:
             d = DOTParser(name)
@@ -253,7 +330,7 @@ def main(**kwargs):
     elif kwargs["completion"]:
         name = kwargs["completion"]
 
-        if kwargs["force"] is True:
+        if kwargs["overwrite"] is True:
             choice = "y"
         else:  # pragma: no cover
             msg = f"This action will replace the {name}.sh and {name}.fish files stored in ~/.config/sequana/pipelines. Do you want to proceed y/n: "
@@ -292,6 +369,19 @@ def main(**kwargs):
     elif kwargs["init_new_pipeline"]:  # pragma: no cover
         cmd = "cookiecutter https://github.com/sequana/sequana_pipeline_template -o . --overwrite-if-exists"
         subprocess.run(cmd.split(), capture_output=False)
+    elif kwargs["diagnose"]:
+        from sequana_pipetools.diagnose import diagnose
+
+        workdir = kwargs["workdir"]
+        provider = kwargs["provider"]
+        model = kwargs["model"]  # may be None → uses provider default
+        click.echo(f"Collecting pipeline logs from: {workdir}  [provider: {provider}]\n")
+        try:
+            result = diagnose(workdir=workdir, provider=provider, model=model)
+            _print_diagnosis(result)
+        except (ImportError, EnvironmentError, ValueError) as exc:
+            click.echo(f"[ERROR] {exc}", err=True)
+            sys.exit(1)
 
 
 if __name__ == "__main__":

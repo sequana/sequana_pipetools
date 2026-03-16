@@ -18,18 +18,17 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
-from shutil import which
 
 import aiohttp
 import colorlog
-from easydev import AttrDict, CustomConfig
+from easydev import CustomConfig
 from tqdm.asyncio import tqdm
 
 from sequana_pipetools import get_package_version
-from sequana_pipetools.misc import get_url_file_size, url2hash
+from sequana_pipetools.misc import url2hash
 from sequana_pipetools.snaketools.profile import _is_v8, create_profile
 
-from .misc import Colors, PipetoolsException
+from .misc import AttrDict, Colors
 from .snaketools import Pipeline, SequanaConfig
 
 logger = colorlog.getLogger(__name__)
@@ -85,7 +84,6 @@ class SequanaManager:
                 workdir = "fastqc"
                 job=1
                 force = True
-                use_apptainer = False
                 apptainer_prefix = ""
                 def __init__(self):
                     pass
@@ -102,9 +100,7 @@ class SequanaManager:
         # whereas new click provides a dictionary. Here we covnert the
         # dictionary into a attribute/class like using AttrDict
 
-        try:
-            options.version
-        except AttributeError:
+        if not hasattr(options, "version"):
             options = AttrDict(**options)
 
         # the logger must be defined here because from a pipeline, it may not
@@ -135,9 +131,7 @@ class SequanaManager:
         config_name = os.path.basename(self.module.config)
         self.config = None
 
-        try:
-            options.from_project
-        except AttributeError:
+        if not hasattr(options, "from_project"):
             options.from_project = False
 
         if options.from_project:
@@ -177,7 +171,7 @@ class SequanaManager:
 
         if self.options.apptainer_prefix:  # pragma: no cover
             self.apptainer_prefix = Path(self.options.apptainer_prefix).resolve()
-            self.options.use_apptainer = True
+            self.use_apptainer = True
 
             if self.apptainer_prefix.exists() is False:
                 logger.warning(f"Creating {self.apptainer_prefix} to store containers (does not exist)")
@@ -186,6 +180,7 @@ class SequanaManager:
         else:  # pragma: no cover
             self.apptainer_prefix = os.environ.get("SEQUANA_SINGULARITY_PREFIX", f"{self.workdir}/.sequana/apptainers")
             self.local_apptainers = True
+            self.use_apptainer = False
 
     def exists(self, filename, exit_on_error=True, warning_only=False):  # pragma: no cover
         """This is a convenient function to check if a directory/file exists
@@ -213,13 +208,13 @@ class SequanaManager:
         cfg = self.config.config
         if options.from_project:
             if "--input-pattern" in sys.argv:
-                cfg.input_pattern = options["input_pattern"]
+                cfg.input_pattern = options.input_pattern
             if "--input-directory" in sys.argv:
-                cfg.input_directory = os.path.abspath(options["input_directory"])
+                cfg.input_directory = os.path.abspath(options.input_directory)
             if "--input-readtag" in sys.argv:
-                cfg.input_readtag = options["input_readtag"]
+                cfg.input_readtag = options.input_readtag
             if "--exclude-pattern" in sys.argv:
-                cfg.exclude_pattern = options["exclude_pattern"]
+                cfg.exclude_pattern = options.exclude_pattern
         else:
             cfg.input_pattern = options.input_pattern
             cfg.exclude_pattern = options.exclude_pattern
@@ -233,45 +228,13 @@ class SequanaManager:
         - Copy the pipeline and associated files (e.g. config file)
         - Create a script in the directory ready to use
 
-
         """
-        # First we create the beginning of the command with the optional
-        # parameters for a run on a SLURM scheduler
         logger.info("Welcome to Sequana pipelines suite (https://sequana.readthedocs.io)")
         logger.info(" - Found an issue, have a question: https://tinyurl.com/2bh6frp2 ")
         logger.info(f" - more about this pipeline on https://github.com/sequana/{self.name} ")
 
-        snakefilename = os.path.basename(self.module.snakefile)
-        self.command = f"#!/bin/bash\nsnakemake -s {snakefilename} "
-
         if self.sequana_wrappers:
-            self.command += f" --wrapper-prefix {self.sequana_wrappers} "
             logger.info(f"Using sequana-wrappers from {self.sequana_wrappers}")
-
-        if self.options.use_apptainer:  # pragma: no cover
-            # --home directory is set by snakemake using getcwd(), which prevent the
-            # /home/user/ to be seen somehow. Therefore, we bind the /home manually.
-            # We could have reset --home /home but we may have a side effect with snakemake.
-            # We also add the -e to make sure a clean environment is used. This will avoid
-            # unwanted side effect. We also appdn any user apptainer arguments.
-            home = str(Path.home())
-            apptainer_prefix = ".sequana/apptainers" if self.local_apptainers else str(self.apptainer_prefix)
-
-            if _is_v8():
-                # snakemake v8+ renamed singularity → apptainer flags
-                apptainer_args = f"--apptainer-args=' -e -B {home} {self.options.apptainer_args}'"
-                self.command += f" --software-deployment-method apptainer {apptainer_args}"
-                self.command += f" --apptainer-prefix {apptainer_prefix}"
-            else:
-                apptainer_args = f"--singularity-args=' -e -B {home} {self.options.apptainer_args}'"
-                self.command += f" --use-singularity {apptainer_args}"
-                self.command += f" --singularity-prefix {apptainer_prefix}"
-
-        # set up core/jobs options
-        if self.options.profile == "local":
-            self.command += " -p --cores {} ".format(self.options.jobs)
-        else:
-            self.command += " -p --jobs {}".format(self.options.jobs)
 
         # This should be in the setup, not in the teardown since we may want to
         # copy files when creating the pipeline. This is the case e.g. in the
@@ -287,7 +250,7 @@ class SequanaManager:
                 logger.warning(f"\u2757 Path {self.workdir} exists already but you set --force to overwrite it")
             else:  # pragma: no cover
                 logger.error(f"Output path {self.workdir} exists already. Use --force to overwrite")
-                sys.exit()
+                sys.exit(1)
         else:
             self.workdir.mkdir()
 
@@ -304,7 +267,7 @@ class SequanaManager:
         filenames = glob.glob(cfg.input_directory + os.sep + cfg.input_pattern)
 
         # this code is just informative. Actual run is snaketools.pipeline_manager
-        if cfg.get("exclude_pattern", None) and cfg.get("exclude_pattern"):
+        if cfg.get("exclude_pattern"):
             filenames = [x for x in filenames if cfg.get("exclude_pattern") not in x.split("/")[-1]]
         logger.info(
             f"\u2705 Found {len(filenames)} files matching your input  pattern ({cfg.input_pattern}) in {cfg.input_directory}"
@@ -362,10 +325,11 @@ class SequanaManager:
             "wrappers": self.sequana_wrappers,
             "jobs": self.options.jobs,
             "forceall": False,
-            "use_apptainer": self.options.use_apptainer,
+            "keep_going": getattr(self.options, "keep_going", False),
+            "use_apptainer": self.use_apptainer,
         }
 
-        if self.options.use_apptainer:  # pragma: no cover
+        if self.use_apptainer:  # pragma: no cover
             if self.local_apptainers:
                 options["apptainer_prefix"] = ".sequana/apptainers"
             else:
@@ -400,7 +364,21 @@ class SequanaManager:
                 options.update({"partition": self.options.slurm_queue, "qos": self.options.slurm_queue})
 
         profile_dir = create_profile(self.workdir, self.options.profile, **options)
-        command = f"#!/bin/bash\nsnakemake -s {snakefilename} --profile {profile_dir}"
+
+        use_monitor = getattr(self.options, "monitor", False)
+        if use_monitor:
+            pipeline_version = self._get_package_version()
+            command = (
+                f"#!/bin/bash\n"
+                f"sequana_pipetools_monitor"
+                f" --snakefile {snakefilename}"
+                f" --profile {profile_dir}"
+                f" --name {self.name}"
+                f" --version {pipeline_version}"
+            )
+        else:
+            command = f"#!/bin/bash\nsnakemake -s {snakefilename} --profile {profile_dir}"
+
         command_file.write_text(command)
 
         # create a runme.sh (easier for end-user ?)
@@ -467,12 +445,12 @@ class SequanaManager:
                 cfg = SequanaConfig(f"{self.workdir}/{config_name}")
                 cfg.check_config_with_schema(f"{self.workdir}/{schema_name}")
 
-        # if --use-apptainer is set, we need to download images for the users
+        # if --apptainer-prefix is set, we need to download images for the users
         # Sequana pipelines will store images in Zenodo website (via damona).
         # introspecting sections written as:
         # container:
         #     "https://...image.img"
-        if self.options.use_apptainer:  # pragma: no cover
+        if self.use_apptainer:  # pragma: no cover
             self._download_zenodo_images()
 
         # some information
@@ -502,7 +480,8 @@ class SequanaManager:
             fout.write(" ".join([cmd1] + sys.argv[1:]))
 
         # Save unlock.sh
-        script = f"#!/bin/sh\nsnakemake -s {snakefilename} --unlock -j 1"
+        unlock_cores = "--cores 1" if _is_v8() else "-j 1"
+        script = f"#!/bin/sh\nsnakemake -s {snakefilename} --unlock {unlock_cores}"
         (self.workdir / "unlock.sh").write_text(script)
 
         if shutil.which("pip"):
@@ -555,7 +534,8 @@ class SequanaManager:
 
         comments starting with # are allowed.
         """
-        assert section_name.endswith(":")
+        if not section_name.endswith(":"):
+            raise ValueError(f"section_name must end with ':', got: {section_name!r}")
 
         contents = []
         with open(filename, "r") as fin:

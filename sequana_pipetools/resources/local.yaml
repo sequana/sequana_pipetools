@@ -1,4 +1,4 @@
-keep-going: True
+keep-going: {keep_going}
 printshellcmds: True
 cores: {jobs}
 wrapper-prefix: {wrappers}

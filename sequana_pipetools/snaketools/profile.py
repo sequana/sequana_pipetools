@@ -61,7 +61,7 @@ def _create_profile_v7(workdir: Path, profile: str, **kwargs) -> str:
 def _build_local_config_v8(**kwargs) -> dict:
     """Build a snakemake v8 local profile config dict."""
     config = {
-        "keep-going": True,
+        "keep-going": bool(kwargs.get("keep_going", False)),
         "printshellcmds": True,
         "cores": kwargs["jobs"],
         "wrapper-prefix": kwargs["wrappers"],
@@ -98,7 +98,7 @@ def _build_slurm_config_v8(**kwargs) -> dict:
             "mem": kwargs["memory"],
             "gres": "",
         },
-        "keep-going": True,
+        "keep-going": bool(kwargs.get("keep_going", False)),
         "printshellcmds": True,
         "jobs": kwargs["jobs"],
         "wrapper-prefix": kwargs["wrappers"],

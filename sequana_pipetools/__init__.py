@@ -20,11 +20,17 @@ import colorlog
 
 logger = colorlog.getLogger(logger.name)
 
-from .misc import download_and_extract_tar_gz, levenshtein_distance, url2hash
-from .sequana_manager import SequanaManager  # , get_pipeline_location
-from .snaketools import (
+from .misc import (  # noqa: F401
+    AttrDict,
+    download_and_extract_tar_gz,
+    levenshtein_distance,
+    url2hash,
+)
+from .sequana_manager import SequanaManager  # noqa: F401
+from .snaketools import (  # noqa: F401
     Pipeline,
     PipelineManager,
     PipelineManagerDirectory,
     SequanaConfig,
+    get_shell,
 )

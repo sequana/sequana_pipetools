@@ -335,7 +335,8 @@ class FastQFactory(FileFactory):
             elif len(self.tags) > 1:
                 raise ValueError("Ambiguous tag. You must provide one " "(sequana.FastQFactory)")
         else:
-            assert tag in self.tags, "invalid tag"
+            if tag not in self.tags:
+                raise ValueError(f"Invalid tag '{tag}'. Valid tags are: {self.tags}")
 
         # retrieve file of tag
         if self.read_tag:
