@@ -27,7 +27,7 @@ from tqdm.asyncio import tqdm
 
 from sequana_pipetools import get_package_version
 from sequana_pipetools.misc import get_url_file_size, url2hash
-from sequana_pipetools.snaketools.profile import create_profile
+from sequana_pipetools.snaketools.profile import _is_v8, create_profile
 
 from .misc import Colors, PipetoolsException
 from .snaketools import Pipeline, SequanaConfig
@@ -255,16 +255,17 @@ class SequanaManager:
             # We also add the -e to make sure a clean environment is used. This will avoid
             # unwanted side effect. We also appdn any user apptainer arguments.
             home = str(Path.home())
-            apptainer_args = f"--singularity-args=' -e -B {home} {self.options.apptainer_args}'"
+            apptainer_prefix = ".sequana/apptainers" if self.local_apptainers else str(self.apptainer_prefix)
 
-            # to add to the main command
-            self.command += f" --use-singularity {apptainer_args}"
-
-            # finally, the prefix where images are stored
-            if self.local_apptainers:
-                self.command += " --singularity-prefix .sequana/apptainers"
+            if _is_v8():
+                # snakemake v8+ renamed singularity → apptainer flags
+                apptainer_args = f"--apptainer-args=' -e -B {home} {self.options.apptainer_args}'"
+                self.command += f" --software-deployment-method apptainer {apptainer_args}"
+                self.command += f" --apptainer-prefix {apptainer_prefix}"
             else:
-                self.command += f" --singularity-prefix {self.apptainer_prefix} "
+                apptainer_args = f"--singularity-args=' -e -B {home} {self.options.apptainer_args}'"
+                self.command += f" --use-singularity {apptainer_args}"
+                self.command += f" --singularity-prefix {apptainer_prefix}"
 
         # set up core/jobs options
         if self.options.profile == "local":
@@ -376,18 +377,23 @@ class SequanaManager:
             # We also add the -e to make sure a clean environment is used. This will avoid
             # unwanted side effect. We also appdn any user apptainer arguments.
             home = str(Path.home())
-            options["apptainer_args"] = f" ' -e -B {home} {self.options.apptainer_args}'"
+            # v7 YAML template needs the value quoted; v8 programmatic YAML does not
+            if _is_v8():
+                options["apptainer_args"] = f"-e -B {home} {self.options.apptainer_args}".strip()
+            else:
+                options["apptainer_args"] = f" ' -e -B {home} {self.options.apptainer_args}'"
         else:
             options["apptainer_prefix"] = ""
             options["apptainer_args"] = ""
 
         if self.options.profile == "slurm":
-            # add slurm options
+            # add slurm options; v7 YAML template needs quoted memory value, v8 programmatic does not
+            memory_value = self.options.slurm_memory if _is_v8() else f"'{self.options.slurm_memory}'"
             options.update(
                 {
-                    "partition": f"common",
+                    "partition": "common",
                     "qos": "normal",
-                    "memory": f"'{self.options.slurm_memory}'",  # quotes needed to avoid error in profile (° ͜ʖ °)
+                    "memory": memory_value,
                 }
             )
             if self.options.slurm_queue != "common":

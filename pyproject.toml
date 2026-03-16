@@ -50,6 +50,10 @@ dependencies = [
 ]
 
 
+[project.optional-dependencies]
+# Required for snakemake >= 8 cluster (SLURM) execution
+slurm = ["snakemake-executor-plugin-cluster-generic"]
+
 [project.scripts]
 sequana_pipetools = "sequana_pipetools.scripts.main:main"
 
