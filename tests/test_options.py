@@ -1,9 +1,14 @@
 import argparse
 import sys
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from sequana_pipetools.options import ClickGeneralOptions, OptionEatAll
+from sequana_pipetools.options import (
+    ClickGeneralOptions,
+    ClickTrimmingOptions,
+    OptionEatAll,
+)
 
 # for test_click_general_options() to work we need to define a global variable
 NAME = "TEST"
@@ -73,3 +78,66 @@ def test_click_option_eat_all():
 
     runner = CliRunner()
     runner.invoke(main, ["--databases", "1", "2"])
+
+
+def test_version_callback_with_value():
+    ctx = MagicMock()
+    ctx.NAME = "test_pipeline"
+    with patch("sequana_pipetools.options.print_version") as mock_pv:
+        ClickGeneralOptions.version_callback(ctx, None, True)
+    mock_pv.assert_called_once_with("test_pipeline")
+    ctx.exit.assert_called_once_with(0)
+
+
+def test_version_callback_no_value():
+    result = ClickGeneralOptions.version_callback(MagicMock(), None, False)
+    assert result is None
+
+
+def test_from_project_callback_with_value():
+    option = MagicMock()
+    option.required = True
+    ctx = MagicMock()
+    ctx.command.params = [option]
+    result = ClickGeneralOptions.from_project_callback(ctx, None, "some/path")
+    assert result == "some/path"
+    assert option.required is False
+
+
+def test_from_project_callback_no_value():
+    result = ClickGeneralOptions.from_project_callback(MagicMock(), None, None)
+    assert result is None
+
+
+def test_deps_callback_no_value():
+    result = ClickGeneralOptions.deps_callback(None, None, False)
+    assert result is None
+
+
+def test_trimming_quality_via_cli():
+    import rich_click as click
+    from click.testing import CliRunner
+
+    from sequana_pipetools.options import (
+        ClickTrimmingOptions,
+        include_options_from,
+        init_click,
+    )
+
+    init_click("TEST2")
+
+    @click.command()
+    @include_options_from(ClickTrimmingOptions)
+    def cmd(**kwargs):
+        click.echo(f"quality={kwargs.get('trimming_quality')}")
+
+    runner = CliRunner()
+    # valid positive quality → inner quality() function called
+    result = runner.invoke(cmd, ["--trimming-quality", "20"])
+    assert result.exit_code == 0
+    assert "quality=20" in result.output
+
+    # -1 is the special sentinel value, should also be accepted
+    result = runner.invoke(cmd, ["--trimming-quality", "-1"])
+    assert result.exit_code == 0
+    assert "quality=-1" in result.output

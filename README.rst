@@ -147,6 +147,14 @@ You can also convert the dot file into a nice PNG file using::
 
     sequana_pipetools --dot2png dag.dot
 
+To diagnose pipeline errors using an LLM (requires a Mistral or OpenAI API key)::
+
+    sequana_pipetools --diagnose
+
+To monitor a running pipeline with a rich progress display (used internally by pipelines launched with ``--monitor``)::
+
+    sequana_pipetools --monitor
+
 
 For Sequana developers
 ======================
@@ -327,6 +335,13 @@ Changelog :memo:
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.5.0     * Add snakemake v8+ support with runtime version detection
+          * Fix extra quotes in apptainer-args for snakemake v8 profile
+          * Add opt-in rich progress monitor (--monitor flag) for pipelines
+          * Fix dryrun job count parser (wrong column order, missing --forceall)
+          * Fix YAML long-line wrapping by setting yaml.width = 1024
+          * Fix deprecated pkg_resources usage in get_html_summary
+          * Add --diagnose command for LLM-assisted pipeline error diagnosis
 1.4.0     * Fix #125 and add py3.10/3.11 failure
 1.3.1     * add fish completion for all pipelines
 1.3.0     * create symlink to the profile

@@ -26,7 +26,47 @@ from .module import Pipeline
 from .pipeline_utils import OnSuccessCleaner
 from .sequana_config import SequanaConfig
 
+CITATION_MESSAGE = (
+    "📚 If Sequana was useful to your research, please cite us:\n"
+    "\tCokelaer et al. 'Sequana': a Set of Snakemake NGS pipelines,\n"
+    "\tJournal of Open Source Software, 2(16), 352 (2017)\n"
+    "\tDOI: https://doi.org/10.21105/joss.00352\n"
+    "\tMore info: https://sequana.readthedocs.io"
+)
+
 logger = colorlog.getLogger(__name__)
+
+
+def get_shell(tool_path: str, version: str) -> str:
+    """Return a shell command string from the sequana_wrappers shell library.
+
+    ``tool_path`` is a slash-separated string encoding the tool and command
+    (and any future sub-commands), e.g. ``"bwa/align"`` or ``"bamtools/stats"``.
+
+    Every version — including ``"dev"`` — maps to a subdirectory of the same
+    name under ``shells/<tool>/<command>/``.  No silent fallback: an explicit
+    error is raised if the requested version does not exist.
+
+    :param tool_path: slash-separated tool/command path, e.g. ``"bwa/align"``
+    :param version: shell command version, e.g. ``"v1"``, or ``"dev"`` for the
+        development (unreleased) version.
+
+    Example usage in a pipeline rules file::
+
+        shell: manager.get_shell("bwa/align", "v1")    # pinned — recommended
+        shell: manager.get_shell("bwa/align", "dev")   # development version
+    """
+    parts = tool_path.split("/")
+    module_path = ".".join(["sequana_wrappers", "shells"] + parts + [version, "cmd"])
+    try:
+        return importlib.import_module(module_path).CMD
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            f"Shell command version '{version}' not found: '{module_path}'.\n"
+            f"Available versions are the subdirectories under "
+            f"sequana_wrappers/shells/{'/'.join(parts)}/.\n"
+            f"Use version='dev' for the development version."
+        )
 
 
 class PipelineManagerBase:
@@ -64,6 +104,22 @@ class PipelineManagerBase:
         pipeline = importlib.import_module(f"sequana_pipelines.{self.name}")
         data["pipeline_version"] = pipeline.version
         return data
+
+    def get_shell(self, tool_path: str, version: str) -> str:
+        """Return a shell command string from the sequana_wrappers shell library.
+
+        Delegates to the module-level :func:`get_shell` function.  Using the
+        manager method avoids a separate ``get_shell`` import in pipeline rules
+        files — ``manager`` is already available everywhere.
+
+        :param tool_path: slash-separated tool/command path, e.g. ``"bwa/align"``
+        :param version: shell command version, e.g. ``"v1"``
+
+        Example::
+
+            shell: manager.get_shell("bwa/align", "v1")
+        """
+        return get_shell(tool_path, version)
 
     def error(self, msg):
         msg = (
@@ -146,8 +202,8 @@ class PipelineManagerBase:
             print(
                 f"\nIf you encoutered an error using sequana_{self.name}, please copy paste the above message and create a New Issue on https://github.com/sequana/{self.name}/issues"
             )
-        except Exception as err:  # pragma: no cover
-            print
+        except Exception:  # pragma: no cover
+            pass
 
     def teardown(self, extra_dirs_to_remove=[], extra_files_to_remove=[], outdir="."):
         # add a Makefile
@@ -175,9 +231,7 @@ class PipelineManagerBase:
             print("\u2705 Another successful analysis. Open summary.html in your browser. Have fun.")
         else:
             print("\u2705 Another successful analysis. Have fun.")
-        print(
-            "\u2705 Please consider citing us would you use Sequana in your research. See https://sequana.readthedocs.io or cite: \n\n\tCokelaer et al. Sequana': a Set of Snakemake NGS pipelines, (2007) JOSS 2(16)"
-        )
+        print(CITATION_MESSAGE)
 
         # for HPC with slurm only
         try:
@@ -445,7 +499,7 @@ class PipelineManager(PipelineManagerBase):
 
         # check whether it is paired or not. This is just to raise an error when
         # there is inconsistent mix of R1 and R2
-        self.paired
+        _ = self.paired
 
         # samples contains a correspondance between the sample name and the
         # real filename location.

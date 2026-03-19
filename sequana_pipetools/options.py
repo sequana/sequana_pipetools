@@ -10,9 +10,7 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
-import argparse
 import inspect
-import os
 import shutil
 import sys
 
@@ -113,7 +111,8 @@ class OptionEatAll(click.Option):
     def __init__(self, *args, **kwargs):
         self.save_other_options = kwargs.pop("save_other_options", True)
         nargs = kwargs.pop("nargs", -1)
-        assert nargs == -1, "nargs, if set, must be -1 not {}".format(nargs)
+        if nargs != -1:
+            raise ValueError("nargs, if set, must be -1 not {}".format(nargs))
         super(OptionEatAll, self).__init__(*args, **kwargs)
         self._previous_parser_process = None
         self._eat_all_parser = None
@@ -180,7 +179,7 @@ class ClickGeneralOptions:
                 "level",
                 default="INFO",
                 type=click.Choice(["INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"]),
-                help="logging level in INFO, DEBUG, WARNING, ERROR, CRITICAL",
+                help="Logging level",
             ),
             click.option(
                 "-v", "--version", is_flag=True, callback=self.version_callback, help="Print the version and exit"
@@ -217,7 +216,7 @@ class ClickGeneralOptions:
         data = data.split()
         data = "\n".join(sorted(data))
         click.echo(
-            f"sequana_{ctx.NAME} will need one or more of these software to work correctly. We recommend you to use --use-apptainer and --apptainer-prefix options so that you do not need to install them manually:\n\n{data}\n"
+            f"sequana_{ctx.NAME} will need one or more of these software to work correctly. We recommend you to use --apptainer-prefix to enable containers so that you do not need to install them manually:\n\n{data}\n"
         )
         ctx.exit(0)
 
@@ -243,7 +242,8 @@ class ClickSnakemakeOptions:
             "--apptainer-args",
             "--force",
             "--jobs",
-            "--use-apptainer",
+            "--keep-going",
+            "--monitor",
             "--working-directory",
         ],
     }
@@ -260,14 +260,14 @@ class ClickSnakemakeOptions:
                 default=None,
                 show_default=True,
                 type=click.Path(),
-                help="""If set, pipelines will download apptainer files in this directory otherwise they will be downloaded in the working directory of the pipeline .""",
+                help="""Path to a directory where Apptainer/Singularity images are stored (or will be downloaded). Recommended to avoid redundant downloads across projects.""",
             ),
             click.option(
                 "--apptainer-args",
                 "apptainer_args",
                 default="",
                 show_default=True,
-                help="""provide any arguments accepted by apptainer. By default, we set -B $HOME:$HOME """,
+                help="""Extra arguments passed to apptainer/singularity exec (e.g. bind mounts). By default, -B $HOME:$HOME is set.""",
             ),
             click.option(
                 "--force",
@@ -281,24 +281,50 @@ class ClickSnakemakeOptions:
                 "jobs",
                 default=_default_jobs,
                 show_default=True,
-                help="""Number of jobs to run at the same time (default 4 on a local
-                    computer, 40 on a SLURM scheduler). This is the --jobs options
-                    of Snakemake""",
+                help="""Number of jobs to run in parallel (passed to Snakemake --jobs). Defaults to 4 for local runs and 40 on a SLURM cluster.""",
+            ),
+            click.option(
+                "--keep-going",
+                "keep_going",
+                is_flag=True,
+                default=False,
+                help="""If set, snakemake will keep running independent jobs even if some fail (--keep-going flag).""",
+            ),
+            click.option(
+                "--monitor",
+                "monitor",
+                is_flag=True,
+                default=False,
+                help="""Enable a live rich progress display while the pipeline runs.
+                    Watches logs/<rule>/<sample>.log files to track per-step progress.
+                    Requires an interactive terminal; silently falls back to plain
+                    snakemake output otherwise.""",
             ),
             click.option(
                 "--use-apptainer",
                 "use_apptainer",
                 is_flag=True,
                 default=False,
-                help="""If set, pipelines will download apptainer files for all external tools.""",
+                hidden=True,
+                is_eager=True,
+                expose_value=True,
+                callback=lambda ctx, param, value: (
+                    click.echo(
+                        "WARNING: --use-apptainer is deprecated and has no effect.\n"
+                        "Use --apptainer-prefix to enable apptainer/singularity containers.",
+                        err=True,
+                    )
+                    if value
+                    else None
+                ),
+                help="""[DEPRECATED] Use --apptainer-prefix instead.""",
             ),
             click.option(
                 "--working-directory",
                 "workdir",
                 default=self.workdir,
                 show_default=True,
-                help="""where to save the pipeline and its configuration file and
-                where the analyse can be run""",
+                help="""Directory where the pipeline configuration and results will be saved.""",
             ),
         ]
 
@@ -390,8 +416,7 @@ class ClickKrakenOptions:
                 is_flag=True,
                 default=False,
                 show_default=True,
-                help="""If provided, kraken taxonomy is performed. A database must be
-                  provided (see below). """,
+                help="""Skip the Kraken taxonomy step.""",
             ),
         ]
 
@@ -437,26 +462,22 @@ class ClickTrimmingOptions:
                 default=self.software_default,
                 show_default=True,
                 type=click.Choice(self.software),
-                help="""additional options understood by cutadapt""",
+                help="""Trimming software to use.""",
             ),
-            click.option("--disable-trimming", is_flag=True, default=False, help="If provided, disable trimming "),
+            click.option("--disable-trimming", is_flag=True, default=False, help="Disable the trimming step entirely."),
             click.option(
                 "--trimming-adapter-read1",
                 "trimming_adapter_read1",
                 default="",
                 show_default=True,
-                help="""fastp auto-detects adapters. You may specify the
-                    adapter sequence specificically for fastp or cutadapt/atropos with option for
-                    read1""",
+                help="""Adapter sequence for read1. fastp auto-detects adapters; use this to override for fastp or cutadapt/atropos.""",
             ),
             click.option(
                 "--trimming-adapter-read2",
                 "trimming_adapter_read2",
                 default="",
                 show_default=True,
-                help="""fastp auto-detects adapters. You may specify the
-                    adapter sequence specificically for fastp or cutadapt/atropos with option for
-                    read1""",
+                help="""Adapter sequence for read2. fastp auto-detects adapters; use this to override for fastp or cutadapt/atropos.""",
             ),
             click.option(
                 "--trimming-minimum-length",
@@ -533,26 +554,17 @@ class ClickFeatureCountsOptions:
             click.option(
                 "--feature-counts-extra-attributes",
                 default=None,
-                help="""any extra attribute to add in final feature counts files""",
+                help="""Extra GFF attribute(s) to include in the feature counts output (comma-separated).""",
             ),
             click.option(
                 "--feature-counts-feature-type",
                 default=self.feature_type,
-                help="""the GFF feature type (e.g., gene, exon, mRNA, etc). If you
-                do not know, look at the GFF file or use 'sequana summary
-    YOURFILE.gff'. Would you need to perform an analysis on several features, you
-    can either build your own custom GFF file (see Please see
-    https://github.com/sequana/rnaseq/wiki) or provide several entries separated by
-    commas""",
+                help="""GFF feature type to count (e.g. gene, exon, mRNA). Use 'sequana summary YOURFILE.gff' to inspect available types. For multiple features, provide comma-separated values or see https://github.com/sequana/rnaseq/wiki.""",
             ),
             click.option(
                 "--feature-counts-options",
                 default=self.options,
-                help="""Any extra options for feature counts. Note that the -s
-                  option (strandness), the -g option (attribute name) and -t options
-                  (genetic type) have their own options. If you use still use one of
-                  the -s/-g/-t, it will replace the --feature-counts-strandness,
-                    --feature-counts-attribute and -feature-counts-feature options respectively""",
+                help="""Extra options passed directly to featureCounts. Note: -s (strandness), -g (attribute) and -t (feature type) are already handled by their own flags above and will be overridden if repeated here.""",
             ),
         ]
 
@@ -576,20 +588,20 @@ class ClickSlurmOptions:
                 default=self.profile,
                 show_default=True,
                 type=click.Choice(["local", "slurm"]),
-                help="Create cluster (HPC) profile directory. By default, it uses local profile",
+                help="Execution profile: 'local' for a workstation, 'slurm' for an HPC cluster.",
             ),
             click.option(
                 "--slurm-memory",
                 "slurm_memory",
                 default=self.memory,
                 show_default=True,
-                help="""Specify the memory required by default. (default 4G; stands for 4 Gbytes)""",
+                help="""Memory requested per SLURM job (e.g. 4G, 16G).""",
             ),
             click.option(
                 "--slurm-queue",
                 "slurm_queue",
                 default=self.queue,
                 show_default=True,
-                help="SLURM queue to be used (biomics)",
+                help="SLURM partition/queue name to submit jobs to.",
             ),
         ]

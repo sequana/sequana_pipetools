@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from sequana_pipetools.snaketools.errors import *
 
 from . import test_dir

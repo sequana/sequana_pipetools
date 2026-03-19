@@ -18,17 +18,9 @@ __all__ = ["sequana_epilog"]
 
 
 sequana_epilog = Colors().purple(
-    """\U00002139\U0000FE0F  To use completion, type 'sequana_pipetools --completion {name}'
-
-\u2705 If you use or like the Sequana project,
-please consider citing us (visit sequana.readthedocs.io for details) or use this
-citation:
-
-\U0001F4DA Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of
-Open Source Software, 2(16), 352, JOSS DOI doi:10.21105/joss.00352
-
-
-"""
+    "\U00002139\U0000FE0F  To use completion, type ‘sequana_pipetools --completion {name}’  \n"
+    "\u2705 If you use or like the Sequana project, please consider citing us (visit sequana.readthedocs.io for details) or use this citation:  \n"
+    "\U0001F4DA Cokelaer et al, (2017), ‘Sequana’: a Set of Snakemake NGS pipelines, Journal of Open Source Software, 2(16), 352, JOSS DOI doi:10.21105/joss.00352"
 )
 
 sequana_prolog = """Welcome to Sequana project (https://sequana.readthedocs.io)

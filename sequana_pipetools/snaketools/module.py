@@ -10,15 +10,24 @@
 #  Documentation: http://sequana.readthedocs.io
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
+import hashlib
+import importlib.metadata
 import os
 import shutil
 
 import colorlog
-import easydev
 
 from .module_finder import ModuleFinder
 
 logger = colorlog.getLogger(__name__)
+
+
+def _md5(fname, chunk=65536):
+    hash_md5 = hashlib.md5()
+    with open(fname, "rb") as f:
+        for block in iter(lambda: f.read(chunk), b""):
+            hash_md5.update(block)
+    return hash_md5.hexdigest()
 
 
 class Pipeline:
@@ -241,7 +250,7 @@ or open a Python shell and type::
                 logger.debug(f"Found {req} executable")
             except Exception:  # pragma: no cover
                 # is this a Python code ?
-                if len(easydev.get_dependencies(req)) == 0:
+                if len(importlib.metadata.requires(req) or []) == 0:
                     executable = False
                     missing.append(req)
                 else:
@@ -275,8 +284,8 @@ Some functionalities may not work. Consider using apptainer by setting a host di
 
         """
         data = {}
-        data["snakefile"] = easydev.md5(self.snakefile)
-        data["config"] = easydev.md5(self.config)
+        data["snakefile"] = _md5(self.snakefile)
+        data["config"] = _md5(self.config)
         return data
 
 

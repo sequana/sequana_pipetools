@@ -46,8 +46,8 @@ class DOTParser:
         from sequana.snaketools import DOTParser
         dot = DOTParser(sequana_data("test_dag.dot"))
         dot.add_urls("test.dot", {"fastqc": "fastqc.html"})
-        from easydev import execute
-        execute("dot -Tpng test.ann.dot -o test.png")
+        import subprocess
+        subprocess.run(["dot", "-Tpng", "test.ann.dot", "-o", "test.png"])
         from pylab import imshow, imread, xticks, yticks
         imshow(imread("test.png")); xticks([]) ;yticks([])
 
