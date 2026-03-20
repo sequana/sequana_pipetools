@@ -1,8 +1,9 @@
 import sys
+from types import SimpleNamespace
 
 import pytest
 
-from sequana_pipetools import AttrDict, SequanaConfig, SequanaManager
+from sequana_pipetools import SequanaConfig, SequanaManager
 from sequana_pipetools.sequana_manager import Wrapper
 
 from . import test_dir
@@ -39,7 +40,7 @@ def test_sequana_manager(tmpdir):
     # normal behaviour. also to test profile
     dd = default_dict.copy()
     dd["workdir"] = wkdir
-    pm = SequanaManager(AttrDict(**dd), "fastqc")
+    pm = SequanaManager(SimpleNamespace(**dd), "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
     pm.config.config.input_pattern = "Hm2*gz"
     pm.config.config.input_readtag = "_R[12]_"
@@ -51,7 +52,7 @@ def test_sequana_manager(tmpdir):
     dd = default_dict.copy()
     dd["from_project"] = wkdir
     dd["workdir"] = wkdir
-    pm = SequanaManager(AttrDict(**dd), "fastqc")
+    pm = SequanaManager(SimpleNamespace(**dd), "fastqc")
     pm.fill_data_options()
 
     pm.setup()
@@ -66,7 +67,7 @@ def test_sequana_manager(tmpdir):
     pm.teardown()
 
     # test requirements (even if it is empty)
-    pm.config.config["requirements"] = []
+    pm.config.config.requirements = []
     pm.teardown()
 
     # Test the filling of InputOptions in normal mode or when using --from-project
@@ -79,7 +80,7 @@ def test_sequana_manager_wrong_input(tmpdir):
     # normal behaviour
     dd = default_dict.copy()
     dd["workdir"] = wkdir
-    pm = SequanaManager(AttrDict(**dd), "fastqc")
+    pm = SequanaManager(SimpleNamespace(**dd), "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
     # no files will be found but by default
     pm.config.config.input_pattern = f"FFF*gz"
@@ -100,7 +101,7 @@ def test_scheduler(tmpdir):
     dd["profile"] = "slurm"
     dd["workdir"] = wkdir
 
-    pm = SequanaManager(AttrDict(**dd), "fastqc")
+    pm = SequanaManager(SimpleNamespace(**dd), "fastqc")
 
     pm.options.profile = "slurm"
     pm.options.slurm_memory = "4000"
@@ -145,7 +146,7 @@ def test_copy_requirements(tmpdir):
     # normal behaviour
     dd = default_dict.copy()
     dd["workdir"] = wkdir
-    pm = SequanaManager(AttrDict(**dd), "fastqc")
+    pm = SequanaManager(SimpleNamespace(**dd), "fastqc")
     pm.config.config.input_directory = f"{test_dir}/data/"
     pm.config.config.input_pattern = "Hm2*gz"
     pm.config.config.input_readtag = "_R[12]_"

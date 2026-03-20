@@ -15,7 +15,7 @@ import json
 import os
 import sys
 import tarfile
-from collections import OrderedDict
+from types import SimpleNamespace
 
 import colorlog
 import requests
@@ -27,7 +27,6 @@ logger = colorlog.getLogger(__name__)
 
 
 __all__ = [
-    "AttrDict",
     "Colors",
     "print_version",
     "error",
@@ -36,58 +35,8 @@ __all__ = [
     "download_and_extract_tar_gz",
 ]
 
-
-class AttrDict(dict):
-    """A dictionary subclass that exposes its keys as attributes.
-
-    Nested dictionaries are converted recursively, so deep access works
-    naturally::
-
-        d = AttrDict(**{'a': {'b': {'c': 3}}})
-        d.a.b.c          # 3
-        d['a']['b']['c'] # 3 — plain dict access still works
-
-    Setting a key via attribute or dict syntax are equivalent::
-
-        d.x = 1
-        d['x'] = 1
-
-    Use :meth:`update` (not direct attribute assignment) when setting a value
-    that is itself a dict, so the nested dict is also converted::
-
-        d.update({'nested': {'key': 'value'}})
-        d.nested.key  # 'value'
-
-    """
-
-    def __init__(self, **kwargs):
-        dict.__init__(self, kwargs)
-        self.__dict__ = self
-        self.update(kwargs)
-
-    def update(self, content):
-        if content.__class__ not in (dict, OrderedDict, AttrDict):
-            raise TypeError(f"Expected a dict-like object, got {type(content)}")
-        for k, v in content.items():
-            if isinstance(v, (dict, OrderedDict, AttrDict)):
-                self[k] = AttrDict(**v)
-            else:
-                self[k] = v
-
-    def from_json(self, filename):
-        """Load key/value pairs from a JSON file (merges into existing keys)."""
-        with open(filename, "r") as fh:
-            data = json.load(fh)
-        for k, v in data.items():
-            self[k] = v
-
-    def to_json(self, filename=None):
-        """Serialise to JSON.  Returns the JSON string when *filename* is None."""
-        if filename is not None:
-            with open(filename, "w") as fh:
-                json.dump(self, fh)
-        else:
-            return json.dumps(self)
+# Backward-compatibility alias — new code should use types.SimpleNamespace directly.
+AttrDict = SimpleNamespace
 
 
 def download_and_extract_tar_gz(url, extract_to):

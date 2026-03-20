@@ -40,21 +40,13 @@ logger = colorlog.getLogger(__name__)
 def get_shell(tool_path: str, version: str) -> str:
     """Return a shell command string from the sequana_wrappers shell library.
 
-    ``tool_path`` is a slash-separated string encoding the tool and command
-    (and any future sub-commands), e.g. ``"bwa/align"`` or ``"bamtools/stats"``.
-
-    Every version — including ``"dev"`` — maps to a subdirectory of the same
-    name under ``shells/<tool>/<command>/``.  No silent fallback: an explicit
-    error is raised if the requested version does not exist.
-
     :param tool_path: slash-separated tool/command path, e.g. ``"bwa/align"``
     :param version: shell command version, e.g. ``"v1"``, or ``"dev"`` for the
         development (unreleased) version.
 
     Example usage in a pipeline rules file::
 
-        shell: manager.get_shell("bwa/align", "v1")    # pinned — recommended
-        shell: manager.get_shell("bwa/align", "dev")   # development version
+        shell: manager.get_shell("bwa/align", "v1")
     """
     parts = tool_path.split("/")
     module_path = ".".join(["sequana_wrappers", "shells"] + parts + [version, "cmd"])
@@ -65,6 +57,34 @@ def get_shell(tool_path: str, version: str) -> str:
             f"Shell command version '{version}' not found: '{module_path}'.\n"
             f"Available versions are the subdirectories under "
             f"sequana_wrappers/shells/{'/'.join(parts)}/.\n"
+            f"Use version='dev' for the development version."
+        )
+
+
+def get_run(tool_path: str, version: str):
+    """Return a Python callable from the sequana_wrappers snippets library.
+
+    The returned callable has the signature ``execute(snakemake)`` and is
+    intended for use inside Snakemake ``run:`` blocks.
+
+    :param tool_path: slash-separated tool/command path, e.g. ``"rulegraph/run"``
+    :param version: snippet version, e.g. ``"v1"``, or ``"dev"`` for the
+        development (unreleased) version.
+
+    Example usage in a pipeline rules file::
+
+        run:
+            manager.get_run("rulegraph/run", "v1")(snakemake)
+    """
+    parts = tool_path.split("/")
+    module_path = ".".join(["sequana_wrappers", "snippets"] + parts + [version, "code"])
+    try:
+        return importlib.import_module(module_path).execute
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            f"Snippet version '{version}' not found: '{module_path}'.\n"
+            f"Available versions are the subdirectories under "
+            f"sequana_wrappers/snippets/{'/'.join(parts)}/.\n"
             f"Use version='dev' for the development version."
         )
 
@@ -86,6 +106,7 @@ class PipelineManagerBase:
                 raise PipetoolsException("Please check the config file, some mandatory values are missing.")
 
         # Populate the config with additional information
+        self._sequana_config = cfg
         self.config = cfg.config
         self.config.pipeline_name = name
         self.matplotlib_backend = matplotlib_backend
@@ -108,9 +129,9 @@ class PipelineManagerBase:
     def get_shell(self, tool_path: str, version: str) -> str:
         """Return a shell command string from the sequana_wrappers shell library.
 
-        Delegates to the module-level :func:`get_shell` function.  Using the
-        manager method avoids a separate ``get_shell`` import in pipeline rules
-        files — ``manager`` is already available everywhere.
+        Delegates to :func:`sequana_wrappers.get_shell`.  Using the manager
+        method avoids a separate import in pipeline rules files — ``manager``
+        is already available everywhere.
 
         :param tool_path: slash-separated tool/command path, e.g. ``"bwa/align"``
         :param version: shell command version, e.g. ``"v1"``
@@ -120,6 +141,23 @@ class PipelineManagerBase:
             shell: manager.get_shell("bwa/align", "v1")
         """
         return get_shell(tool_path, version)
+
+    def get_run(self, tool_path: str, version: str):
+        """Return a Python callable from the sequana_wrappers snippets library.
+
+        Delegates to :func:`sequana_wrappers.get_run`.  The returned callable
+        has the signature ``execute(snakemake)`` and is intended for use inside
+        Snakemake ``run:`` blocks.
+
+        :param tool_path: slash-separated tool/command path, e.g. ``"rulegraph/run"``
+        :param version: snippet version, e.g. ``"v1"``
+
+        Example::
+
+            run:
+                manager.get_run("rulegraph/run", "v1")(snakemake)
+        """
+        return get_run(tool_path, version)
 
     def error(self, msg):
         msg = (
@@ -151,7 +189,7 @@ class PipelineManagerBase:
             )
         return lambda wildcards: self.samples[wildcards.sample]
 
-    def setup(self, namespace=None, mode="error"):
+    def setup(self):
         """
 
         90% of the errors come from the fact that users did not set a matplotlib
@@ -175,10 +213,9 @@ class PipelineManagerBase:
 
             mpl.use(self.matplotlib_backend)
 
-    def _get_snakefile(self):
+    @property
+    def snakefile(self):
         return self._snakefile
-
-    snakefile = property(_get_snakefile)
 
     def clean_multiqc(self, filename):
         with open(filename, "r") as fin:
@@ -200,16 +237,16 @@ class PipelineManagerBase:
             p = PipeError(self.name)
             p.status()
             print(
-                f"\nIf you encoutered an error using sequana_{self.name}, please copy paste the above message and create a New Issue on https://github.com/sequana/{self.name}/issues"
+                f"\nIf you encountered an error using sequana_{self.name}, please copy paste the above message and create a New Issue on https://github.com/sequana/{self.name}/issues"
             )
         except Exception:  # pragma: no cover
             pass
 
-    def teardown(self, extra_dirs_to_remove=[], extra_files_to_remove=[], outdir="."):
+    def teardown(self, extra_dirs_to_remove=None, extra_files_to_remove=None, outdir="."):
         # add a Makefile
         cleaner = OnSuccessCleaner(self.name, outdir=outdir)
-        cleaner.directories_to_remove.extend(extra_dirs_to_remove)
-        cleaner.files_to_remove.extend(extra_files_to_remove)
+        cleaner.directories_to_remove.extend(extra_dirs_to_remove or [])
+        cleaner.files_to_remove.extend(extra_files_to_remove or [])
         cleaner.add_makefile()
 
         # create the version file given the requirements
@@ -274,11 +311,6 @@ class PipelineManagerDirectory(PipelineManagerBase):
     def __init__(self, name, config, schema=None):
         super().__init__(name, config, schema)
 
-        # uses the provided sequana_wrappers version if any, otherwise use the main branch of the wrappers
-        if "sequana_wrappers" not in self.config:
-            logger.warning(
-                "This pipeline has no sequana_wrappers in its config file. Using the branch 'main' by default"
-            )
         self.wrappers = self.config.get("sequana_wrappers", "main")
 
 
@@ -287,7 +319,7 @@ class PipelineManager(PipelineManagerBase):
 
     Inside a snakefile, use it as follows::
 
-        from sequana import PipelineManager
+        from sequana_pipetools import PipelineManager
         manager = PipelineManager("pipeline_name", "config.yaml")
 
     This will expect some specific fields in the config file::
@@ -386,7 +418,7 @@ class PipelineManager(PipelineManagerBase):
         config: str,
         schema=None,
         sample_func=None,
-        extra_prefixes_to_strip=[],
+        extra_prefixes_to_strip=None,
         sample_pattern=None,
         exclude_pattern=None,
         **kwargs,
@@ -412,12 +444,12 @@ class PipelineManager(PipelineManagerBase):
         """
         super().__init__(name, config, schema)
 
-        cfg = SequanaConfig(config)
+        cfg = self._sequana_config
         cfg.config.pipeline_name = self.name
 
         # can be provided in the config file or arguments
         self.sample_pattern = cfg.config.get("sample_pattern", sample_pattern)
-        self.extra_prefixes_to_strip = cfg.config.get("extra_prefixes_to_strip", extra_prefixes_to_strip)
+        self.extra_prefixes_to_strip = cfg.config.get("extra_prefixes_to_strip", extra_prefixes_to_strip or [])
         self.exclude_pattern = cfg.config.get("exclude_pattern", exclude_pattern)
 
         # if input_directory is not filled, the input_pattern, if valid, will be used instead and must
@@ -451,8 +483,8 @@ class PipelineManager(PipelineManagerBase):
         # The config uses the input_directory and input_pattern (compulsary).
         if sample_func:
             logger.info("Using sample_func function to get sample names as provided by the pipeline/user")
-            path = cfg.config["input_directory"]
-            pattern = cfg.config["input_pattern"]
+            path = cfg.config.input_directory
+            pattern = cfg.config.input_pattern
             if path.strip():
                 pattern = path + os.sep + pattern
 

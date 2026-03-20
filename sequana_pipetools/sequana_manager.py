@@ -18,6 +18,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import aiohttp
 import colorlog
@@ -28,7 +29,7 @@ from sequana_pipetools import get_package_version
 from sequana_pipetools.misc import url2hash
 from sequana_pipetools.snaketools.profile import _is_v8, create_profile
 
-from .misc import AttrDict, Colors
+from .misc import Colors
 from .snaketools import Pipeline, SequanaConfig
 
 logger = colorlog.getLogger(__name__)
@@ -96,12 +97,10 @@ class SequanaManager:
 
         """
 
-        # Old argparse version provide a structure with attributes
-        # whereas new click provides a dictionary. Here we covnert the
-        # dictionary into a attribute/class like using AttrDict
-
+        # Old argparse version provides a namespace with attributes;
+        # new click version provides a dictionary — convert it here.
         if not hasattr(options, "version"):
-            options = AttrDict(**options)
+            options = SimpleNamespace(**options)
 
         # the logger must be defined here because from a pipeline, it may not
         # have been defined yet.
@@ -267,8 +266,9 @@ class SequanaManager:
         filenames = glob.glob(cfg.input_directory + os.sep + cfg.input_pattern)
 
         # this code is just informative. Actual run is snaketools.pipeline_manager
-        if cfg.get("exclude_pattern"):
-            filenames = [x for x in filenames if cfg.get("exclude_pattern") not in x.split("/")[-1]]
+        exclude_pattern = getattr(cfg, "exclude_pattern", None)
+        if exclude_pattern:
+            filenames = [x for x in filenames if exclude_pattern not in x.split("/")[-1]]
         logger.info(
             f"\u2705 Found {len(filenames)} files matching your input  pattern ({cfg.input_pattern}) in {cfg.input_directory}"
         )

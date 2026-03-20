@@ -335,6 +335,13 @@ Changelog :memo:
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.5.1     * Replace AttrDict with types.SimpleNamespace (_Namespace subclass
+            with dict-like helpers) across the codebase; AttrDict kept as a
+            backward-compatible alias
+          * Fix double SequanaConfig load in PipelineManager (base class now
+            exposes _sequana_config so the subclass reuses the parsed object)
+          * Simplify snakefile property to use @property decorator
+          * Expand url2hash tests (determinism, distinctness, output format)
 1.5.0     * Add snakemake v8+ support with runtime version detection
           * Fix extra quotes in apptainer-args for snakemake v8 profile
           * Add opt-in rich progress monitor (--monitor flag) for pipelines
