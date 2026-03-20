@@ -22,6 +22,14 @@ def test_levenshtein():
 def test_url2hash():
     md5 = url2hash("https://zenodo.org/record/7822910/files/samtools_1.17_minimap2_2.24.0.img")
     assert md5 == "c3e4a8244ce7b65fa873ebda134fea7f"
+    # same URL always produces the same hash
+    assert url2hash("https://example.com/file.tar.gz") == url2hash("https://example.com/file.tar.gz")
+    # different URLs produce different hashes
+    assert url2hash("https://example.com/a.gz") != url2hash("https://example.com/b.gz")
+    # returns a 32-character hex string
+    result = url2hash("https://example.com/test")
+    assert len(result) == 32
+    assert all(c in "0123456789abcdef" for c in result)
 
 
 def test_colors():

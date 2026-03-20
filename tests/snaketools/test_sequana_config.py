@@ -109,7 +109,7 @@ def test_check_bad_config_with_schema():
 
     cfg = SequanaConfig(cfg_name)
     # threads can not be a string
-    cfg.config["busco"]["threads"] = ""
+    cfg.config.busco.threads = ""
     assert not cfg.check_config_with_schema(schema)
 
 
@@ -121,14 +121,14 @@ def test_check_config_with_schema_and_ext(tmpdir):
     assert cfg.check_config_with_schema(schema)
 
     # not nullable key cannot be empty
-    cfg.config["busco"]["lineage"] = ""
+    cfg.config.busco.lineage = ""
     assert not cfg.check_config_with_schema(schema)
 
     # but it is not a problem the rule is not necessary
-    cfg.config["busco"]["do"] = False
+    cfg.config.busco.do = False
     assert cfg.check_config_with_schema(schema)
 
-    cfg.config["busco"].update({"do": True, "lineage": "bacteria", "threads": ""})
+    vars(cfg.config.busco).update({"do": True, "lineage": "bacteria", "threads": ""})
     assert not cfg.check_config_with_schema(schema)
 
 

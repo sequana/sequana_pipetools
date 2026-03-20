@@ -32,5 +32,6 @@ from .snaketools import (  # noqa: F401
     PipelineManager,
     PipelineManagerDirectory,
     SequanaConfig,
+    get_run,
     get_shell,
 )

@@ -13,11 +13,30 @@
 import os
 import tempfile
 import warnings
+from types import SimpleNamespace
 
 import ruamel.yaml
 from pykwalify.core import Core, CoreError, SchemaError
 
-from sequana_pipetools.misc import AttrDict
+
+class _Namespace(SimpleNamespace):
+    """SimpleNamespace extended with dict-like access helpers."""
+
+    def get(self, key, default=None):
+        return getattr(self, key, default)
+
+    def items(self):
+        return vars(self).items()
+
+    def values(self):
+        return vars(self).values()
+
+    def keys(self):
+        return vars(self).keys()
+
+    def __contains__(self, key):
+        return hasattr(self, key)
+
 
 try:
     import importlib.resources as resources
@@ -28,6 +47,22 @@ except ImportError:  # pragma: no cover
 import colorlog
 
 logger = colorlog.getLogger(__name__)
+
+
+def _dict_to_ns(d):
+    """Recursively convert a dict to a _Namespace."""
+    if isinstance(d, dict):
+        return _Namespace(**{k: _dict_to_ns(v) for k, v in d.items()})
+    return d
+
+
+def _ns_to_dict(d):
+    """Recursively convert a _Namespace (or nested dict) to a plain dict."""
+    if isinstance(d, SimpleNamespace):
+        return {k: _ns_to_dict(v) for k, v in vars(d).items()}
+    if isinstance(d, dict):
+        return {k: _ns_to_dict(v) for k, v in d.items()}
+    return d
 
 
 class SequanaConfig:
@@ -68,19 +103,23 @@ class SequanaConfig:
         # a dictionary. Be aware that the update method may lose the comments
         # if yaml dictionary not updated correctly.
         if data:
-            try:
-                self.config = AttrDict(**data)
+            if isinstance(data, dict):
+                self.config = _dict_to_ns(data)
                 self._yaml_code = ruamel.yaml.comments.CommentedMap(data.copy())
-            except TypeError:
-                if hasattr(data, "config"):
-                    self.config = AttrDict(**data.config)
-                    self._yaml_code = ruamel.yaml.comments.CommentedMap(data.config.copy())
-                else:
-                    # populate self._yaml_code
-                    config = self._read_file(data)
-                    self.config = AttrDict(**config)
+            elif hasattr(data, "config"):
+                d = _ns_to_dict(data.config)
+                self.config = _dict_to_ns(d)
+                self._yaml_code = ruamel.yaml.comments.CommentedMap(d)
+            elif isinstance(data, SimpleNamespace):
+                d = _ns_to_dict(data)
+                self.config = _dict_to_ns(d)
+                self._yaml_code = ruamel.yaml.comments.CommentedMap(d)
+            else:
+                # populate self._yaml_code from a YAML/JSON filename
+                config = self._read_file(data)
+                self.config = _dict_to_ns(config)
         else:
-            self.config = AttrDict()
+            self.config = _Namespace()
             self._yaml_code = ruamel.yaml.comments.CommentedMap()
 
         # remove templates and None->""
@@ -130,7 +169,7 @@ class SequanaConfig:
         # !! essential to use the update() method of the dictionary otherwise
         # comments are lost
         for key, value in data.items():
-            if isinstance(value, dict):
+            if isinstance(value, (dict, SimpleNamespace)):
                 target.update({key: self._recursive_update(target[key], value)})
             elif isinstance(value, list):
                 try:
@@ -141,12 +180,11 @@ class SequanaConfig:
                 except Exception:
                     target[key] = value
             elif isinstance(key, (int, float, str)):
+                value = data.get(key) if isinstance(data, _Namespace) else data[key]
                 if key in target.keys():
-                    value = data[key]
                     target.update({key: value})
                 else:
                     logger.warning("This %s key was not in the original config" " but added" % key)
-                    value = data[key]
                     target.update({key: value})
             else:  # pragma: no cover
                 raise NotImplementedError(
@@ -166,15 +204,16 @@ class SequanaConfig:
                 self._recursive_cleanup(value)
             except AttributeError:
                 if value is None:
-                    d[key] = ""
+                    setattr(d, key, "")
                 elif isinstance(value, str):
-                    d[key] = value.strip()
+                    value = value.strip()
+                    setattr(d, key, value)
 
                     # https://github.com/sequana/sequana/issues/486
                     if key.endswith("_directory") and value.startswith("~/"):
-                        d[key] = os.path.expanduser(value)
+                        setattr(d, key, os.path.expanduser(value))
                     if key.endswith("_file") and value.startswith("~/"):
-                        d[key] = os.path.expanduser(value)
+                        setattr(d, key, os.path.expanduser(value))
 
         self._update_yaml()
 
@@ -225,5 +264,5 @@ class SequanaConfig:
             else:
                 # second level
                 print(f'{tab}"{k}":\n{tab}{tab}type: map\n{tab}{tab}mapping:')
-                for k2, v2 in self.config[k].items():
+                for k2, v2 in self.config.get(k).items():
                     print(f'{tab}{tab}{tab}"{k2}":\n{tab}{tab}{tab}{tab}type: str\n{tab}{tab}{tab}{tab}required: False')

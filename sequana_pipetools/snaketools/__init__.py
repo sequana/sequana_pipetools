@@ -5,6 +5,7 @@ from .module_finder import ModuleFinder  # noqa: F401
 from .pipeline_manager import (  # noqa: F401
     PipelineManager,
     PipelineManagerDirectory,
+    get_run,
     get_shell,
 )
 from .pipeline_utils import (  # noqa: F401
