@@ -61,9 +61,21 @@ def _read_tail(path: Path, max_lines: int) -> str:
 
 
 def _find_snakemake_log(workdir: Path) -> "Path | None":
-    """Return .sequana/snakemake.log if it exists, else None."""
+    """Return the best available snakemake log, in priority order:
+
+    1. ``.sequana/snakemake.log`` — written by the tee redirect in runme.sh
+    2. The most-recently-modified ``slurm-*.out`` at the workdir root — the
+       main SLURM controller output produced when ``runme.sh`` was submitted
+       via ``sbatch`` without a tee redirect (legacy runs).
+    """
     p = workdir / ".sequana" / "snakemake.log"
-    return p if p.exists() else None
+    if p.exists():
+        return p
+
+    # Fallback: root-level slurm output files are the snakemake controller log
+    # (per-rule job logs live under logs/<rule>/ and are handled separately).
+    candidates = sorted(workdir.glob("slurm-*.out"), key=lambda f: f.stat().st_mtime)
+    return candidates[-1] if candidates else None
 
 
 def _extract_error_sections(text: str) -> str:
