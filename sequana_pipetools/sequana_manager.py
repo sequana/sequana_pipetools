@@ -377,7 +377,11 @@ class SequanaManager:
                 f" --version {pipeline_version}"
             )
         else:
-            command = f"#!/bin/bash\nsnakemake -s {snakefilename} --profile {profile_dir}"
+            command = (
+                f"#!/bin/bash\nset -o pipefail\n"
+                f"snakemake -s {snakefilename} --profile {profile_dir}"
+                f" 2>&1 | tee .sequana/snakemake.log"
+            )
 
         command_file.write_text(command)
 
