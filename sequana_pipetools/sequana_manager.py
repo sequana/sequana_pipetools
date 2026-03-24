@@ -649,16 +649,17 @@ class SequanaManager:
 def multiple_downloads(files_to_download, timeout=3600):
     async def download(session, url, name, position):
         async with session.get(url, timeout=timeout) as resp:
-            with tqdm.wrapattr(
-                open(name, "wb"),
-                "write",
-                miniters=1,
-                desc=url.split("/")[-1],
-                total=int(resp.headers.get("content-length", 0)),
-                position=position,
-            ) as fout:
-                async for chunk in resp.content.iter_chunked(4096):
-                    fout.write(chunk)
+            with open(name, "wb") as fd:
+                with tqdm.wrapattr(
+                    fd,
+                    "write",
+                    miniters=1,
+                    desc=url.split("/")[-1],
+                    total=int(resp.headers.get("content-length", 0)),
+                    position=position,
+                ) as fout:
+                    async for chunk in resp.content.iter_chunked(4096):
+                        fout.write(chunk)
 
     async def download_all(files_to_download):
         """data_to_download is a list of tuples
