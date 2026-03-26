@@ -335,6 +335,15 @@ Changelog :memo:
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.5.3     * Add Rich-styled Sequana tips panel on pipeline failure (onerror)
+          * Add Rich-styled Citation panel on pipeline success (teardown)
+          * Add onsuccess() method with Rich panel linking to summary.html
+          * Replace tqdm download bars with Rich progress bars for containers
+          * Add AI disclaimer panel to --diagnose output
+          * Wrap Sequana tips in a Rich panel in --diagnose output
+          * Add --execute flag to run the pipeline immediately after setup
+          * Add __getitem__ to _Namespace for dict-like key access
+1.5.2     * update --diagnose for slurm usage
 1.5.1     * Replace AttrDict with types.SimpleNamespace (_Namespace subclass
             with dict-like helpers) across the codebase; AttrDict kept as a
             backward-compatible alias

@@ -212,3 +212,61 @@ def test_pipeline_others():
     pm = snaketools.pipeline_manager.PipelineManager("fastqc", cfg)
     pm.getmetadata()
     pm.get_html_summary()
+
+
+def test_get_shell_module_not_found():
+    """get_shell raises ModuleNotFoundError for nonexistent tool."""
+    from sequana_pipetools.snaketools.pipeline_manager import get_shell
+
+    with pytest.raises(ModuleNotFoundError, match="Shell command version"):
+        get_shell("nonexistent/tool", "v99")
+
+
+def test_get_run_module_not_found():
+    """get_run raises ModuleNotFoundError for nonexistent snippet."""
+    from sequana_pipetools.snaketools.pipeline_manager import get_run
+
+    with pytest.raises(ModuleNotFoundError, match="Snippet version"):
+        get_run("nonexistent/tool", "v99")
+
+
+def test_pipeline_manager_getrawdata():
+    """getrawdata returns a callable that maps wildcards to sample paths."""
+    from types import SimpleNamespace
+
+    cfg = SequanaConfig({})
+    cfg.config.input_directory = str(Path(test_dir) / "data")
+    cfg.config.input_pattern = "*notag*"
+    pm = snaketools.pipeline_manager.PipelineManager("test", cfg)
+
+    func = pm.getrawdata("sample")
+    sample_name = list(pm.samples.keys())[0]
+    wildcards = SimpleNamespace(sample=sample_name)
+    result = func(wildcards)
+    assert result is not None
+
+
+def test_pipeline_manager_onsuccess(tmp_path):
+    """onsuccess() runs without error (no summary.html)."""
+    cfg = SequanaConfig({})
+    cfg.config.input_directory = str(Path(test_dir) / "data")
+    cfg.config.input_pattern = "*notag*"
+    pm = snaketools.pipeline_manager.PipelineManager("test", cfg)
+    pm.onsuccess()  # should not raise
+
+
+def test_pipeline_manager_teardown_creates_versions(tmpdir):
+    """teardown writes versions.txt when tools.txt exists."""
+    cfg = SequanaConfig({})
+    cfg.config.input_directory = str(Path(test_dir) / "data")
+    cfg.config.input_pattern = "*notag*"
+    pm = snaketools.pipeline_manager.PipelineManager("test", cfg)
+
+    working_dir = tmpdir.mkdir("teardown_test")
+    seq_dir = working_dir.mkdir(".sequana")
+    tools_file = seq_dir.join("tools.txt")
+    tools_file.write("fastqc\n")
+
+    pm.teardown(outdir=str(working_dir))
+
+    assert os.path.exists(str(seq_dir.join("versions.txt")))

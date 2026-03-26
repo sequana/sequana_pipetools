@@ -23,7 +23,6 @@ from types import SimpleNamespace
 import aiohttp
 import colorlog
 from easydev import CustomConfig
-from tqdm.asyncio import tqdm
 
 from sequana_pipetools import get_package_version
 from sequana_pipetools.misc import url2hash
@@ -52,7 +51,7 @@ class Wrapper:
 
     def clone(self):  # pragma: no cover
         if not self.repo_path.exists():
-            logger.warning(f"Cloning sequana-wrappers-lite into {self.repo_path}")
+            logger.info(f"Cloning sequana-wrappers into {self.repo_path}")
             self.repo_path.parent.mkdir(parents=True, exist_ok=True)
             result = subprocess.run(
                 ["git", "clone", "https://github.com/sequana/sequana-wrappers-lite.git", str(self.repo_path)],
@@ -62,7 +61,7 @@ class Wrapper:
             logger.debug(result.stdout)
             logger.debug(result.stderr)
         else:
-            logger.info(f"Updating sequana-wrappers-lite into {self.repo_path}")
+            logger.info(f"Updating sequana-wrappers into {self.repo_path}")
             self.repo_path.parent.mkdir(parents=True, exist_ok=True)
             result = subprocess.run(["git", "pull"], cwd=self.repo_path, capture_output=True, text=True)
             logger.debug(result.stdout)
@@ -164,6 +163,16 @@ class SequanaManager:
             "SEQUANA_WRAPPERS", "https://raw.githubusercontent.com/sequana/sequana-wrappers/"
         )
 
+        from rich.console import Console
+        from rich.panel import Panel
+
+        lines = [
+            f"[bold cyan]Pipeline:[/bold cyan] sequana_{self.name}  (v{self._get_package_version()})",
+            f"[bold cyan]Docs:    [/bold cyan] https://github.com/sequana/{self.name}",
+            f"[bold cyan]Website: [/bold cyan] https://sequana.readthedocs.io",
+        ]
+        Console().print(Panel("\n".join(lines), title="Welcome to Sequana", border_style="bold blue", padding=(1, 2)))
+
         wrapper_factory = Wrapper()
         wrapper_factory.clone()
         self.sequana_wrappers = wrapper_factory.prefixed_path
@@ -228,13 +237,6 @@ class SequanaManager:
         - Create a script in the directory ready to use
 
         """
-        logger.info("Welcome to Sequana pipelines suite (https://sequana.readthedocs.io)")
-        logger.info(" - Found an issue, have a question: https://tinyurl.com/2bh6frp2 ")
-        logger.info(f" - more about this pipeline on https://github.com/sequana/{self.name} ")
-
-        if self.sequana_wrappers:
-            logger.info(f"Using sequana-wrappers from {self.sequana_wrappers}")
-
         # This should be in the setup, not in the teardown since we may want to
         # copy files when creating the pipeline. This is the case e.g. in the
         # rnaseq pipeline. It is a bit annoying since if there is failure
@@ -457,18 +459,20 @@ class SequanaManager:
         if self.use_apptainer:  # pragma: no cover
             self._download_zenodo_images()
 
-        # some information
-        msg = "Please check the script in {}/{}.sh and "
-        msg += f"the configuration file in {{}}/{config_name}.\n"
-        print(self.colors.purple(msg.format(self.workdir, self.name, self.workdir)))
+        from rich.console import Console
+        from rich.panel import Panel
 
-        msg = "Once ready, execute the script {}.sh using \n\n\t".format(self.name)
         if self.options.profile == "slurm":
-            msg += "cd {}; sbatch {}.sh\n\n".format(self.workdir, self.name)
+            run_cmd = f"cd {self.workdir}; sbatch {self.name}.sh"
         else:
-            msg += "cd {}; sh {}.sh\n\n".format(self.workdir, self.name)
-        msg += f"You may tune extra parameters related to snakemake in {self.workdir}/.sequana/profile_{self.options.profile}"
-        print(self.colors.purple(msg))
+            run_cmd = f"cd {self.workdir}; sh {self.name}.sh"
+
+        lines = [
+            f"[bold]1.[/bold] Review the pipeline config:\n   [cyan]{self.workdir}/{config_name}[/cyan]",
+            f"[bold]2.[/bold] Tune snakemake settings:\n   [cyan]{self.workdir}/.sequana/profile_{self.options.profile}/config.yaml[/cyan]",
+            f"[bold]3.[/bold] Launch the pipeline:\n   [green]{run_cmd}[/green]",
+        ]
+        Console().print(Panel("\n".join(lines), title="Next steps", border_style="bold magenta", padding=(1, 2)))
 
         # Save an info.txt with the command used
         with open(self.workdir / ".sequana" / "info.txt", "w") as fout:
@@ -520,6 +524,24 @@ class SequanaManager:
 
         else:
             logger.info(f"Note that completion is possible with sequana_pipetools --completion{self.name}")
+
+        if getattr(self.options, "execute", False):
+            self.run()
+
+    def run(self):
+        """Execute the pipeline script from the working directory.
+
+        For local runs, executes ``{name}.sh`` with bash.
+        For SLURM, submits ``{name}.sh`` via sbatch.
+        """
+        script = f"{self.name}.sh"
+        if self.options.profile == "slurm":
+            cmd = ["sbatch", script]
+        else:
+            cmd = ["bash", script]
+
+        logger.info(f"Launching pipeline: {' '.join(cmd)} (in {self.workdir})")
+        subprocess.run(cmd, cwd=self.workdir)
 
     def _get_section_content(self, filename, section_name):
         """searching for a given section (e.g. container)
@@ -602,7 +624,7 @@ class SequanaManager:
 
         count = 0
         files_to_download = []
-        total_size = 0
+        all_outfiles = []
 
         # define the URLs and the output filename.
         for url in urls:
@@ -622,21 +644,14 @@ class SequanaManager:
             except (FileExistsError, PermissionError):  # pragma: no cover
                 pass
 
+            all_outfiles.append(outfile)
             container = url.split("/")[-1]
-            imagedir = Path(outfile).parent
             if os.path.exists(outfile):
-                logger.info(f"\u2705 Found container {container} in {imagedir}")
+                logger.info(f"\u2705 Found container {container}")
             else:
                 files_to_download.append((url, outfile, count))
                 count += 1
-                logger.info(f"Preparing {url} for download")
-
-            if os.path.exists(outfile):
-                total_size += Path(outfile).stat().st_size
-
-        total_size /= 1024 * 1024
-        total_size = round(total_size)
-        logger.info(f"Total container size (Mb): {total_size}")
+                logger.info(f"Preparing {Path(url).name}")
 
         try:  # try an asynchrone downloads
             multiple_downloads(files_to_download)
@@ -649,27 +664,47 @@ class SequanaManager:
                 "Keep going but your pipeline will probably not be fully executable since images could not be downloaded"
             )
 
+        total_size = sum(
+            f.stat().st_size for f in Path(self.apptainer_prefix).iterdir() if f.is_file() and not f.is_symlink()
+        )
+        total_size = round(total_size / 1024 / 1024)
+        logger.info(f"Total container size (Mb): {total_size}")
+
 
 def multiple_downloads(files_to_download, timeout=3600):
-    async def download(session, url, name, position):
+    from rich.progress import (
+        BarColumn,
+        DownloadColumn,
+        Progress,
+        SpinnerColumn,
+        TextColumn,
+        TimeRemainingColumn,
+        TransferSpeedColumn,
+    )
+
+    progress = Progress(
+        SpinnerColumn(),
+        TextColumn("[bold cyan]{task.description}"),
+        BarColumn(bar_width=40, complete_style="yellow", finished_style="bold green"),
+        "[progress.percentage]{task.percentage:>3.0f}%",
+        DownloadColumn(),
+        TransferSpeedColumn(),
+        TimeRemainingColumn(),
+    )
+
+    async def download(session, url, name, _position):
         async with session.get(url, timeout=timeout) as resp:
+            total = int(resp.headers.get("content-length", 0))
+            task = progress.add_task(url.split("/")[-1], total=total)
             with open(name, "wb") as fd:
-                with tqdm.wrapattr(
-                    fd,
-                    "write",
-                    miniters=1,
-                    desc=url.split("/")[-1],
-                    total=int(resp.headers.get("content-length", 0)),
-                    position=position,
-                ) as fout:
-                    async for chunk in resp.content.iter_chunked(4096):
-                        fout.write(chunk)
+                async for chunk in resp.content.iter_chunked(4096):
+                    fd.write(chunk)
+                    progress.advance(task, len(chunk))
 
     async def download_all(files_to_download):
-        """data_to_download is a list of tuples
-        each tuple contain the url to download, its output name, and a unique
-        position for the progress bar."""
         async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(limit=10)) as session:
-            await asyncio.gather(*(download(session, *data) for data in files_to_download))
+            with progress:
+                for data in files_to_download:
+                    await download(session, *data)
 
     asyncio.run(download_all(files_to_download))

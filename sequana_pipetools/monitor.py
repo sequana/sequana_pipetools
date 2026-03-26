@@ -239,8 +239,17 @@ def _scan_logs(workdir: Path, prev: dict, log_to_job: dict | None = None) -> "Or
 
         age = now - stat.st_mtime
         job_state = DONE if age > _DONE_THRESHOLD else RUNNING
-        start = prev_job["start"] if prev_job else datetime.fromtimestamp(stat.st_ctime)
-        end = datetime.fromtimestamp(stat.st_mtime) if job_state == DONE else None
+        start = prev_job["start"] if prev_job else datetime.now()
+        # Use datetime.now() when first transitioning to DONE rather than
+        # stat.st_mtime: on Linux ctime and mtime update together, so
+        # mtime - ctime ≈ 0, giving a near-zero elapsed duration.
+        if job_state == DONE:
+            if prev_job and prev_job.get("end"):
+                end = prev_job["end"]  # preserve existing end time
+            else:
+                end = datetime.now()  # first DONE detection ≈ real end
+        else:
+            end = None
 
         state[rule][sample] = {
             "state": job_state,
@@ -251,7 +260,9 @@ def _scan_logs(workdir: Path, prev: dict, log_to_job: dict | None = None) -> "Or
 
 
 _TS_RE = re.compile(r"^\[(\w+ \w+ +\d+ \d+:\d+:\d+ \d+)\]")
-_FINISHED_RE = re.compile(r"Finished jobid: \d+ \(Rule: (\w+)\)")
+_FINISHED_RE = re.compile(r"Finished jobid: \d+ \(Rule: (\w+)\)")  # snakemake <8
+_FINISHED_JOB_RE = re.compile(r"^Finished job (\d+)\.")  # snakemake >=8
+_JOBID_RE = re.compile(r"^\s+jobid:\s*(\d+)")
 _RULE_START_RE = re.compile(r"^(?:local)?rule (\w+):")
 _WILDCARDS_RE = re.compile(r"wildcards:\s*sample=(\S+)")
 _ERROR_RULE_RE = re.compile(r"Error in (?:rule|checkpoint) (\w+):")
@@ -285,9 +296,11 @@ def _scan_snakemake_log(snakelog: Path, prev: dict) -> dict:
         return state
 
     current_ts: datetime | None = None
-    # pending starts per rule: list of (start_ts, sample_name|None)
+    # pending starts per rule: list of (start_ts, sample_name|None, jobid|None)
     pending: dict = {}
     done_count: dict = {}  # rule → int
+    jobid_to_rule: dict = {}  # jobid str → rule name  (snakemake >=8)
+    last_rule: str | None = None  # rule seen most recently (for jobid association)
 
     for line in text.splitlines():
         ts_m = _TS_RE.match(line)
@@ -301,14 +314,25 @@ def _scan_snakemake_log(snakelog: Path, prev: dict) -> dict:
         # job starting: "localrule X:" or "rule X:"
         rs_m = _RULE_START_RE.match(line.strip())
         if rs_m:
-            rule = rs_m.group(1)
-            pending.setdefault(rule, []).append([current_ts or datetime.now(), None])
+            last_rule = rs_m.group(1)
+            pending.setdefault(last_rule, []).append([current_ts or datetime.now(), None, None])
+            continue
+
+        # jobid line immediately following rule start (snakemake >=8: "    jobid: 5")
+        jid_m = _JOBID_RE.match(line)
+        if jid_m and last_rule:
+            jid = jid_m.group(1)
+            jobid_to_rule[jid] = last_rule
+            # attach jobid to the last pending entry for this rule
+            starts = pending.get(last_rule, [])
+            if starts and starts[-1][2] is None:
+                starts[-1][2] = jid
+            last_rule = None  # consumed
             continue
 
         # wildcard on the next line after rule start: grab sample name
         wc_m = _WILDCARDS_RE.search(line)
         if wc_m:
-            # attach to the last pending entry for any rule (most recent)
             sample_val = wc_m.group(1).rstrip(",")
             for starts in reversed(list(pending.values())):
                 if starts and starts[-1][1] is None:
@@ -316,13 +340,36 @@ def _scan_snakemake_log(snakelog: Path, prev: dict) -> dict:
                     break
             continue
 
-        # job finished
+        # job finished — snakemake >=8: "Finished job 5."
+        fin8_m = _FINISHED_JOB_RE.match(line.strip())
+        if fin8_m:
+            jid = fin8_m.group(1)
+            rule = jobid_to_rule.get(jid)
+            if rule:
+                n = done_count.get(rule, 0)
+                starts = pending.get(rule, [])
+                # find the pending entry with this jobid
+                entry = next((e for e in starts if e[2] == jid), starts[0] if starts else None)
+                if entry and entry in starts:
+                    starts.remove(entry)
+                start_ts, sample_val = (entry[0], entry[1]) if entry else (current_ts, None)
+                end_ts = current_ts or datetime.now()
+                job_key = f"sample={sample_val}" if sample_val else f"job_{n + 1}"
+                state.setdefault(rule, OrderedDict())[job_key] = {
+                    "state": DONE,
+                    "start": start_ts or end_ts,
+                    "end": end_ts,
+                }
+                done_count[rule] = n + 1
+            continue
+
+        # job finished — snakemake <8: "Finished jobid: 5 (Rule: flye)"
         fin_m = _FINISHED_RE.search(line)
         if fin_m:
             rule = fin_m.group(1)
             n = done_count.get(rule, 0)
             starts = pending.get(rule, [])
-            start_ts, sample_val = starts.pop(0) if starts else (current_ts, None)
+            start_ts, sample_val, _ = starts.pop(0) if starts else (current_ts, None, None)
             end_ts = current_ts or datetime.now()
             job_key = f"sample={sample_val}" if sample_val else f"job_{n + 1}"
             state.setdefault(rule, OrderedDict())[job_key] = {
@@ -339,7 +386,7 @@ def _scan_snakemake_log(snakelog: Path, prev: dict) -> dict:
             rule = err_m.group(1)
             n = done_count.get(rule, 0)
             starts = pending.get(rule, [])
-            start_ts, sample_val = starts.pop(0) if starts else (current_ts, None)
+            start_ts, sample_val, _ = starts.pop(0) if starts else (current_ts, None, None)
             end_ts = current_ts or datetime.now()
             job_key = f"sample={sample_val}" if sample_val else f"job_{n + 1}"
             state.setdefault(rule, OrderedDict())[job_key] = {
@@ -352,7 +399,7 @@ def _scan_snakemake_log(snakelog: Path, prev: dict) -> dict:
     # anything still pending → RUNNING
     for rule, starts in pending.items():
         already = len(state.get(rule, {}))
-        for i, (start_ts, sample_val) in enumerate(starts):
+        for i, (start_ts, sample_val, _jid) in enumerate(starts):
             job_key = f"sample={sample_val}" if sample_val else f"job_{already + i + 1}"
             if job_key not in state.get(rule, {}):
                 state.setdefault(rule, OrderedDict())[job_key] = {
@@ -509,15 +556,15 @@ def _build_display(
         s_bar = "█" * filled + "░" * (bar_w - filled)
         sample_str = f"{n_done}/{n_total}  {s_bar}"
 
-        # rule timing — only count jobs that started in this monitor session
+        # rule timing — show the slowest sample; exclude synthetic _job_N placeholders
         monitor_start_dt = datetime.fromtimestamp(start_time)
         durations = [
             (j["end"] - j["start"]).total_seconds()
-            for j in rule_jobs.values()
-            if j["state"] == DONE and j["end"] and j["start"] >= monitor_start_dt
+            for s, j in rule_jobs.items()
+            if j["state"] == DONE and j["end"] and j["start"] >= monitor_start_dt and not s.startswith("_job_")
         ]
         if durations:
-            time_str = _elapsed_str(sum(durations) / len(durations))
+            time_str = _elapsed_str(max(durations))
         elif n_run > 0:
             running_s = [
                 (datetime.now() - j["start"]).total_seconds() for j in rule_jobs.values() if j["state"] == RUNNING
@@ -607,6 +654,7 @@ def run_monitor(
     start_time = time.time()
     current: dict = {}
     sm_current: dict = {}  # state from snakemake log (fallback for no-log rules)
+    prev_merged: dict = {}  # merged state from previous scan, for transition detection
     memory_peaks: dict = {}  # rule → peak GB seen while any sample was RUNNING
     console = Console()
 
@@ -616,13 +664,46 @@ def run_monitor(
     signal.signal(signal.SIGINT, _handle_sigint)
 
     def _merged_scan():
-        """Return merged state: log-file entries take precedence over snakemake-log entries."""
-        nonlocal current, sm_current
+        """Return merged state: log-file entries take precedence, but snakemake-log
+        RUNNING state prevents premature DONE from a stale log-file mtime (e.g. a
+        tool like flye that writes nothing to stdout/stderr during its main work).
+        Timing is captured at the RUNNING→DONE transition in merged state so that
+        the elapsed time reflects the true wall-clock duration seen by the monitor."""
+        nonlocal current, sm_current, prev_merged
         current = _scan_logs(workdir_path, current, log_to_job)
         sm_current = _scan_snakemake_log(snakelog, sm_current)
         merged = dict(sm_current)  # start with snakemake-log state
         for rule, jobs in current.items():
-            merged[rule] = jobs  # log-file entries override for tracked rules
+            # If snakemake-log still shows RUNNING jobs for this rule, don't let
+            # a stale log-file mtime mark any job as DONE prematurely.
+            sm_rule_running = any(j["state"] == RUNNING for j in sm_current.get(rule, {}).values())
+            if sm_rule_running:
+                corrected = {
+                    s: ({**j, "state": RUNNING, "end": None} if j["state"] == DONE else j) for s, j in jobs.items()
+                }
+                merged[rule] = corrected
+            else:
+                merged[rule] = jobs
+
+        # Fix timing: when a job transitions RUNNING→DONE in the merged view,
+        # stamp end=now and carry forward the start from the RUNNING entry.
+        # This avoids using filesystem mtime/ctime which are unreliable on Linux
+        # (ctime≈mtime, so end-start≈0 when derived from log-file metadata alone).
+        now_dt = datetime.now()
+        for rule, jobs in merged.items():
+            for sample, job in jobs.items():
+                prev_job = prev_merged.get(rule, {}).get(sample)
+                if job["state"] == DONE:
+                    if prev_job and prev_job["state"] == RUNNING:
+                        # First cycle where this job appears DONE: lock in timing now
+                        job["end"] = now_dt
+                        job["start"] = prev_job["start"]
+                    elif prev_job and prev_job["state"] == DONE and prev_job.get("end"):
+                        # Already had a locked end time: preserve it
+                        job["end"] = prev_job["end"]
+                        job["start"] = prev_job["start"]
+
+        prev_merged = {r: {s: dict(j) for s, j in rj.items()} for r, rj in merged.items()}
         return merged
 
     def _update_memory_peaks(display_state: dict, ram_now: float) -> None:
@@ -655,13 +736,37 @@ def run_monitor(
         console.print(
             f"\n[bold red]Pipeline failed (exit {returncode}).[/bold red] " f"See [dim]{snakelog}[/dim] for details."
         )
+        try:
+            from rich.panel import Panel
+
+            from sequana_pipetools.diagnose import _sequana_tips
+
+            log_context = snakelog.read_text(errors="replace") if snakelog.exists() else ""
+            tips = _sequana_tips(log_context, workdir_path).lstrip("\n-").strip()
+            console.print(Panel(tips, title="💡 Sequana tips", border_style="bold green", padding=(1, 2)))
+        except Exception:
+            pass
     else:
         total_done = sum(1 for rv in current.values() for j in rv.values() if j["state"] == DONE)
         elapsed = time.time() - start_time
+        from rich.panel import Panel
+
         console.print(
             f"\n[bold green]✅ Pipeline completed successfully.[/bold green] "
-            f"{total_done} jobs in {_elapsed_str(elapsed)}.\n"
-            f"[dim]{CITATION_MESSAGE}[/dim]"
+            f"{total_done} jobs in {_elapsed_str(elapsed)}."
         )
+        console.print(Panel(CITATION_MESSAGE, title="Citation", border_style="bold cyan", padding=(1, 2)))
+        summary = workdir_path / "summary.html"
+        if summary.exists():
+            from rich.panel import Panel
+
+            console.print(
+                Panel(
+                    f"Open the summary report: [cyan]{summary}[/cyan]",
+                    title="✅ Pipeline completed",
+                    border_style="bold green",
+                    padding=(1, 2),
+                )
+            )
 
     return returncode

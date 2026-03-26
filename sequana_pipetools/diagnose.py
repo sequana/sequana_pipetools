@@ -231,29 +231,50 @@ def _detect_missing_tools(context: str) -> list:
     return tools
 
 
-def _sequana_tips(context: str, workdir: Path) -> str:
+def _sequana_tips(context: str, workdir: Path, show_diagnose_tip: bool = True) -> str:
     """Build the unconditional Sequana tips block appended after the LLM output."""
-    lines = ["\n---", "💡 **Sequana tips**\n"]
+    lines = ["\n---"]
 
-    # re-run instruction: find the pipeline .sh launcher
     sh_files = [p.name for p in workdir.glob("*.sh") if not p.name.startswith(".")]
+
+    # re-run instruction
     if sh_files:
         sh_name = sh_files[0]
-        lines.append(f"  • **once done, re-run the pipeline**: `sh {sh_name}`")
+        lines.append(f"• Once errors are corrected, re-run the pipeline: `sh {sh_name}`")
     else:
-        lines.append("  • **once done, re-run the pipeline**: `sh <pipeline_name>.sh`")
+        lines.append("• Once errors are corrected, re-run the pipeline: `sh <pipeline_name>.sh`")
 
     # apptainer tip — always shown
     lines.append(
-        "  • **Use container images** (avoids manual tool installs): "
-        "re-run setup with `--apptainer-prefix ~/images`, e.g.:\n"
-        "      `sequana_<pipeline> --apptainer-prefix ~/images [other options]`"
+        "• To avoid tool installation issues, use container images: "
+        "add `--apptainer-prefix ~/images` to your setup command."
     )
+
+    # snakemake log tip — always shown
+    lines.append("• Full snakemake output is in `.sequana/snakemake.log` if the terminal was truncated.")
+
+    # unlock tip — always shown
+    unlock_cmd = "sh unlock.sh" if (workdir / "unlock.sh").exists() else "snakemake --unlock"
+    lines.append(f"• If snakemake reports a locked directory, unlock it with: `{unlock_cmd}`")
 
     # missing-tool tip — only when a tool name can be identified
     tools = _detect_missing_tools(context)
     for tool in tools:
-        lines.append(f"  • **Missing tool detected**: `damona install {tool}`")
+        lines.append(f"• Missing tool detected: `damona install {tool}`")
+
+    # out-of-memory tip — shown when OOM keywords are present
+    if re.search(r"out.of.memory|oom.?kill|memory limit|exceeded.*memory|killed", context, re.IGNORECASE):
+        lines.append(
+            "• Job may have run out of memory. Increase the memory limit in your SLURM profile or"
+            " add `--resources mem_mb=<value>` to your snakemake command."
+        )
+
+    # diagnose tip — suppressed when already running --diagnose
+    if show_diagnose_tip:
+        lines.append(
+            "• For an AI-powered diagnosis, set `export MISTRAL_API_KEY=<your-key>` and run:\n"
+            "  `sequana_pipetools --diagnose`"
+        )
 
     return "\n".join(lines)
 
@@ -293,4 +314,4 @@ def diagnose(workdir: str = ".", provider: str = "mistral", model: str | None = 
     else:
         result = _call_openai(context, model)
 
-    return result + _sequana_tips(context, workdir_path)
+    return result + _sequana_tips(context, workdir_path, show_diagnose_tip=False)

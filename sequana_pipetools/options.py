@@ -107,7 +107,7 @@ def include_options_from(cls, *args, **kwargs):
 
         # add groups dynamically to the OPTION_GROUPS
         # NAME = kwargs.get("caller", None)
-        click.rich_click.OPTION_GROUPS[f"sequana_{NAME}"].insert(0, cls.metadata)
+        click.rich_click.OPTION_GROUPS.setdefault(f"sequana_{NAME}", []).insert(0, cls.metadata)
 
         return f
 
@@ -254,6 +254,7 @@ class ClickSnakemakeOptions:
             "--jobs",
             "--keep-going",
             "--monitor",
+            "--execute",
             "--working-directory",
         ],
     }
@@ -328,6 +329,13 @@ class ClickSnakemakeOptions:
                     else None
                 ),
                 help="""[DEPRECATED] Use --apptainer-prefix instead.""",
+            ),
+            click.option(
+                "--execute",
+                "execute",
+                is_flag=True,
+                default=False,
+                help="""Execute the pipeline immediately after the working directory is prepared. Intended for automation and scripting; interactive users should review config.yaml first.""",
             ),
             click.option(
                 "--working-directory",
