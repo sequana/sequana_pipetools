@@ -27,11 +27,11 @@ from .pipeline_utils import OnSuccessCleaner
 from .sequana_config import SequanaConfig
 
 CITATION_MESSAGE = (
-    "📚 If Sequana was useful to your research, please cite us:\n"
+    "📚 Found Sequana useful? Please cite us:\n"
     "\tCokelaer et al. 'Sequana': a Set of Snakemake NGS pipelines,\n"
     "\tJournal of Open Source Software, 2(16), 352 (2017)\n"
     "\tDOI: https://doi.org/10.21105/joss.00352\n"
-    "\tMore info: https://sequana.readthedocs.io"
+    "ℹ️  More info: https://sequana.readthedocs.io"
 )
 
 logger = colorlog.getLogger(__name__)
@@ -242,6 +242,44 @@ class PipelineManagerBase:
         except Exception:  # pragma: no cover
             pass
 
+        try:
+            from pathlib import Path
+
+            from rich.console import Console
+            from rich.panel import Panel
+
+            from sequana_pipetools.diagnose import _sequana_tips
+
+            console = Console()
+            tips = _sequana_tips("", Path("."))
+            # strip the leading "---" separator used when appending to LLM output
+            tips = tips.lstrip("\n-").strip()
+            console.print(Panel(tips, title="💡 Sequana tips", border_style="bold green", padding=(1, 2)))
+        except Exception:  # pragma: no cover
+            pass
+
+    def onsuccess(self):
+        """Print a success message, pointing to summary.html if present."""
+        try:
+            from pathlib import Path
+
+            from rich.console import Console
+            from rich.panel import Panel
+
+            console = Console()
+            summary = Path(".") / "summary.html"
+            if summary.exists():
+                console.print(
+                    Panel(
+                        f"Open the summary report: [cyan]{summary.resolve()}[/cyan]",
+                        title="✅ Pipeline completed",
+                        border_style="bold green",
+                        padding=(1, 2),
+                    )
+                )
+        except Exception:  # pragma: no cover
+            pass
+
     def teardown(self, extra_dirs_to_remove=None, extra_files_to_remove=None, outdir="."):
         # add a Makefile
         cleaner = OnSuccessCleaner(self.name, outdir=outdir)
@@ -264,11 +302,15 @@ class PipelineManagerBase:
                             version = "unknown"
                         fout.write(f"{dep}\t{version}\n")
 
+        from rich.console import Console
+        from rich.panel import Panel
+
+        console = Console()
         if os.path.exists("summary.html"):
-            print("\u2705 Another successful analysis. Open summary.html in your browser. Have fun.")
+            console.print("\n✅ Another successful analysis. Open summary.html in your browser. Have fun.")
         else:
-            print("\u2705 Another successful analysis. Have fun.")
-        print(CITATION_MESSAGE)
+            console.print("\n✅ Another successful analysis. Have fun.")
+        console.print(Panel(CITATION_MESSAGE, title="Citation", border_style="bold cyan", padding=(1, 2)))
 
         # for HPC with slurm only
         try:
