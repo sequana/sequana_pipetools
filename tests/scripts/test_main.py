@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 from click.testing import CliRunner
 
-from sequana_pipetools.scripts.main import main
+from sequana_pipetools.scripts.main import ClickComplete, _print_diagnosis, main
 from sequana_pipetools.scripts.monitor import main as monitor_main
 
 from . import test_dir
@@ -109,3 +109,56 @@ def test_monitor_runs(tmp_path):
         )
     assert results.exit_code == 0
     mock_run.assert_called_once_with("pipeline.rules", ".sequana/profile_local", "test", "", str(tmp_path))
+
+
+# ── _print_diagnosis ──────────────────────────────────────────────────────────
+
+
+def test_print_diagnosis_with_tips():
+    """Result containing the tips separator renders without error."""
+    _print_diagnosis("Some LLM analysis output.\n---\nSequana tip: check your slurm logs.")
+
+
+def test_print_diagnosis_with_plain_explanation():
+    """Plain Explanation section is extracted into a Rich panel."""
+    result = (
+        "## Analysis\n"
+        "Some context.\n\n"
+        "## Plain Explanation\n"
+        "The error is caused by a missing tool.\n\n"
+        "## Technical Details\n"
+        "Traceback shown here.\n"
+    )
+    _print_diagnosis(result)
+
+
+def test_print_diagnosis_plain_explanation_and_tips():
+    """Both Plain Explanation regex and tips separator are exercised."""
+    result = "## Plain Explanation\n" "Install the missing dependency.\n" "\n---\n" "Sequana tip: use --diagnose."
+    _print_diagnosis(result)
+
+
+def test_print_diagnosis_no_match():
+    """Result with no special sections renders the raw text."""
+    _print_diagnosis("Simple error message without any structured sections.")
+
+
+# ── ClickComplete.set_option_file ─────────────────────────────────────────────
+
+
+def test_set_option_file():
+    """set_option_file generates valid bash completion snippet."""
+    cc = ClickComplete.__new__(ClickComplete)
+    result = cc.set_option_file("--my-file")
+    assert "--my-file" in result
+    assert "compgen" in result
+
+
+# ── dot2png bad extension ─────────────────────────────────────────────────────
+
+
+def test_dot2png_bad_extension():
+    """--dot2png with a non-.dot file raises ValueError (caught by Click)."""
+    runner = CliRunner()
+    results = runner.invoke(main, ["--dot2png", "notadotfile.txt"])
+    assert results.exit_code != 0

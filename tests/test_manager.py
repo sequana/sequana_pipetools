@@ -1,5 +1,7 @@
+import subprocess
 import sys
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 
@@ -177,3 +179,73 @@ def test_multiple_downloads(tmpdir):
     from sequana_pipetools.sequana_manager import multiple_downloads
 
     multiple_downloads(data)
+
+
+def test_sequana_manager_run_local(tmpdir):
+    """run() invokes bash on the pipeline script for a local profile."""
+    wkdir = tmpdir.mkdir("run_local")
+    dd = default_dict.copy()
+    dd["workdir"] = wkdir
+    pm = SequanaManager(SimpleNamespace(**dd), "fastqc")
+    pm.config.config.input_directory = f"{test_dir}/data/"
+    pm.config.config.input_pattern = "Hm2*gz"
+    pm.config.config.input_readtag = "_R[12]_"
+    pm.setup()
+    pm.teardown()
+
+    with patch("subprocess.run") as mock_sub:
+        pm.run()
+    mock_sub.assert_called_once()
+    cmd = mock_sub.call_args[0][0]
+    assert "bash" in cmd
+
+
+def test_sequana_manager_run_slurm(tmpdir):
+    """run() uses sbatch for a slurm profile."""
+    wkdir = tmpdir.mkdir("run_slurm")
+    dd = default_dict.copy()
+    dd["workdir"] = wkdir
+    pm = SequanaManager(SimpleNamespace(**dd), "fastqc")
+    pm.config.config.input_directory = f"{test_dir}/data/"
+    pm.config.config.input_pattern = "Hm2*gz"
+    pm.config.config.input_readtag = "_R[12]_"
+    pm.setup()
+    pm.teardown()
+
+    # switch to slurm profile after teardown to test run() slurm branch
+    pm.options.profile = "slurm"
+    with patch("subprocess.run") as mock_sub:
+        pm.run()
+    mock_sub.assert_called_once()
+    cmd = mock_sub.call_args[0][0]
+    assert "sbatch" in cmd
+
+
+def test_sequana_manager_new_workdir(tmpdir):
+    """When workdir does not yet exist, it is created (else branch in _create_directories)."""
+    wkdir = str(tmpdir.join("nonexistent_workdir"))  # does NOT exist yet
+    dd = default_dict.copy()
+    dd["workdir"] = wkdir
+    pm = SequanaManager(SimpleNamespace(**dd), "fastqc")
+    # workdir should now have been created by setup()
+    pm.setup()
+    import os
+
+    assert os.path.isdir(wkdir)
+
+
+def test_sequana_manager_teardown_with_monitor(tmpdir):
+    """teardown() with monitor=True writes the sequana_pipetools_monitor command."""
+    wkdir = tmpdir.mkdir("monitor_test")
+    dd = default_dict.copy()
+    dd["workdir"] = wkdir
+    pm = SequanaManager(SimpleNamespace(**dd), "fastqc")
+    pm.config.config.input_directory = f"{test_dir}/data/"
+    pm.config.config.input_pattern = "Hm2*gz"
+    pm.config.config.input_readtag = "_R[12]_"
+    pm.setup()
+    pm.options.monitor = True
+    pm.teardown()
+
+    script = (wkdir / "fastqc.sh").read_text("utf-8")
+    assert "sequana_pipetools_monitor" in script
