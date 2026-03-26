@@ -232,15 +232,36 @@ def _print_diagnosis(result: str) -> None:
     from rich.panel import Panel
 
     console = Console()
-    m = _PLAIN_EXPLANATION_RE.search(result)
+    console.print(
+        Panel(
+            "[bold]These are generic AI-generated tips and may not accurately reflect your specific situation.[/bold]\n"
+            "Always verify the suggested fixes before applying them.",
+            title="⚠️  AI Disclaimer",
+            border_style="bold yellow",
+            padding=(1, 2),
+        )
+    )
+    # Split off the Sequana tips block (appended after "---")
+    tips_text = ""
+    if "\n---\n" in result:
+        llm_part, tips_part = result.split("\n---\n", 1)
+        tips_text = tips_part.strip()
+    else:
+        llm_part = result
+
+    m = _PLAIN_EXPLANATION_RE.search(llm_part)
     if m:
         plain_text = m.group(1).strip()
         console.print(Panel(plain_text, title="💡 Plain Explanation", border_style="bold cyan", padding=(1, 2)))
         # print the rest without the Plain Explanation section
-        rest = result[: m.start()] + result[m.end() :]
-        click.echo(rest.strip())
+        rest = llm_part[: m.start()] + llm_part[m.end() :]
+        if rest.strip():
+            click.echo(rest.strip())
     else:
-        click.echo(result)
+        click.echo(llm_part.strip())
+
+    if tips_text:
+        console.print(Panel(tips_text, title="💡 Sequana tips", border_style="bold green", padding=(1, 2)))
 
 
 @click.command(context_settings=CONTEXT_SETTINGS)
