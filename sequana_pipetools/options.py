@@ -250,6 +250,7 @@ class ClickSnakemakeOptions:
         "options": [
             "--apptainer-prefix",
             "--apptainer-args",
+            "--no-md5-check",
             "--force",
             "--jobs",
             "--keep-going",
@@ -279,6 +280,13 @@ class ClickSnakemakeOptions:
                 default="",
                 show_default=True,
                 help="""Extra arguments passed to apptainer/singularity exec (e.g. bind mounts). By default, -B $HOME:$HOME is set.""",
+            ),
+            click.option(
+                "--no-md5-check",
+                "no_md5_check",
+                is_flag=True,
+                default=False,
+                help="""Skip MD5 checksum verification of existing containers against the damona registry. By default, existing containers are verified and re-downloaded if corrupted.""",
             ),
             click.option(
                 "--force",

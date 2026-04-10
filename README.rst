@@ -16,7 +16,7 @@
 .. image:: https://app.codacy.com/project/badge/Grade/9031e4e4213e4e57a876fd5b792b5003
    :target: https://app.codacy.com/gh/sequana/sequana_pipetools/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.6818254.svg
+.. image:: https://img.shields.io/badge/DOI-10.5281%2Fzenodo.6818254-blue
    :target: https://doi.org/10.5281/zenodo.6818254
 
 .. image:: https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11-blue
@@ -335,7 +335,10 @@ Changelog :memo:
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
-1.5.4     * Supports both snakemake v7 and v8 for the profile files
+1.5.5     * Verify MD5 checksums of existing containers against the damona
+            registry and automatically re-download corrupted or invalid images
+          * Add ``--no-md5-check`` flag to skip container checksum verification
+/bin/bash: line 1: q: command not found
 1.5.3     * Add Rich-styled Sequana tips panel on pipeline failure (onerror)
           * Add Rich-styled Citation panel on pipeline success (teardown)
           * Add onsuccess() method with Rich panel linking to summary.html

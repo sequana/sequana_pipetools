@@ -13,6 +13,7 @@
 import asyncio
 import datetime
 import glob
+import hashlib
 import os
 import shutil
 import subprocess
@@ -383,10 +384,12 @@ class SequanaManager:
             )
 
         command_file.write_text(command)
+        command_file.chmod(command_file.stat().st_mode | 0o111)
 
         # create a runme.sh (easier for end-user ?)
         command_file = self.workdir / "runme.sh"
         command_file.write_text(command)
+        command_file.chmod(command_file.stat().st_mode | 0o111)
 
         # README
         command_file = self.workdir / "README"
@@ -462,7 +465,7 @@ class SequanaManager:
         if self.options.profile == "slurm":
             run_cmd = f"cd {self.workdir}; sbatch {self.name}.sh"
         else:
-            run_cmd = f"cd {self.workdir}; sh {self.name}.sh"
+            run_cmd = f"cd {self.workdir}; ./{self.name}.sh"
 
         lines = [
             f"[bold]1.[/bold] Review the pipeline config:\n   [cyan]{self.workdir}/{config_name}[/cyan]",
@@ -616,6 +619,16 @@ class SequanaManager:
         # make sure there are unique URLs
         urls = set(urls)
 
+        # fetch registry for MD5 verification (unless --no-md5-check)
+        check_md5 = not getattr(self.options, "no_md5_check", False)
+        md5_by_url = {}
+        if check_md5:
+            md5_by_url = _fetch_registry_md5s()
+            if md5_by_url:
+                logger.info(f"Fetched damona registry ({len(md5_by_url)} containers with MD5)")
+            else:
+                logger.warning("MD5 verification skipped (could not fetch registry)")
+
         # directory where images will be saved
         os.makedirs(self.apptainer_prefix, exist_ok=True)
 
@@ -644,7 +657,22 @@ class SequanaManager:
             all_outfiles.append(outfile)
             container = url.split("/")[-1]
             if os.path.exists(outfile):
-                logger.info(f"\u2705 Found container {container}")
+                # verify MD5 if we have a reference from the registry
+                expected_md5 = md5_by_url.get(url)
+                if expected_md5:
+                    actual_md5 = _md5sum(outfile)
+                    if actual_md5 != expected_md5:
+                        logger.warning(
+                            f"MD5 mismatch for {container} "
+                            f"(expected {expected_md5}, got {actual_md5}). Re-downloading."
+                        )
+                        os.remove(outfile)
+                        files_to_download.append((url, outfile, count))
+                        count += 1
+                    else:
+                        logger.info(f"\u2705 Found container {container} (MD5 verified)")
+                else:
+                    logger.info(f"\u2705 Found container {container}")
             else:
                 files_to_download.append((url, outfile, count))
                 count += 1
@@ -667,6 +695,44 @@ class SequanaManager:
             logger.info(f"Total container size: {total_size_mb / 1024:.1f} Gb")
         else:
             logger.info(f"Total container size: {total_size_mb} Mb")
+
+
+def _md5sum(filepath, chunk=65536):
+    """Compute MD5 checksum of a file."""
+    h = hashlib.md5(usedforsecurity=False)
+    with open(filepath, "rb") as f:
+        for block in iter(lambda: f.read(chunk), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def _fetch_registry_md5s():
+    """Fetch the damona registry and return a dict mapping download URLs to md5sums."""
+    import yaml
+
+    url = "https://raw.githubusercontent.com/cokelaer/damona/main/damona/software/registry.yaml"
+    try:
+        import requests
+
+        resp = requests.get(url, timeout=10)
+        resp.raise_for_status()
+        registry = yaml.safe_load(resp.text)
+    except Exception as e:
+        logger.warning(f"Could not fetch damona registry for MD5 verification: {e}")
+        return {}
+
+    md5_by_url = {}
+    for _tool, info in registry.items():
+        if not isinstance(info, dict):
+            continue
+        for _version, release in info.get("releases", {}).items():
+            if not isinstance(release, dict):
+                continue
+            dl = release.get("download", "")
+            md5 = release.get("md5sum", "")
+            if dl and md5:
+                md5_by_url[dl] = md5
+    return md5_by_url
 
 
 def multiple_downloads(files_to_download, timeout=3600):
