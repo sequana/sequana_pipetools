@@ -338,7 +338,6 @@ Version   Description
 1.5.5     * Verify MD5 checksums of existing containers against the damona
             registry and automatically re-download corrupted or invalid images
           * Add ``--no-md5-check`` flag to skip container checksum verification
-/bin/bash: line 1: q: command not found
 1.5.3     * Add Rich-styled Sequana tips panel on pipeline failure (onerror)
           * Add Rich-styled Citation panel on pipeline success (teardown)
           * Add onsuccess() method with Rich panel linking to summary.html
