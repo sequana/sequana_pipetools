@@ -66,6 +66,8 @@ class OnSuccessCleaner:
         self.files_to_remove = [
             "config.yaml",
             "multiqc_config.yaml",
+            "profile_config.yam",
+            "runme.sh",
             "slurm*out",
             "stats.txt",
             "unlock.sh",
