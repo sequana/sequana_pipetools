@@ -170,9 +170,12 @@ class FileFactory:
             return res.split(".")[0]
 
         filenames = [func(basename) for basename in self.basenames]
-        if len(set(filenames)) != len(self._glob):
+        # Allow duplicates if we have exactly 2x unique names (paired-end reads)
+        # Otherwise enforce uniqueness
+        unique_count = len(set(filenames))
+        if unique_count != len(self._glob) and unique_count * 2 != len(self._glob):
             raise PipetoolsException(
-                f"Your sample names do not seem to be unique. After removing some common prefixes ({prefixes_to_strip}), we end up with {filenames}"
+                f"Your sample names do not seem to be unique. After removing some common prefixes ({prefixes_to_strip}), we end up with {set(filenames)}"
             )
 
         return filenames
