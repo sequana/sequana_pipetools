@@ -335,6 +335,8 @@ Changelog :memo:
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.5.7     * Fix SLURM sbatch memory allocation using mem_mb instead of mem
+            to avoid "Unable to open file GB" error with space-formatted values
 1.5.6     * Allow duplicate sample names in paired-end read files (2x files
             with same sample name). Enforce uniqueness otherwise.
           * Improve test coverage for FileFactory paired-end handling

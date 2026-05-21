@@ -66,7 +66,7 @@ def _build_slurm_config_v7(**kwargs) -> dict:
         "--partition={resources.partition} "
         "--qos={resources.qos} "
         "--cpus-per-task={threads} "
-        "--mem={resources.mem} "
+        "--mem={resources.mem_mb} "
         "--job-name=smk-{rule}-{wildcards} "
         "--output=logs/{rule}/{rule}-{wildcards}-slurm-%j.out "
         '$(bash -c \'[[ ! -z "{resources.gres}" ]] && echo "--gres={resources.gres}"\')'
@@ -137,7 +137,7 @@ def _build_slurm_config_v8(**kwargs) -> dict:
         "--partition={resources.partition} "
         "--qos={resources.qos} "
         "--cpus-per-task={threads} "
-        "--mem={resources.mem} "
+        "--mem={resources.mem_mb} "
         "--job-name=smk-{rule}-{wildcards} "
         "--output=logs/{rule}/{rule}-{wildcards}-slurm-%j.out "
         '$(bash -c \'[[ ! -z "{resources.gres}" ]] && echo "--gres={resources.gres}"\')'
