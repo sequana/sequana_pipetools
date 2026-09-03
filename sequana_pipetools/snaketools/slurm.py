@@ -31,7 +31,7 @@ class SlurmData:
         try:
             self.master = sorted(main_slurms)[-1]
             print(f"Found slurm master {self.master}")
-        except Exception as err:
+        except IndexError:
             self.master = None
 
         log_dir = Path(working_directory) / logs_directory

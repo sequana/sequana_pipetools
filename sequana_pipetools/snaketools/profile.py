@@ -1,6 +1,7 @@
 """Setting up Snakemake profiles.
 
 Supports snakemake version ranges:
+
 - snakemake < 8 : YAML profile with ``use-singularity`` / ``singularity-args`` /
   ``singularity-prefix`` keys (the only valid option names for all v7.x)
 - snakemake >= 8: programmatic config with executor plugins and
@@ -202,6 +203,7 @@ def create_profile(workdir: Path, profile: str, **kwargs) -> str:
 
     Automatically selects the correct format for the installed snakemake
     version:
+
     - snakemake < 7.8 : programmatic config with ``use-singularity`` key
     - snakemake >= 7.8: programmatic config with ``use-apptainer`` key
     - snakemake >= 8  : programmatic config with executor plugins and

@@ -26,12 +26,13 @@ class ModuleFinder(metaclass=Singleton):
     def __init__(self):
         """.. rubric:: constructor
 
-        :param list extra_paths:
+        Scans the **sequana_pipelines** namespace and stores the path of each
+        installed Sequana pipeline.
 
         .. doctest::
 
-            >>> from sequana import ModuleFinderSingleton
-            >>> modnames = ModuleFinderSingleton()
+            >>> from sequana_pipetools.snaketools import ModuleFinder
+            >>> modnames = ModuleFinder()
             >>> modnames.isvalid('fastqc')
             True
             >>> modnames.isvalid('dummy')

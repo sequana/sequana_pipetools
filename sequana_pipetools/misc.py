@@ -100,6 +100,7 @@ def levenshtein_distance(token1: str, token2: str) -> int:
         2
 
     Notes:
+
     - The function uses a 2D list to store the distances, which requires O(m * n) space,
       where m and n are the lengths of the input strings.
     - The time complexity is O(m * n) since each cell of the matrix is filled once.

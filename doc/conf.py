@@ -137,10 +137,7 @@ numpydoc_show_class_members = False
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-import sphinx_rtd_theme
-
 html_theme = "sphinx_rtd_theme"
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # the user theme contains the otpions 'homepage', which is populated here
 # html_theme_options = {'homepage': init_sphinx.url}

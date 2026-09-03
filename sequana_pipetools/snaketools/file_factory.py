@@ -27,7 +27,7 @@ class FileFactory:
 
     ::
 
-        from sequana.snaketools import FileFactory
+        from sequana_pipetools.snaketools import FileFactory
         ff = FileFactory("H*.gz")
         ff.filenames
 
@@ -111,7 +111,7 @@ class FileFactory:
 
         # remove candidates that have the exclude pattern
         if self.exclude_pattern:  # pragma: no cover
-            self._glob = [x for x in self._glob if not self.exclude_pattern in x]
+            self._glob = [x for x in self._glob if self.exclude_pattern not in x]
 
     def _get_realpaths(self):
         return [os.path.realpath(filename) for filename in self._glob]

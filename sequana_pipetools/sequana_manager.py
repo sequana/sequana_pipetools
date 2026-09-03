@@ -301,7 +301,7 @@ class SequanaManager:
 
         and if present:
 
-        * multiqc_config file for mutliqc reports
+        * multiqc_config file for multiqc reports
         * the schema.yaml file used to check the content of the
           config.yaml file
 

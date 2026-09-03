@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """Rich terminal monitor for Sequana pipelines.
 
 Drives a live display by watching ``logs/<rule>/<sample>.log`` files:
@@ -10,6 +8,8 @@ Drives a live display by watching ``logs/<rule>/<sample>.log`` files:
 The monitor runs snakemake as a child process so the user only needs to call
 ``sh runme.sh`` (or the generated ``sequana_pipetools_monitor`` command).
 """
+
+from __future__ import annotations
 
 import os
 import re
