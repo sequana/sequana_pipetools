@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 """LLM-powered diagnosis of Sequana pipeline failures.
 
 Scans the snakemake log and failed rule logs in a pipeline working directory,
@@ -12,6 +10,8 @@ mistral  (default) – free tier available, requires MISTRAL_API_KEY
 openai             – paid account required, requires OPENAI_API_KEY
                       https://platform.openai.com/
 """
+
+from __future__ import annotations
 
 import os
 import re
@@ -37,7 +37,7 @@ _NOISE_LINE_RE = re.compile(
 def _strip_noise(text: str) -> str:
     """Strip ANSI codes and drop lines that are known to mislead the LLM in local runs."""
     text = _ANSI_RE.sub("", text)
-    lines = [l for l in text.splitlines() if not _NOISE_LINE_RE.search(l)]
+    lines = [line for line in text.splitlines() if not _NOISE_LINE_RE.search(line)]
     return "\n".join(lines)
 
 

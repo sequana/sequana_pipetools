@@ -117,7 +117,7 @@ def get_pipeline_statistics():
 
     ::
 
-        from sequana.snaketools import get_pipeline_statistics
+        from sequana_pipetools.snaketools import get_pipeline_statistics
         df = get_pipeline_statistics()
         df.sum(axis=1).sort_values(ascending=False)
         df.sum(axis=0).plot(kind="barh")

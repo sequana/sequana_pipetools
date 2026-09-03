@@ -22,13 +22,11 @@ class DOTParser:
 
     Consider this example where the test file was created by snakemake --dag ::
 
-        from sequana import sequana_data
-        from sequana.snaketools import DOTParser
+        from sequana_pipetools.snaketools import DOTParser
 
-        filename = sequana_data("test_dag.dot")
-        dot = DOTParser(filename)
+        dot = DOTParser("test_dag.dot")
 
-        # creates test_dag.ann.dot locally
+        # creates test.dot locally with URLs added on the fastqc node
         dot.add_urls("test.dot", {"fastqc": "fastqc.html"})
 
     You can then convert the dag in an unix shell::
@@ -40,39 +38,45 @@ class DOTParser:
 
         sequana_pipetools --dot2png input.dot
 
-    .. plot::
+    or read the dot file from the standard input (use - as the input name)::
 
-        from sequana import sequana_data
-        from sequana.snaketools import DOTParser
-        dot = DOTParser(sequana_data("test_dag.dot"))
-        dot.add_urls("test.dot", {"fastqc": "fastqc.html"})
-        import subprocess
-        subprocess.run(["dot", "-Tpng", "test.ann.dot", "-o", "test.png"])
-        from pylab import imshow, imread, xticks, yticks
-        imshow(imread("test.png")); xticks([]) ;yticks([])
+        snakemake --rulegraph | sequana_pipetools --dot2png - -o rulegraph.png
 
     """
 
     _name_to_drops = {"dag", "rulegraph", "copy_multiple_files"}
 
-    def __init__(self, filename):
+    def __init__(self, filename=None, content=None):
         """.. rubric:: constructor
 
         :param str filename: a DAG in dot format created by snakemake
+        :param str content: the DAG itself (dot format) as a string. Useful to
+            read the output of e.g. **snakemake --rulegraph** from a pipe. Either
+            *filename* or *content* must be provided.
 
         """
+        if filename is None and content is None:
+            raise ValueError("You must provide either a filename or a content (dot format)")
         self.filename = filename
+        self.content = content
         self.re_index = re.compile(r"(\d+)\[")
         self.re_name = re.compile(r'label = "([\w\n\s,.!?-_:]+)"')
         self.re_arrow = re.compile(r"(\d+) -> (\d+)")
 
     def add_urls(self, output_filename=None, mapper={}, title=None):
-        # Open the original file
-        with open(self.filename, "r") as fh:
-            data = fh.read()
+        """Annotate the DAG and save it. Returns the name of the file created."""
+        # Read the original DAG (from a file or from the content provided)
+        if self.content is not None:
+            data = self.content
+        else:
+            with open(self.filename, "r") as fh:
+                data = fh.read()
 
         if not output_filename:
-            output_filename = os.path.basename(self.filename).replace(".dot", ".ann.dot")
+            if self.filename is None:
+                output_filename = "rulegraph.ann.dot"
+            else:
+                output_filename = os.path.basename(self.filename).replace(".dot", ".ann.dot")
 
         # The DOT parsing
         with open(output_filename, "w") as fout:
@@ -120,6 +124,8 @@ class DOTParser:
                     else:
                         line = line.replace("dashed", "")
                         fout.write(line + "\n")
+
+        return output_filename
 
     def _drop_arrow(self, index, indices_to_drop, title=None):
         for i in index:

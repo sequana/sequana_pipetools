@@ -53,6 +53,10 @@ click.rich_click.OPTION_GROUPS["sequana_pipetools"] = [
         "name": "Completion",
         "options": ["--completion", "--overwrite"],
     },
+    {
+        "name": "Rule graph",
+        "options": ["--dot2png", "--output"],
+    },
 ]
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
 
@@ -267,7 +271,18 @@ def _print_diagnosis(result: str) -> None:
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--version", is_flag=True)
 @click.option(
-    "--dot2png", type=click.STRING, help="convert the input.dot into PNG file. Output name is called INPUT.sequana.png"
+    "--dot2png",
+    type=click.STRING,
+    help="""convert the input.dot into PNG file. Output name is called INPUT.sequana.png.
+Use - to read the dot file from the standard input e.g. *snakemake --rulegraph | sequana_pipetools --dot2png -*
+in which case the output is called rulegraph.sequana.png unless --output is used.""",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(file_okay=True, dir_okay=False),
+    default=None,
+    help="Name of the PNG file created by --dot2png.",
 )
 @click.option(
     "--completion",
@@ -287,7 +302,7 @@ def _print_diagnosis(result: str) -> None:
     help="""Given a config file, this command creates a draft schema file""",
 )
 @click.option("--slurm-diag", is_flag=True, help="Scans slurm files and get summary information")
-@click.option("--url2hash", type=click.STRING, help="For developers. Convert a URL to hash mame. ")
+@click.option("--url2hash", type=click.STRING, help="For developers. Convert a URL into its hash name.")
 @click.option(
     "--init-new-pipeline",
     is_flag=True,
@@ -338,6 +353,9 @@ def main(**kwargs):
         click.echo(click.get_current_context().get_help())
         return
 
+    if kwargs["output"] and not kwargs["dot2png"]:
+        raise click.UsageError("--output is only used together with --dot2png")
+
     if kwargs["version"]:
         click.echo(f"sequana_pipetools v{version}")
         return
@@ -345,14 +363,28 @@ def main(**kwargs):
         click.echo(url2hash(kwargs["url2hash"]))
     elif kwargs["dot2png"]:
         name = kwargs["dot2png"]
-        if not name.endswith(".dot"):
-            raise ValueError(f"Input file must have a .dot extension, got: {name}")
-        outname = name.replace(".dot", ".sequana.png")
-        with tempfile.NamedTemporaryFile(mode="w") as fout:
+        if name == "-":
+            # e.g. snakemake --rulegraph | sequana_pipetools --dot2png -
+            content = sys.stdin.read()
+            if not content.strip():
+                raise ValueError("No data found on the standard input.")
+            d = DOTParser(content=content)
+            outname = kwargs["output"] or "rulegraph.sequana.png"
+        else:
+            if not name.endswith(".dot"):
+                raise ValueError(f"Input file must have a .dot extension, got: {name}")
             d = DOTParser(name)
+            outname = kwargs["output"] or name.replace(".dot", ".sequana.png")
+
+        with tempfile.NamedTemporaryFile(mode="w") as fout:
             d.add_urls(fout.name)
-            cmd = f"dot -Tpng {fout.name} -o {outname}"
-            subprocess.call(cmd.split())
+            try:
+                status = subprocess.call(["dot", "-Tpng", fout.name, "-o", outname])
+            except FileNotFoundError:
+                raise click.ClickException("The 'dot' executable was not found. Please install graphviz.")
+        if status != 0:
+            raise click.ClickException(f"dot failed to convert your input into {outname} (error {status})")
+        click.echo(f"Created {outname}")
 
     elif kwargs["completion"]:
         name = kwargs["completion"]

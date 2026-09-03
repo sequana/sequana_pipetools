@@ -33,22 +33,21 @@ def _md5(fname, chunk=65536):
 class Pipeline:
     """Data structure that holds metadata about a **Sequana Pipeline**
 
-    So, a **Pipeline** in sequana's parlance is a directory that contains:
+    So, a **Pipeline** in sequana's parlance is a directory (installed in the
+    **sequana_pipelines** namespace) that contains:
 
-        - A **snakemake** file named after the directory with the extension
-          **.rules**
+        - A **snakemake** file named after the pipeline. Accepted names are
+          *Snakefile*, *Snakefile.NAME*, *NAME.rules* or *NAME.smk*.
         - A **README.rst** file in restructured text format
-        - An optional config file in YAML format named config.yaml.
-          Although json format is possible, we use YAML throughout
-          **sequana** for consistency. Rules do not have any but pipelines
-          do. So if a pipeline does not provide a config.yaml, the one found
-          in ./sequana/sequana/pipelines will be used.
+        - A config file in YAML format named config.yaml. Although json format
+          is possible, we use YAML throughout **sequana** for consistency.
+        - An optional **schema.yaml** used to validate the config file.
         - a **tools.txt** with list of expected standalones required by the pipeline
           (non-python tools).
 
     The :class:`Pipeline` will ease the retrieval of information linked to a
     rule or pipeline. For instance if a pipeline has a config file, its path
-    can be retrived easily::
+    can be retrieved easily::
 
         m = Pipeline("quality_control")
         m.config
@@ -66,17 +65,18 @@ class Pipeline:
 
         if name not in self._mf.names:
             raise ValueError(
-                """Sequana error: unknown rule or pipeline '{}'.
-Check the source code at:
+                """Sequana error: unknown pipeline '{}'.
 
-    https://github.com/sequana/sequana/tree/develop/sequana/pipelines and
-    https://github.com/sequana/sequana/tree/develop/sequana/rules
+Pipelines are independent packages to be installed first e.g.::
 
-or open a Python shell and type::
+    pip install sequana_{}
 
-    from sequana_pipetools.snaketools.module import modules
+The list of available pipelines can be found on https://github.com/sequana .
+To check the pipelines installed on your system, open a Python shell and type::
+
+    from sequana_pipetools.snaketools import modules
     modules.keys()""".format(
-                    name
+                    name, name
                 )
             )
         else:
@@ -276,7 +276,7 @@ Some functionalities may not work. Consider using apptainer by setting a host di
 
         ::
 
-            >>> from sequana import snaketools as sm
+            >>> from sequana_pipetools import snaketools as sm
             >>> m = sm.Pipeline("variant_calling")
             >>> m.md5()
             {'config': 'e23b26a2ff45fa9ddb36c40670a8a00e',

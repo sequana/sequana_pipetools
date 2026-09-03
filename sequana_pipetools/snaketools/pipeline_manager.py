@@ -388,23 +388,23 @@ class PipelineManager(PipelineManagerBase):
 
     The manager tells you if the samples are paired or not assuming all
     samples are homogeneous (either all paired or all single-ended) and a user
-    read_tag that can discrimate the sample name unambigously.
+    read_tag that can discriminate the sample name unambiguously.
 
     In Sequencing data, the sequences are stored in one file (single-ended) data
     or in two files (paired-data). In both cases, most common sequencers will append
-    a so-called read-tag to identify the first and second file. Traditionnally, e.g.,
+    a so-called read-tag to identify the first and second file. Traditionally, e.g.,
     with illumina sequencers the read tag are _R1_ and _R2_ or a trailing _1 and _2
     Note that samples names have sometimes this tag included. Consider e.g.
     `sample_replicate_1_R1_.fastq.gz` or `sample_replicate_1_1.fastq.gz` then you can imagine that
     it is tricky to handle.
 
-    The sample names are extracted by cutting filenames on the first dot that is encoutered
+    The sample names are extracted by cutting filenames on the first dot that is encountered
     (before extension presumably). For instance the sample name for the file::
 
         A.fastq.gz
 
     will be **A**. sometimes, you may have ambiguous names. For instance, they may start with
-    a common prefix. Considere these two files::
+    a common prefix. Consider these two files::
 
         demultiplex.A.fastq.gz
         demultiplex.B.fastq.gz
@@ -433,10 +433,10 @@ class PipelineManager(PipelineManagerBase):
     and input_pattern and use this function to extract the sample names
     ::
 
-        from sequana_pipetools import SequanaManager
+        from sequana_pipetools import PipelineManager
         def func(filename):
             return filename.split("/")[-1].split('.', 1)[0]
-        pm = SequanaManager("fastqc", "config.yaml", sample_func=func)
+        pm = PipelineManager("fastqc", "config.yaml", sample_func=func)
 
     The manager can then easily access to the data with a :class:`FastQFactory`
     instance::
