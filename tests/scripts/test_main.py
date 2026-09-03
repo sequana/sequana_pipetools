@@ -2,6 +2,7 @@ import os
 import sys
 from unittest.mock import patch
 
+import pytest
 from click.testing import CliRunner
 
 from sequana_pipetools.scripts.main import ClickComplete, _print_diagnosis, main
@@ -162,3 +163,72 @@ def test_dot2png_bad_extension():
     runner = CliRunner()
     results = runner.invoke(main, ["--dot2png", "notadotfile.txt"])
     assert results.exit_code != 0
+
+
+# ── dot2png from stdin ────────────────────────────────────────────────────────
+
+
+def test_dot2png_stdin(tmp_path, monkeypatch):
+    """--dot2png - reads the dot file (e.g. snakemake --rulegraph) from stdin."""
+    monkeypatch.chdir(tmp_path)
+    dotfile = os.path.join(test_dir, "..", "data", "test_dag.dot")
+    with open(dotfile, "r") as fin:
+        content = fin.read()
+
+    runner = CliRunner()
+    results = runner.invoke(main, ["--dot2png", "-"], input=content)
+    assert results.exit_code == 0
+    assert (tmp_path / "rulegraph.sequana.png").exists()
+
+
+def test_dot2png_stdin_output(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    dotfile = os.path.join(test_dir, "..", "data", "test_dag.dot")
+    with open(dotfile, "r") as fin:
+        content = fin.read()
+
+    runner = CliRunner()
+    results = runner.invoke(main, ["--dot2png", "-", "-o", "test.png"], input=content)
+    assert results.exit_code == 0
+    assert (tmp_path / "test.png").exists()
+
+
+def test_dot2png_stdin_empty():
+    runner = CliRunner()
+    results = runner.invoke(main, ["--dot2png", "-"], input="")
+    assert results.exit_code != 0
+
+
+def test_dotparser_no_input():
+    from sequana_pipetools.snaketools import DOTParser
+
+    with pytest.raises(ValueError):
+        DOTParser()
+
+
+def test_dot2png_bad_content(tmp_path, monkeypatch):
+    """A non-dot input makes graphviz fail: no success message, non-zero exit."""
+    monkeypatch.chdir(tmp_path)
+    runner = CliRunner()
+    results = runner.invoke(main, ["--dot2png", "-"], input="this is not dot\n")
+    assert results.exit_code != 0
+    assert "Created" not in results.output
+
+
+def test_dot2png_output_with_spaces(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    dotfile = os.path.join(test_dir, "..", "data", "test_dag.dot")
+    with open(dotfile, "r") as fin:
+        content = fin.read()
+
+    runner = CliRunner()
+    results = runner.invoke(main, ["--dot2png", "-", "-o", "my file.png"], input=content)
+    assert results.exit_code == 0
+    assert (tmp_path / "my file.png").exists()
+
+
+def test_output_without_dot2png():
+    runner = CliRunner()
+    results = runner.invoke(main, ["--output", "test.png"])
+    assert results.exit_code != 0
+    assert "--dot2png" in results.output

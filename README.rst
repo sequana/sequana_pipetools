@@ -19,7 +19,7 @@
 .. image:: https://img.shields.io/badge/DOI-10.5281%2Fzenodo.6818254-blue
    :target: https://doi.org/10.5281/zenodo.6818254
 
-.. image:: https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11-blue
+.. image:: https://img.shields.io/badge/python-3.9%20|%203.10%20|%203.11%20|%203.12-blue
     :target: https://www.python.org/
     :alt: Python versions
 
@@ -49,13 +49,13 @@ No dependencies for this package except Python packages. In practice, this packa
 See `Sequana <https://sequana.readthedocs.io>`_ for a list of pipelines ready for production.
 
 
-🎯 Targetted audience
-=========================
+🎯 Targeted audience
+=====================
 
 This package is intended for `Sequana <https://sequana.readthedocs.io>`_ developers seeking to integrate Snakemake pipelines into the Sequana project. Please refer below for more information. Additionally, note that as a developer, you can generate the reference documentation using Sphinx::
 
     git clone https://github.com/sequana/sequana_pipetools
-    cd html
+    cd sequana_pipetools/doc
     make html
     browse build/html/index.html
 
@@ -110,7 +110,7 @@ As a final step, we separated the rules originally available in Sequana to creat
 Quick tour of the standalone
 ============================
 
-The **sequana_pipetools** package provide a standalone called **sequana_pipetools**. Here is a snapshot of the user interface:
+The **sequana_pipetools** package provides a standalone called **sequana_pipetools**. Here is a snapshot of the user interface:
 
 .. figure:: https://raw.githubusercontent.com/sequana/sequana_pipetools/main/doc/UI.png
 
@@ -132,20 +132,29 @@ files::
     sequana_pipetools --slurm-diag
 
 It searches for files with pattern **slurm** in the current directory and slurm files in the ./logs directory.
-This is used within th pipeline but can be used manually as well and is useful to get a quick summary of common errors found in slurm files.
+This is used within the pipeline but can be used manually as well and is useful to get a quick summary of common errors found in slurm files.
 
 The following command provides statistics about Sequana pipelines installed on your system (number of rules, wrappers
 used)::
 
     sequana_pipetools --stats
 
-And for developpers, a quick creation of schema file given a config file (experimental, developers would still need to edit the schema but it does 90% of the job)::
+And for developers, a quick creation of schema file given a config file (experimental, developers would still need to edit the schema but it does 90% of the job)::
 
     sequana_pipetools --config-to-schema config.yaml > schema.yaml
 
 You can also convert the dot file into a nice PNG file using::
 
     sequana_pipetools --dot2png dag.dot
+
+The dot file can also be read from the standard input (use **-** as the input name), which is handy
+to plot a pipeline rule graph without saving an intermediate dot file::
+
+    snakemake --rulegraph | sequana_pipetools --dot2png -
+
+The output is called *rulegraph.sequana.png* in that case; use **-o/--output** to choose another name::
+
+    snakemake --rulegraph | sequana_pipetools --dot2png - -o rulegraph.png
 
 To diagnose pipeline errors using an LLM (requires a Mistral or OpenAI API key)::
 
@@ -249,7 +258,7 @@ The Options classes provided can be used and combined to design pipelines.
 How to use sequana pipetools within your Pipeline
 --------------------------------------------------
 
-For FastQ files (paired ot not), The config file should look like::
+For FastQ files (paired or not), the config file should look like::
 
     sequana_wrappers: "v0.15.1"
 
@@ -335,6 +344,13 @@ Changelog :memo:
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.6.0     * --dot2png can read the dot file from the standard input (use - as
+            the input name) e.g. snakemake --rulegraph | sequana_pipetools
+            --dot2png - ; add -o/--output to name the output PNG file
+          * --dot2png now fails (non-zero exit) when graphviz's dot fails or
+            is missing instead of reporting a success
+          * test python 3.12 in the CI and document all modules in the
+            reference documentation
 1.5.7     * Fix SLURM sbatch memory allocation using mem_mb instead of mem
             to avoid "Unable to open file GB" error with space-formatted values
 1.5.6     * Allow duplicate sample names in paired-end read files (2x files
