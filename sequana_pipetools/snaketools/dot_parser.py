@@ -12,6 +12,10 @@
 ##############################################################################
 import os
 import re
+import subprocess
+import tempfile
+
+import rich_click as click
 
 
 class DOTParser:
@@ -132,3 +136,27 @@ class DOTParser:
             if i in indices_to_drop:
                 return True
         return False
+
+
+def convert_dot_to_png(name, output=None, content=None):
+    """Convert a Snakemake DAG/rulegraph DOT input into a PNG file."""
+    if content is not None:
+        if not content.strip():
+            raise ValueError("No data found on the standard input.")
+        d = DOTParser(content=content)
+        outname = output or "rulegraph.sequana.png"
+    else:
+        if not name.endswith(".dot"):
+            raise ValueError(f"Input file must have a .dot extension, got: {name}")
+        d = DOTParser(name)
+        outname = output or name.replace(".dot", ".sequana.png")
+
+    with tempfile.NamedTemporaryFile(mode="w") as fout:
+        d.add_urls(fout.name)
+        try:
+            status = subprocess.call(["dot", "-Tpng", fout.name, "-o", outname])
+        except FileNotFoundError:
+            raise click.ClickException("The 'dot' executable was not found. Please install graphviz.")
+    if status != 0:
+        raise click.ClickException(f"dot failed to convert your input into {outname} (error {status})")
+    return outname

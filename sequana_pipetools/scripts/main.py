@@ -13,16 +13,15 @@
 import importlib
 import os
 import re
-import subprocess
 import sys
-import tempfile
 
 import rich_click as click
 from packaging.version import Version
 
 from sequana_pipetools import version
+from sequana_pipetools.external_runner import run_wrapper
 from sequana_pipetools.misc import url2hash
-from sequana_pipetools.snaketools.dot_parser import DOTParser
+from sequana_pipetools.snaketools.dot_parser import convert_dot_to_png
 from sequana_pipetools.snaketools.errors import PipeError
 from sequana_pipetools.snaketools.pipeline_utils import get_pipeline_statistics
 from sequana_pipetools.snaketools.sequana_config import SequanaConfig
@@ -56,6 +55,19 @@ click.rich_click.OPTION_GROUPS["sequana_pipetools"] = [
     {
         "name": "Rule graph",
         "options": ["--dot2png", "--output"],
+    },
+    {
+        "name": "External wrapper",
+        "options": [
+            "--wrapper",
+            "--wrapper-name",
+            "--wrapper-profile",
+            "--wrapper-jobs",
+            "--wrapper-keep-going",
+            "--wrapper-slurm-memory",
+            "--wrapper-slurm-queue",
+            "--workdir",
+        ],
     },
 ]
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -267,7 +279,6 @@ def _print_diagnosis(result: str) -> None:
     if tips_text:
         console.print(Panel(tips_text, title="💡 Sequana tips", border_style="bold green", padding=(1, 2)))
 
-
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--version", is_flag=True)
 @click.option(
@@ -318,7 +329,7 @@ in which case the output is called rulegraph.sequana.png unless --output is used
     default=".",
     show_default=True,
     type=click.Path(file_okay=False),
-    help="Pipeline working directory for --diagnose.",
+    help="Pipeline working directory for --diagnose and --wrapper.",
 )
 @click.option(
     "--provider",
@@ -331,6 +342,37 @@ in which case the output is called rulegraph.sequana.png unless --output is used
     "--model",
     default=None,
     help="Model name for --diagnose. Defaults to mistral-small-latest (mistral) or gpt-4o-mini (openai).",
+)
+@click.option(
+    "--wrapper",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    help="Run an arbitrary Snakefile with a generated profile, rulegraph PNG and summary report.",
+)
+@click.option("--wrapper-name", default="External Snakemake", show_default=True, help="Display name used in reports.")
+@click.option(
+    "--wrapper-profile",
+    default="local",
+    show_default=True,
+    type=click.Choice(["local", "slurm"]),
+    help="Execution profile for --wrapper.",
+)
+@click.option("--wrapper-jobs", default=4, show_default=True, type=int, help="Number of jobs for the wrapper profile.")
+@click.option(
+    "--wrapper-keep-going",
+    is_flag=True,
+    help="Continue running independent jobs after a failure when using --wrapper.",
+)
+@click.option(
+    "--wrapper-slurm-memory",
+    default="4G",
+    show_default=True,
+    help="Memory requested per SLURM job when using --wrapper-profile slurm.",
+)
+@click.option(
+    "--wrapper-slurm-queue",
+    default="common",
+    show_default=True,
+    help="SLURM partition/queue used with --wrapper-profile slurm.",
 )
 def main(**kwargs):
     """Pipetools utilities for the Sequana project (sequana.readthedocs.io)
@@ -366,24 +408,9 @@ def main(**kwargs):
         if name == "-":
             # e.g. snakemake --rulegraph | sequana_pipetools --dot2png -
             content = sys.stdin.read()
-            if not content.strip():
-                raise ValueError("No data found on the standard input.")
-            d = DOTParser(content=content)
-            outname = kwargs["output"] or "rulegraph.sequana.png"
+            outname = convert_dot_to_png(name, output=kwargs["output"], content=content)
         else:
-            if not name.endswith(".dot"):
-                raise ValueError(f"Input file must have a .dot extension, got: {name}")
-            d = DOTParser(name)
-            outname = kwargs["output"] or name.replace(".dot", ".sequana.png")
-
-        with tempfile.NamedTemporaryFile(mode="w") as fout:
-            d.add_urls(fout.name)
-            try:
-                status = subprocess.call(["dot", "-Tpng", fout.name, "-o", outname])
-            except FileNotFoundError:
-                raise click.ClickException("The 'dot' executable was not found. Please install graphviz.")
-        if status != 0:
-            raise click.ClickException(f"dot failed to convert your input into {outname} (error {status})")
+            outname = convert_dot_to_png(name, output=kwargs["output"])
         click.echo(f"Created {outname}")
 
     elif kwargs["completion"]:
@@ -441,6 +468,19 @@ def main(**kwargs):
         except (ImportError, EnvironmentError, ValueError) as exc:
             click.echo(f"[ERROR] {exc}", err=True)
             sys.exit(1)
+    elif kwargs["wrapper"]:
+        sys.exit(
+            run_wrapper(
+                kwargs["wrapper"],
+                kwargs["workdir"],
+                kwargs["wrapper_name"],
+                kwargs["wrapper_profile"],
+                kwargs["wrapper_jobs"],
+                kwargs["wrapper_keep_going"],
+                kwargs["wrapper_slurm_memory"],
+                kwargs["wrapper_slurm_queue"],
+            )
+        )
 
 
 if __name__ == "__main__":
