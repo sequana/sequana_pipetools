@@ -11,20 +11,27 @@
 #  Contributors:  https://github.com/sequana/sequana/graphs/contributors
 ##############################################################################
 import importlib
+import html
 import os
+import platform
 import re
 import subprocess
 import sys
 import tempfile
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
 
 import rich_click as click
 from packaging.version import Version
 
 from sequana_pipetools import version
 from sequana_pipetools.misc import url2hash
+from sequana_pipetools.monitor import run_monitor
 from sequana_pipetools.snaketools.dot_parser import DOTParser
 from sequana_pipetools.snaketools.errors import PipeError
 from sequana_pipetools.snaketools.pipeline_utils import get_pipeline_statistics
+from sequana_pipetools.snaketools.profile import create_profile
 from sequana_pipetools.snaketools.sequana_config import SequanaConfig
 
 if Version(click.__version__) >= Version("1.9.0"):
@@ -56,6 +63,19 @@ click.rich_click.OPTION_GROUPS["sequana_pipetools"] = [
     {
         "name": "Rule graph",
         "options": ["--dot2png", "--output"],
+    },
+    {
+        "name": "External wrapper",
+        "options": [
+            "--wrapper",
+            "--wrapper-name",
+            "--wrapper-profile",
+            "--wrapper-jobs",
+            "--wrapper-keep-going",
+            "--wrapper-slurm-memory",
+            "--wrapper-slurm-queue",
+            "--workdir",
+        ],
     },
 ]
 CONTEXT_SETTINGS = dict(help_option_names=["-h", "--help"])
@@ -268,6 +288,182 @@ def _print_diagnosis(result: str) -> None:
         console.print(Panel(tips_text, title="💡 Sequana tips", border_style="bold green", padding=(1, 2)))
 
 
+def _convert_dot_to_png(name: str, output: Optional[str] = None, content: Optional[str] = None) -> str:
+    if content is not None:
+        if not content.strip():
+            raise ValueError("No data found on the standard input.")
+        d = DOTParser(content=content)
+        outname = output or "rulegraph.sequana.png"
+    else:
+        if not name.endswith(".dot"):
+            raise ValueError(f"Input file must have a .dot extension, got: {name}")
+        d = DOTParser(name)
+        outname = output or name.replace(".dot", ".sequana.png")
+
+    with tempfile.NamedTemporaryFile(mode="w") as fout:
+        d.add_urls(fout.name)
+        try:
+            status = subprocess.call(["dot", "-Tpng", fout.name, "-o", outname])
+        except FileNotFoundError:
+            raise click.ClickException("The 'dot' executable was not found. Please install graphviz.")
+    if status != 0:
+        raise click.ClickException(f"dot failed to convert your input into {outname} (error {status})")
+    return outname
+
+
+def _format_elapsed(seconds: float) -> str:
+    total_seconds = int(round(seconds))
+    hours, remainder = divmod(total_seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    if hours:
+        return f"{hours:d}h {minutes:02d}m {seconds:02d}s"
+    if minutes:
+        return f"{minutes:d}m {seconds:02d}s"
+    return f"{seconds:d}s"
+
+
+def _get_snakemake_version() -> str:
+    try:
+        import snakemake
+
+        return snakemake.__version__
+    except Exception:
+        return "unknown"
+
+
+def _create_wrapper_rulegraph(snakefile: str, profile: str, workdir: Path) -> Path:
+    dotfile = workdir / ".sequana" / "rulegraph.dot"
+    pngfile = workdir / ".sequana" / "rulegraph.sequana.png"
+    cmd = ["snakemake", "-s", snakefile, "--profile", profile, "--rulegraph"]
+    result = subprocess.run(cmd, cwd=workdir, capture_output=True, text=True)
+    if result.returncode != 0:
+        msg = result.stderr.strip() or result.stdout.strip() or f"snakemake exited with status {result.returncode}"
+        raise click.ClickException(f"Could not generate rulegraph: {msg}")
+    if not result.stdout.strip():
+        raise click.ClickException("Could not generate rulegraph: snakemake returned an empty graph.")
+    dotfile.write_text(result.stdout)
+    _convert_dot_to_png(str(dotfile), output=str(pngfile))
+    return pngfile
+
+
+def _write_wrapper_summary(
+    workdir: Path,
+    snakefile: Path,
+    profile: str,
+    pipeline_name: str,
+    start_dt: datetime,
+    end_dt: datetime,
+    returncode: int,
+    rulegraph_png: Optional[Path],
+) -> Path:
+    summary = workdir / "summary.html"
+    snakelog = workdir / ".sequana" / "snakemake.log"
+    profile_config = workdir / profile / "config.yaml"
+    status = "success" if returncode == 0 else "failure"
+    escaped_name = html.escape(pipeline_name)
+    rows = [
+        ("Status", status),
+        ("Exit code", str(returncode)),
+        ("Snakefile", str(snakefile)),
+        ("Working directory", str(workdir)),
+        ("Profile", profile),
+        ("Profile config", str(profile_config.resolve()) if profile_config.exists() else "not created"),
+        ("Started", start_dt.isoformat()),
+        ("Finished", end_dt.isoformat()),
+        ("Elapsed", _format_elapsed((end_dt - start_dt).total_seconds())),
+        ("Host", platform.node() or "unknown"),
+        ("Platform", platform.platform()),
+        ("Python", sys.version.split()[0]),
+        ("Snakemake", _get_snakemake_version()),
+        ("Executable", sys.executable),
+    ]
+
+    links = []
+    if rulegraph_png and rulegraph_png.exists():
+        links.append(
+            f'<li><a href="{html.escape(os.path.relpath(rulegraph_png, workdir))}">Rulegraph PNG</a></li>'
+        )
+    if snakelog.exists():
+        links.append(f'<li><a href="{html.escape(os.path.relpath(snakelog, workdir))}">Snakemake log</a></li>')
+    if profile_config.exists():
+        links.append(
+            f'<li><a href="{html.escape(os.path.relpath(profile_config, workdir))}">Profile config</a></li>'
+        )
+
+    lines = [
+        "<!DOCTYPE html>",
+        "<html><head><meta charset='utf-8'>",
+        f"<title>{escaped_name} summary</title>",
+        "<style>body{font-family:sans-serif;margin:2rem;line-height:1.5}table{border-collapse:collapse}"
+        "td,th{border:1px solid #ccc;padding:.4rem .6rem;text-align:left}th{background:#f5f5f5}</style>",
+        "</head><body>",
+        f"<h1>{escaped_name} summary</h1>",
+        "<table>",
+        "<tr><th>Field</th><th>Value</th></tr>",
+    ]
+    for key, value in rows:
+        lines.append(f"<tr><td>{html.escape(key)}</td><td>{html.escape(value)}</td></tr>")
+    lines.extend(["</table>"])
+    if links:
+        lines.append("<h2>Artifacts</h2><ul>")
+        lines.extend(links)
+        lines.append("</ul>")
+    lines.append("</body></html>")
+    summary.write_text("\n".join(lines))
+    return summary
+
+
+def _run_wrapper(
+    snakefile: str,
+    workdir: str,
+    wrapper_name: str,
+    wrapper_profile: str,
+    wrapper_jobs: int,
+    wrapper_keep_going: bool,
+    wrapper_slurm_memory: str,
+    wrapper_slurm_queue: str,
+) -> int:
+    workdir_path = Path(workdir).resolve()
+    workdir_path.mkdir(parents=True, exist_ok=True)
+    snakefile_path = Path(snakefile).resolve()
+
+    profile_kwargs = {
+        "jobs": wrapper_jobs,
+        "wrappers": os.environ.get("SEQUANA_WRAPPERS", "https://raw.githubusercontent.com/sequana/sequana-wrappers/"),
+        "forceall": False,
+        "keep_going": wrapper_keep_going,
+        "use_apptainer": False,
+        "apptainer_prefix": "",
+        "apptainer_args": "",
+    }
+    if wrapper_profile == "slurm":
+        profile_kwargs.update(
+            {
+                "partition": wrapper_slurm_queue,
+                "qos": wrapper_slurm_queue,
+                "memory": wrapper_slurm_memory,
+            }
+        )
+
+    profile_dir = create_profile(workdir_path, wrapper_profile, **profile_kwargs)
+
+    rulegraph_png = None
+    try:
+        rulegraph_png = _create_wrapper_rulegraph(str(snakefile_path), profile_dir, workdir_path)
+        click.echo(f"Created {rulegraph_png}")
+    except Exception as exc:
+        click.echo(f"# Warning: {exc}", err=True)
+
+    start_dt = datetime.now().astimezone()
+    returncode = run_monitor(str(snakefile_path), profile_dir, wrapper_name, "", str(workdir_path))
+    end_dt = datetime.now().astimezone()
+    summary = _write_wrapper_summary(
+        workdir_path, snakefile_path, profile_dir, wrapper_name, start_dt, end_dt, returncode, rulegraph_png
+    )
+    click.echo(f"Created {summary}")
+    return returncode
+
+
 @click.command(context_settings=CONTEXT_SETTINGS)
 @click.option("--version", is_flag=True)
 @click.option(
@@ -318,7 +514,7 @@ in which case the output is called rulegraph.sequana.png unless --output is used
     default=".",
     show_default=True,
     type=click.Path(file_okay=False),
-    help="Pipeline working directory for --diagnose.",
+    help="Pipeline working directory for --diagnose and --wrapper.",
 )
 @click.option(
     "--provider",
@@ -331,6 +527,37 @@ in which case the output is called rulegraph.sequana.png unless --output is used
     "--model",
     default=None,
     help="Model name for --diagnose. Defaults to mistral-small-latest (mistral) or gpt-4o-mini (openai).",
+)
+@click.option(
+    "--wrapper",
+    type=click.Path(exists=True, file_okay=True, dir_okay=False),
+    help="Run an arbitrary Snakefile with a generated profile, rulegraph PNG and summary report.",
+)
+@click.option("--wrapper-name", default="External Snakemake", show_default=True, help="Display name used in reports.")
+@click.option(
+    "--wrapper-profile",
+    default="local",
+    show_default=True,
+    type=click.Choice(["local", "slurm"]),
+    help="Execution profile for --wrapper.",
+)
+@click.option("--wrapper-jobs", default=4, show_default=True, type=int, help="Number of jobs for the wrapper profile.")
+@click.option(
+    "--wrapper-keep-going",
+    is_flag=True,
+    help="Continue running independent jobs after a failure when using --wrapper.",
+)
+@click.option(
+    "--wrapper-slurm-memory",
+    default="4G",
+    show_default=True,
+    help="Memory requested per SLURM job when using --wrapper-profile slurm.",
+)
+@click.option(
+    "--wrapper-slurm-queue",
+    default="common",
+    show_default=True,
+    help="SLURM partition/queue used with --wrapper-profile slurm.",
 )
 def main(**kwargs):
     """Pipetools utilities for the Sequana project (sequana.readthedocs.io)
@@ -441,6 +668,19 @@ def main(**kwargs):
         except (ImportError, EnvironmentError, ValueError) as exc:
             click.echo(f"[ERROR] {exc}", err=True)
             sys.exit(1)
+    elif kwargs["wrapper"]:
+        sys.exit(
+            _run_wrapper(
+                kwargs["wrapper"],
+                kwargs["workdir"],
+                kwargs["wrapper_name"],
+                kwargs["wrapper_profile"],
+                kwargs["wrapper_jobs"],
+                kwargs["wrapper_keep_going"],
+                kwargs["wrapper_slurm_memory"],
+                kwargs["wrapper_slurm_queue"],
+            )
+        )
 
 
 if __name__ == "__main__":

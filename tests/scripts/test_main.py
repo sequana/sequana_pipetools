@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from sequana_pipetools.scripts.main import ClickComplete, _print_diagnosis, main
+from sequana_pipetools.scripts.main import ClickComplete, _create_wrapper_rulegraph, _print_diagnosis, main
 from sequana_pipetools.scripts.monitor import main as monitor_main
 
 from . import test_dir
@@ -232,3 +232,73 @@ def test_output_without_dot2png():
     results = runner.invoke(main, ["--output", "test.png"])
     assert results.exit_code != 0
     assert "--dot2png" in results.output
+
+
+def test_create_wrapper_rulegraph(tmp_path):
+    snakefile = tmp_path / "Snakefile"
+    snakefile.write_text("rule all:\n    input: []\n")
+    workdir = tmp_path / "work"
+    workdir.mkdir()
+    (workdir / ".sequana").mkdir()
+
+    dot_content = "digraph snakemake_dag { all[label = \"all\"]; }\n"
+
+    with patch("sequana_pipetools.scripts.main.subprocess.run") as mock_run:
+        with patch("sequana_pipetools.scripts.main._convert_dot_to_png") as mock_convert:
+            mock_run.return_value.returncode = 0
+            mock_run.return_value.stdout = dot_content
+            result = _create_wrapper_rulegraph(str(snakefile), ".sequana/profile_local", workdir)
+
+    assert result == workdir / ".sequana" / "rulegraph.sequana.png"
+    assert (workdir / ".sequana" / "rulegraph.dot").read_text() == dot_content
+    mock_convert.assert_called_once_with(
+        str(workdir / ".sequana" / "rulegraph.dot"), output=str(workdir / ".sequana" / "rulegraph.sequana.png")
+    )
+
+
+def test_wrapper_runs_and_writes_summary(tmp_path):
+    runner = CliRunner()
+    snakefile = tmp_path / "Snakefile"
+    snakefile.write_text("rule all:\n    input: []\n")
+    workdir = tmp_path / "analysis"
+    (workdir / ".sequana" / "profile_local").mkdir(parents=True)
+    (workdir / ".sequana" / "profile_local" / "config.yaml").write_text("cores: 2\n")
+    (workdir / ".sequana" / "rulegraph.sequana.png").write_text("png")
+
+    with patch("sequana_pipetools.scripts.main.create_profile", return_value=".sequana/profile_local") as mock_profile:
+        with patch(
+            "sequana_pipetools.scripts.main._create_wrapper_rulegraph",
+            return_value=workdir / ".sequana" / "rulegraph.sequana.png",
+        ) as mock_graph:
+            with patch("sequana_pipetools.scripts.main.run_monitor", return_value=0) as mock_run:
+                results = runner.invoke(
+                    main,
+                    [
+                        "--wrapper",
+                        str(snakefile),
+                        "--workdir",
+                        str(workdir),
+                        "--wrapper-name",
+                        "My wrapper",
+                        "--wrapper-profile",
+                        "local",
+                        "--wrapper-jobs",
+                        "2",
+                    ],
+                )
+
+    assert results.exit_code == 0
+    mock_profile.assert_called_once()
+    assert mock_profile.call_args.args[0] == workdir.resolve()
+    assert mock_profile.call_args.args[1] == "local"
+    assert mock_profile.call_args.kwargs["jobs"] == 2
+    mock_graph.assert_called_once_with(str(snakefile.resolve()), ".sequana/profile_local", workdir.resolve())
+    mock_run.assert_called_once_with(str(snakefile.resolve()), ".sequana/profile_local", "My wrapper", "", str(workdir))
+
+    summary = workdir / "summary.html"
+    assert summary.exists()
+    content = summary.read_text()
+    assert "My wrapper summary" in content
+    assert str(snakefile.resolve()) in content
+    assert ".sequana/profile_local/config.yaml" in content
+    assert "Rulegraph PNG" in content

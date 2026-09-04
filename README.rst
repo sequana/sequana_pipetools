@@ -160,9 +160,19 @@ To diagnose pipeline errors using an LLM (requires a Mistral or OpenAI API key):
 
     sequana_pipetools --diagnose
 
-To monitor a running pipeline with a rich progress display (used internally by pipelines launched with ``--monitor``)::
+To execute an external Snakemake workflow with the rich monitor, a generated
+rulegraph PNG and a small HTML summary report::
 
-    sequana_pipetools --monitor
+    sequana_pipetools --wrapper Snakefile --workdir analysis
+
+This creates ``analysis/.sequana/profile_local/config.yaml``,
+``analysis/.sequana/rulegraph.sequana.png``, ``analysis/.sequana/snakemake.log``
+and ``analysis/summary.html``.
+
+The monitor used internally by Sequana pipelines is also available as a
+standalone command::
+
+    sequana_pipetools_monitor --snakefile Snakefile --profile .sequana/profile_local
 
 
 For Sequana developers
