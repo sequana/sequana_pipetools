@@ -5,7 +5,8 @@ from unittest.mock import patch
 import pytest
 from click.testing import CliRunner
 
-from sequana_pipetools.scripts.main import ClickComplete, _create_wrapper_rulegraph, _print_diagnosis, main
+from sequana_pipetools.external_runner import create_wrapper_rulegraph
+from sequana_pipetools.scripts.main import ClickComplete, _print_diagnosis, main
 from sequana_pipetools.scripts.monitor import main as monitor_main
 
 from . import test_dir
@@ -243,11 +244,11 @@ def test_create_wrapper_rulegraph(tmp_path):
 
     dot_content = "digraph snakemake_dag { all[label = \"all\"]; }\n"
 
-    with patch("sequana_pipetools.scripts.main.subprocess.run") as mock_run:
-        with patch("sequana_pipetools.scripts.main._convert_dot_to_png") as mock_convert:
+    with patch("sequana_pipetools.external_runner.subprocess.run") as mock_run:
+        with patch("sequana_pipetools.external_runner.convert_dot_to_png") as mock_convert:
             mock_run.return_value.returncode = 0
             mock_run.return_value.stdout = dot_content
-            result = _create_wrapper_rulegraph(str(snakefile), ".sequana/profile_local", workdir)
+            result = create_wrapper_rulegraph(str(snakefile), ".sequana/profile_local", workdir)
 
     assert result == workdir / ".sequana" / "rulegraph.sequana.png"
     assert (workdir / ".sequana" / "rulegraph.dot").read_text() == dot_content
@@ -265,12 +266,12 @@ def test_wrapper_runs_and_writes_summary(tmp_path):
     (workdir / ".sequana" / "profile_local" / "config.yaml").write_text("cores: 2\n")
     (workdir / ".sequana" / "rulegraph.sequana.png").write_text("png")
 
-    with patch("sequana_pipetools.scripts.main.create_profile", return_value=".sequana/profile_local") as mock_profile:
+    with patch("sequana_pipetools.external_runner.create_profile", return_value=".sequana/profile_local") as mock_profile:
         with patch(
-            "sequana_pipetools.scripts.main._create_wrapper_rulegraph",
+            "sequana_pipetools.external_runner.create_wrapper_rulegraph",
             return_value=workdir / ".sequana" / "rulegraph.sequana.png",
         ) as mock_graph:
-            with patch("sequana_pipetools.scripts.main.run_monitor", return_value=0) as mock_run:
+            with patch("sequana_pipetools.external_runner.run_monitor", return_value=0) as mock_run:
                 results = runner.invoke(
                     main,
                     [
