@@ -391,26 +391,23 @@ Changelog :memo:
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
-1.7.0     * --dot2png can read the dot file from the standard input (use - as
+1.7.0     * --diagnose no longer crashes with a traceback when the LLM
+            provider fails; rate-limit errors (HTTP 429) are retried with an
+            exponential backoff and the offline Sequana tips are still shown
+          * --diagnose accepts --provider local and --base-url to query any
+            OpenAI-compatible server (Ollama, vLLM, llama.cpp, institutional
+            gateway), which requires neither an API key nor internet access
+          * offline error cataloguei extended and --diagnose falls back to
+            it whenever no provider can be reached (e.g., rate limit)
+          * the tips panel printed by a pipeline on failure (onerror) now scans
+            the snakemake and rule logs; it used to report generic advice only
+1.6.0     * --dot2png can read the dot file from the standard input (use - as
             the input name) e.g. snakemake --rulegraph | sequana_pipetools
             --dot2png - ; add -o/--output to name the output PNG file
           * --dot2png now fails (non-zero exit) when graphviz's dot fails or
             is missing instead of reporting a success
           * test python 3.12 in the CI and document all modules in the
             reference documentation
-          * --diagnose no longer crashes with a traceback when the LLM
-            provider fails; rate-limit errors (HTTP 429) are retried with an
-            exponential backoff and the offline Sequana tips are still shown
-          * --diagnose accepts --provider local and --base-url to query any
-            OpenAI-compatible server (Ollama, vLLM, llama.cpp, institutional
-            gateway), which requires neither an API key nor internet access
-          * offline error catalogue: missing input files, incomplete files,
-            missing outputs, out of memory, walltime, full disk, permissions,
-            invalid config, container and lock errors are now detected without
-            any LLM. --diagnose falls back to it whenever no provider can be
-            reached (missing key, missing package, endpoint down, rate limit)
-          * the tips panel printed by a pipeline on failure (onerror) now scans
-            the snakemake and rule logs; it used to report generic advice only
 1.5.7     * Fix SLURM sbatch memory allocation using mem_mb instead of mem
             to avoid "Unable to open file GB" error with space-formatted values
 1.5.6     * Allow duplicate sample names in paired-end read files (2x files
