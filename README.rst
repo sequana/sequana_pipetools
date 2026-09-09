@@ -386,6 +386,8 @@ To join the project, please let us know on `github <https://github.com/sequana/s
 Changelog :memo:
 ================
 
+**Note:** Version 1.6.0 features are listed under 1.7.0 in the table below.
+
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
