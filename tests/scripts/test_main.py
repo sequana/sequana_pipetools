@@ -75,15 +75,63 @@ def test_diagnose(tmp_path):
         results = runner.invoke(main, ["--diagnose", "--workdir", str(tmp_path)])
     assert results.exit_code == 0
     assert "All good." in results.output
-    mock_diag.assert_called_once_with(workdir=str(tmp_path), provider="mistral", model=None)
+    mock_diag.assert_called_once_with(workdir=str(tmp_path), provider="mistral", model=None, base_url=None)
+
+
+def test_diagnose_local_provider_default_endpoint(tmp_path):
+    runner = CliRunner()
+    with patch("sequana_pipetools.diagnose.diagnose", return_value="local output") as mock_diag:
+        results = runner.invoke(main, ["--diagnose", "--workdir", str(tmp_path), "--provider", "local"])
+    assert results.exit_code == 0
+    assert "http://localhost:11434/v1" in results.output
+    mock_diag.assert_called_once_with(
+        workdir=str(tmp_path), provider="local", model=None, base_url="http://localhost:11434/v1"
+    )
+
+
+def test_diagnose_custom_base_url(tmp_path):
+    runner = CliRunner()
+    url = "http://gpu-node:8000/v1"
+    with patch("sequana_pipetools.diagnose.diagnose", return_value="vllm output") as mock_diag:
+        results = runner.invoke(
+            main, ["--diagnose", "--workdir", str(tmp_path), "--provider", "local", "--base-url", url]
+        )
+    assert results.exit_code == 0
+    mock_diag.assert_called_once_with(workdir=str(tmp_path), provider="local", model=None, base_url=url)
 
 
 def test_diagnose_error(tmp_path):
+    """A missing API key must not lose the offline tips."""
+    (tmp_path / "fastqc.sh").write_text("snakemake")
     runner = CliRunner()
     with patch("sequana_pipetools.diagnose.diagnose", side_effect=EnvironmentError("no key")):
-        results = runner.invoke(main, ["--diagnose", "--workdir", str(tmp_path)])
+        with patch("sequana_pipetools.diagnose.local_server_available", return_value=False):
+            results = runner.invoke(main, ["--diagnose", "--workdir", str(tmp_path)])
     assert results.exit_code == 1
     assert "no key" in results.output
+    assert "sh fastqc.sh" in results.output
+
+
+def test_diagnose_suggests_local_provider_when_server_is_up(tmp_path):
+    runner = CliRunner()
+    with patch("sequana_pipetools.diagnose.diagnose", side_effect=EnvironmentError("no key")):
+        with patch("sequana_pipetools.diagnose.local_server_available", return_value=True):
+            results = runner.invoke(main, ["--diagnose", "--workdir", str(tmp_path)])
+    assert "--provider local" in results.output
+
+
+def test_diagnose_rate_limit_falls_back_to_tips(tmp_path):
+    from sequana_pipetools.diagnose import DiagnoseError
+
+    (tmp_path / "fastqc.sh").write_text("snakemake")
+    runner = CliRunner()
+    with patch("sequana_pipetools.diagnose.diagnose", side_effect=DiagnoseError("rate-limiting this account")):
+        with patch("sequana_pipetools.diagnose.local_server_available", return_value=False):
+            results = runner.invoke(main, ["--diagnose", "--workdir", str(tmp_path)])
+    assert results.exit_code == 1
+    assert "rate-limiting this account" in results.output
+    # offline tips must still be printed
+    assert "sh fastqc.sh" in results.output
 
 
 def test_monitor_help():
@@ -242,7 +290,7 @@ def test_create_wrapper_rulegraph(tmp_path):
     workdir.mkdir()
     (workdir / ".sequana").mkdir()
 
-    dot_content = "digraph snakemake_dag { all[label = \"all\"]; }\n"
+    dot_content = 'digraph snakemake_dag { all[label = "all"]; }\n'
 
     with patch("sequana_pipetools.external_runner.subprocess.run") as mock_run:
         with patch("sequana_pipetools.external_runner.convert_dot_to_png") as mock_convert:
@@ -266,7 +314,9 @@ def test_wrapper_runs_and_writes_summary(tmp_path):
     (workdir / ".sequana" / "profile_local" / "config.yaml").write_text("cores: 2\n")
     (workdir / ".sequana" / "rulegraph.sequana.png").write_text("png")
 
-    with patch("sequana_pipetools.external_runner.create_profile", return_value=".sequana/profile_local") as mock_profile:
+    with patch(
+        "sequana_pipetools.external_runner.create_profile", return_value=".sequana/profile_local"
+    ) as mock_profile:
         with patch(
             "sequana_pipetools.external_runner.create_wrapper_rulegraph",
             return_value=workdir / ".sequana" / "rulegraph.sequana.png",

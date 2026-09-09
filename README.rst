@@ -52,12 +52,28 @@ See `Sequana <https://sequana.readthedocs.io>`_ for a list of pipelines ready fo
 🎯 Targeted audience
 =====================
 
-This package is intended for `Sequana <https://sequana.readthedocs.io>`_ developers seeking to integrate Snakemake pipelines into the Sequana project. Please refer below for more information. Additionally, note that as a developer, you can generate the reference documentation using Sphinx::
+This package is primarily intended for `Sequana <https://sequana.readthedocs.io>`_ developers seeking to integrate Snakemake pipelines into the Sequana project. Please refer below for more information. Additionally, note that as a developer, you can generate the reference documentation using Sphinx::
 
     git clone https://github.com/sequana/sequana_pipetools
     cd sequana_pipetools/doc
     make html
     browse build/html/index.html
+
+**End users of the pipelines also have a use for it.** A few standalone commands
+are meant to be typed by anyone running a Sequana pipeline, with no knowledge of
+the library itself. The main one explains why a pipeline failed and what to do
+about it::
+
+    cd /path/to/the/pipeline/working/directory
+    sequana_pipetools --diagnose
+
+It reads the snakemake and rule logs, names the cause (missing tool, out of
+memory, walltime, full disk, invalid config, ...) and suggests a fix. An LLM
+adds a plain-language explanation when one is available, but the command works
+without any API key and without internet access. Two other user-facing
+commands are ``--slurm-diag`` (summary of the SLURM job failures) and
+``--dot2png`` (rulegraph as a PNG). See the
+`diagnosis documentation <https://sequana-pipetools.readthedocs.io/en/latest/diagnose.html>`_.
 
 
 ❓ What is sequana_pipetools ?
@@ -159,6 +175,25 @@ The output is called *rulegraph.sequana.png* in that case; use **-o/--output** t
 To diagnose pipeline errors using an LLM (requires a Mistral or OpenAI API key)::
 
     sequana_pipetools --diagnose
+
+No API key, or no internet access on the compute nodes? Use **--provider local**
+to query an OpenAI-compatible server running on your machine. With
+`Ollama <https://ollama.com>`_ installed, this is all it takes::
+
+    ollama pull llama3.2
+    sequana_pipetools --diagnose --provider local
+
+Inference then runs on the CPU: no API key, no quota, no CUDA driver, and the
+logs never leave your machine. Use **--base-url** (or the *OPENAI_BASE_URL*
+environment variable) to target another endpoint, such as a vLLM or llama.cpp
+server, a GPU node, or an institutional gateway::
+
+    sequana_pipetools --diagnose --provider local --base-url http://gpu-node:8000/v1 --model mistral:7b
+
+If the provider is unreachable or rate-limits the request, the deterministic
+Sequana tips are printed anyway, so **--diagnose** always returns something useful.
+See the `documentation <https://sequana-pipetools.readthedocs.io/en/latest/diagnose.html>`_
+for the complete setup and troubleshooting guide.
 
 To execute an external Snakemake workflow with the rich monitor, a generated
 rulegraph PNG and a small HTML summary report::
@@ -351,9 +386,21 @@ To join the project, please let us know on `github <https://github.com/sequana/s
 Changelog :memo:
 ================
 
+**Note:** Version 1.6.0 features are listed under 1.7.0 in the table below.
+
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.7.0     * --diagnose no longer crashes with a traceback when the LLM
+            provider fails; rate-limit errors (HTTP 429) are retried with an
+            exponential backoff and the offline Sequana tips are still shown
+          * --diagnose accepts --provider local and --base-url to query any
+            OpenAI-compatible server (Ollama, vLLM, llama.cpp, institutional
+            gateway), which requires neither an API key nor internet access
+          * offline error catalogue extended and --diagnose falls back to
+            it whenever no provider can be reached (e.g., rate limit)
+          * the tips panel printed by a pipeline on failure (onerror) now scans
+            the snakemake and rule logs; it used to report generic advice only
 1.6.0     * --dot2png can read the dot file from the standard input (use - as
             the input name) e.g. snakemake --rulegraph | sequana_pipetools
             --dot2png - ; add -o/--output to name the output PNG file

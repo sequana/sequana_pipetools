@@ -168,6 +168,27 @@ def test_multiqc_clean(tmpdir):
     pm.onerror()
 
 
+def test_onerror_tips_use_the_real_logs(tmp_path, monkeypatch, capsys):
+    """onerror must scan the logs so the panel names the actual failure, not generic advice."""
+    cfg = SequanaConfig({})
+    cfg.config.input_directory = str(Path(test_dir) / "data")
+    cfg.config.input_pattern = "*notag*"
+    pm = snaketools.PipelineManager("test", cfg)
+
+    (tmp_path / ".sequana").mkdir()
+    (tmp_path / ".sequana" / "snakemake.log").write_text(
+        "Error in rule fastp:\n"
+        "slurmstepd: error: Detected 1 oom-kill event in StepId=42.batch\n"
+        "/bin/bash: line 1: fastp: command not found\n"
+    )
+    monkeypatch.chdir(tmp_path)
+    pm.onerror()
+
+    out = capsys.readouterr().out
+    assert "damona install fastp" in out
+    assert "mem_mb" in out
+
+
 def test_pipeline_manager_wrong_inputs(tmpdir):
 
     # test wrong input files
