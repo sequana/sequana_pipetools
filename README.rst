@@ -397,7 +397,7 @@ Version   Description
           * --diagnose accepts --provider local and --base-url to query any
             OpenAI-compatible server (Ollama, vLLM, llama.cpp, institutional
             gateway), which requires neither an API key nor internet access
-          * offline error cataloguei extended and --diagnose falls back to
+          * offline error catalogue extended and --diagnose falls back to
             it whenever no provider can be reached (e.g., rate limit)
           * the tips panel printed by a pipeline on failure (onerror) now scans
             the snakemake and rule logs; it used to report generic advice only
