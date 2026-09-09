@@ -248,10 +248,13 @@ class PipelineManagerBase:
             from rich.console import Console
             from rich.panel import Panel
 
-            from sequana_pipetools.diagnose import _sequana_tips
+            from sequana_pipetools.diagnose import _sequana_tips, collect_context
 
             console = Console()
-            tips = _sequana_tips("", Path("."))
+            # scan the snakemake and rule logs so that the tips name the actual failure
+            # (missing tool, out of memory, walltime, full disk, ...) instead of staying generic
+            context = collect_context(Path("."))
+            tips = _sequana_tips(context, Path("."))
             # strip the leading "---" separator used when appending to LLM output
             tips = tips.lstrip("\n-").strip()
             console.print(Panel(tips, title="💡 Sequana tips", border_style="bold green", padding=(1, 2)))

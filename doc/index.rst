@@ -9,4 +9,5 @@ Sequana_pipetools documentation
 
 .. toctree::
 
+    diagnose
     references
