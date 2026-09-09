@@ -335,8 +335,10 @@ def _call_provider(
     """
     if provider == "mistral":
         call = partial(_call_mistral, context, model)
-    else:
+    elif provider in _OPENAI_COMPATIBLE:
         call = partial(_call_openai, context, model, base_url=base_url)
+    else:
+        raise ValueError(f"Unknown provider: {provider}. Must be one of {_PROVIDERS}.")
 
     last_error = None
     for attempt in range(1, max_attempts + 1):
@@ -354,7 +356,7 @@ def _call_provider(
                         "Check that the server is running and serves an OpenAI-compatible API "
                         "(for Ollama: `ollama serve` then `ollama pull " + model + "`)."
                     )
-                raise DiagnoseError(message) from err
+                raise DiagnoseError(message) from None
             if attempt == max_attempts:
                 break
             delay = _retry_after(err) or _RETRY_BASE_DELAY * 2 ** (attempt - 1)
@@ -363,12 +365,16 @@ def _call_provider(
             )
             time.sleep(delay)
 
+    # Suggest alternatives based on which provider failed
+    alternatives = [p for p in _PROVIDERS if p != provider]
+    alt_text = f"or try --provider {alternatives[0]}" if alternatives else "or try a different API key"
+
     raise DiagnoseError(
         f"The {provider} API is rate-limiting this account (HTTP 429) and did not recover "
         f"after {max_attempts} attempts.\n"
-        "Wait a few minutes, use another API key, or switch provider with --provider openai.\n"
+        f"Wait a few minutes, use another API key, {alt_text}.\n"
         "The Sequana tips below require no API call."
-    ) from last_error
+    ) from None
 
 
 # ── Sequana-specific post-processing ──────────────────────────────────────────
