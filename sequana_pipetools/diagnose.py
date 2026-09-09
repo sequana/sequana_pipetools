@@ -314,7 +314,10 @@ def local_server_available(base_url: str | None = None, timeout: float = 1.0) ->
     """
     url = (base_url or _DEFAULT_LOCAL_BASE_URL).rstrip("/") + "/models"
     try:
-        with urlopen(url, timeout=timeout) as response:  # nosec B310 - fixed http endpoint
+        # nosec B310: user-provided base_url for local LLM server probing; endpoint
+        # is trusted by design (user explicitly specifies it via CLI/env). Exceptions
+        # are caught safely; function only checks server response, never executes it.
+        with urlopen(url, timeout=timeout) as response:
             return response.status == 200
     except (URLError, OSError, ValueError):
         return False
