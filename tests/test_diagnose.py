@@ -1,4 +1,5 @@
 import os
+import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -170,6 +171,22 @@ def test_call_claude_code_success():
     assert "--model" not in run.call_args[0][0]
 
 
+def test_call_claude_code_timeout():
+    err = subprocess.TimeoutExpired(cmd=["claude", "--system-prompt", "SECRET PROMPT"], timeout=1)
+    with patch("sequana_pipetools.diagnose.shutil.which", return_value="/bin/claude"):
+        with patch("sequana_pipetools.diagnose.subprocess.run", side_effect=err):
+            with pytest.raises(RuntimeError, match="did not answer") as exc:
+                _call_claude_code("context", "")
+    assert "SECRET PROMPT" not in str(exc.value)
+
+
+def test_call_claude_code_oserror():
+    with patch("sequana_pipetools.diagnose.shutil.which", return_value="/bin/claude"):
+        with patch("sequana_pipetools.diagnose.subprocess.run", side_effect=PermissionError(13, "Permission denied")):
+            with pytest.raises(RuntimeError, match="could not be started"):
+                _call_claude_code("context", "")
+
+
 def test_call_claude_code_failure():
     proc = MagicMock(returncode=1, stdout="", stderr="not logged in")
     with patch("sequana_pipetools.diagnose.shutil.which", return_value="/bin/claude"):
@@ -317,6 +334,13 @@ def test_resolve_base_url_openai_default(monkeypatch):
 def test_resolve_base_url_from_env(monkeypatch):
     monkeypatch.setenv("OPENAI_BASE_URL", "http://gpu-node:8000/v1")
     assert resolve_base_url("openai") == "http://gpu-node:8000/v1"
+
+
+def test_resolve_base_url_ignored_for_claude_providers(monkeypatch):
+    monkeypatch.setenv("OPENAI_BASE_URL", "http://gpu-node:8000/v1")
+    for provider in ("claude", "claude-code"):
+        assert resolve_base_url(provider) is None
+        assert resolve_base_url(provider, "http://explicit/v1") is None
 
 
 def test_resolve_base_url_explicit_wins(monkeypatch):

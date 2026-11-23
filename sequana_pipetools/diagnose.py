@@ -207,9 +207,15 @@ def _call_claude_code(context: str, model: str) -> str:
     cmd = ["claude", "-p", "--system-prompt", _SYSTEM_PROMPT, "--tools", ""]
     if model:
         cmd += ["--model", model]
-    proc = subprocess.run(
-        cmd, input=f"Here are the pipeline logs:\n\n{context}", capture_output=True, text=True, timeout=_CLI_TIMEOUT
-    )
+    try:
+        proc = subprocess.run(
+            cmd, input=f"Here are the pipeline logs:\n\n{context}", capture_output=True, text=True, timeout=_CLI_TIMEOUT
+        )
+    except subprocess.TimeoutExpired:
+        # do not chain: the exception text would repeat the whole command line, system prompt included
+        raise RuntimeError(f"claude did not answer within {_CLI_TIMEOUT}s (is it logged in?)") from None
+    except OSError as err:
+        raise RuntimeError(f"claude could not be started: {err.strerror or err}") from None
     if proc.returncode != 0:
         raise RuntimeError(f"claude exited with status {proc.returncode}: {(proc.stderr or proc.stdout).strip()}")
     return proc.stdout.strip()
@@ -304,9 +310,12 @@ def _retry_after(err: Exception):
 def resolve_base_url(provider: str, base_url: str | None = None) -> str | None:
     """Return the endpoint to query for *provider*.
 
-    Explicit *base_url* wins, then the ``OPENAI_BASE_URL`` environment variable,
-    then the official API (``None``).
+    Only the ``openai`` provider uses an endpoint: for it, explicit *base_url* wins, then
+    the ``OPENAI_BASE_URL`` environment variable, then the official API (``None``).
+    Other providers always get ``None``.
     """
+    if provider != "openai":
+        return None
     return base_url or os.environ.get("OPENAI_BASE_URL")
 
 
