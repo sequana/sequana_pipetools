@@ -13,7 +13,8 @@ on:
 
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    # Python 3.9 is not available on Ubuntu 26.04 (ubuntu-latest).
+    runs-on: ${{ matrix.python == '3.9' && 'ubuntu-24.04' || 'ubuntu-latest' }}
     strategy:
       max-parallel: 5
       matrix:
