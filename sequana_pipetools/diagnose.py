@@ -204,7 +204,17 @@ def _call_claude_code(context: str, model: str) -> str:
             "Install it from https://claude.com/claude-code and log in, or use another --provider."
         )
 
-    cmd = ["claude", "-p", "--system-prompt", _SYSTEM_PROMPT, "--tools", "", "--strict-mcp-config"]
+    cmd = [
+        "claude",
+        "-p",
+        "--system-prompt",
+        _SYSTEM_PROMPT,
+        "--tools",
+        "",
+        "--strict-mcp-config",
+        "--settings",
+        '{"disableAllHooks": true}',
+    ]
     if model:
         cmd += ["--model", model]
     try:
