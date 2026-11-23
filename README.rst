@@ -9,7 +9,7 @@
 .. image:: https://coveralls.io/repos/github/sequana/sequana_pipetools/badge.svg?branch=main
     :target: https://coveralls.io/github/sequana/sequana_pipetools?branch=main
 
-.. image:: https://app.readthedocs.org/projects/sequana-pipetools/badge/?version=latest
+.. image:: https://img.shields.io/readthedocs/sequana-pipetools
     :target: https://sequana-pipetools.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
