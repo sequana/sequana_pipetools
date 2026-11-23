@@ -381,12 +381,21 @@ Changelog :memo:
 ========= ======================================================================
 Version   Description
 ========= ======================================================================
+1.8.0     * --diagnose: add the claude-code provider (runs the claude CLI with
+            your Claude Code login, no API key) and make it the default
+          * --diagnose: add the claude provider (Anthropic API, needs
+            ANTHROPIC_API_KEY and the new ai-claude extra)
+          * **Breaking**: the mistral and local (Ollama) providers and the ai
+            extra are removed; use --provider claude-code, claude or openai.
+            --base-url / OPENAI_BASE_URL now only apply to the openai provider
+          * --diagnose: a claude CLI timeout no longer dumps the whole prompt
+          * documentation badge now uses the app.readthedocs.org URL
 1.7.0     * --diagnose no longer crashes with a traceback when the LLM
             provider fails; rate-limit errors (HTTP 429) are retried with an
             exponential backoff and the offline Sequana tips are still shown
-          * --diagnose accepts --provider claude-code (default, uses the claude
-            CLI, no API key), claude (Anthropic API) and openai, with --base-url
-            to query an OpenAI-compatible gateway
+          * --diagnose accepts --provider local and --base-url to query any
+            OpenAI-compatible server (Ollama, vLLM, llama.cpp, institutional
+            gateway), which requires neither an API key nor internet access
           * offline error catalogue extended and --diagnose falls back to
             it whenever no provider can be reached (e.g., rate limit)
           * the tips panel printed by a pipeline on failure (onerror) now scans
