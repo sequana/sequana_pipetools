@@ -98,7 +98,7 @@ scans `slurm*` files and `logs/`), `--stats`, `--config-to-schema`, `--dot2png`
 (`snaketools/dot_parser.py`), `--url2hash`, `--diagnose`. `scripts/monitor.py` is the second entry
 point (`sequana_pipetools_monitor`), backing the pipelines' `--monitor` flag.
 
-`diagnose.py` sends trimmed snakemake/rule logs to an LLM (mistral by default via `MISTRAL_API_KEY`,
+`diagnose.py` sends trimmed snakemake/rule logs to an LLM (`claude-code` CLI by default, or the Anthropic API via `ANTHROPIC_API_KEY`,
 or openai via `OPENAI_API_KEY`); the provider SDKs are optional extras (`ai`, `ai-openai`), so imports
 must stay lazy and the feature must degrade gracefully when they are absent.
 `monitor.py` infers job state from `logs/<rule>/<sample>.log` mtimes rather than parsing snakemake

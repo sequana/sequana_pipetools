@@ -1,4 +1,5 @@
 import os
+import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -6,7 +7,8 @@ import pytest
 
 from sequana_pipetools.diagnose import (
     DiagnoseError,
-    _call_mistral,
+    _call_claude,
+    _call_claude_code,
     _call_openai,
     _call_provider,
     _detect_error_signatures,
@@ -138,26 +140,59 @@ def test_sequana_tips_missing_tool(tmp_path):
     assert "fastp" in tips
 
 
-def test_call_mistral_no_key(monkeypatch):
-    monkeypatch.delenv("MISTRAL_API_KEY", raising=False)
-    mock_module = MagicMock()
-    with patch.dict("sys.modules", {"mistralai": mock_module, "mistralai.client": mock_module}):
-        with pytest.raises(EnvironmentError, match="MISTRAL_API_KEY"):
-            _call_mistral("context", "mistral-small-latest")
+def test_call_claude_no_key(monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    with patch.dict("sys.modules", {"anthropic": MagicMock()}):
+        with pytest.raises(EnvironmentError, match="ANTHROPIC_API_KEY"):
+            _call_claude("context", "claude-haiku-4-5-20251001")
 
 
-def test_call_mistral_success(monkeypatch):
-    monkeypatch.setenv("MISTRAL_API_KEY", "fake-key")
-    mock_response = MagicMock()
-    mock_response.choices[0].message.content = "diagnosis text"
-    mock_client = MagicMock()
-    mock_client.chat.complete.return_value = mock_response
-    mock_cls = MagicMock(return_value=mock_client)
+def test_call_claude_success(monkeypatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "fake-key")
+    block = MagicMock(type="text", text="diagnosis text")
     mock_module = MagicMock()
-    mock_module.Mistral = mock_cls
-    with patch.dict("sys.modules", {"mistralai": mock_module, "mistralai.client": mock_module}):
-        result = _call_mistral("context", "mistral-small-latest")
+    mock_module.Anthropic.return_value.messages.create.return_value.content = [block]
+    with patch.dict("sys.modules", {"anthropic": mock_module}):
+        result = _call_claude("context", "claude-haiku-4-5-20251001")
     assert result == "diagnosis text"
+
+
+def test_call_claude_code_missing_cli():
+    with patch("sequana_pipetools.diagnose.shutil.which", return_value=None):
+        with pytest.raises(EnvironmentError, match="claude"):
+            _call_claude_code("context", "")
+
+
+def test_call_claude_code_success():
+    proc = MagicMock(returncode=0, stdout=" diagnosis \n", stderr="")
+    with patch("sequana_pipetools.diagnose.shutil.which", return_value="/bin/claude"):
+        with patch("sequana_pipetools.diagnose.subprocess.run", return_value=proc) as run:
+            assert _call_claude_code("context", "") == "diagnosis"
+    assert "--model" not in run.call_args[0][0]
+
+
+def test_call_claude_code_timeout():
+    err = subprocess.TimeoutExpired(cmd=["claude", "--system-prompt", "SECRET PROMPT"], timeout=1)
+    with patch("sequana_pipetools.diagnose.shutil.which", return_value="/bin/claude"):
+        with patch("sequana_pipetools.diagnose.subprocess.run", side_effect=err):
+            with pytest.raises(RuntimeError, match="did not answer") as exc:
+                _call_claude_code("context", "")
+    assert "SECRET PROMPT" not in str(exc.value)
+
+
+def test_call_claude_code_oserror():
+    with patch("sequana_pipetools.diagnose.shutil.which", return_value="/bin/claude"):
+        with patch("sequana_pipetools.diagnose.subprocess.run", side_effect=PermissionError(13, "Permission denied")):
+            with pytest.raises(RuntimeError, match="could not be started"):
+                _call_claude_code("context", "")
+
+
+def test_call_claude_code_failure():
+    proc = MagicMock(returncode=1, stdout="", stderr="not logged in")
+    with patch("sequana_pipetools.diagnose.shutil.which", return_value="/bin/claude"):
+        with patch("sequana_pipetools.diagnose.subprocess.run", return_value=proc):
+            with pytest.raises(RuntimeError, match="not logged in"):
+                _call_claude_code("context", "")
 
 
 def test_call_openai_no_key(monkeypatch):
@@ -195,17 +230,17 @@ def test_diagnose_openai_mock(tmp_path, monkeypatch):
 
 
 def test_diagnose_uses_default_model(tmp_path):
-    with patch("sequana_pipetools.diagnose._call_mistral", return_value="ok") as mock:
-        diagnose(workdir=str(tmp_path), provider="mistral")
+    with patch("sequana_pipetools.diagnose._call_claude", return_value="ok") as mock:
+        diagnose(workdir=str(tmp_path), provider="claude")
     _, call_model = mock.call_args[0]
-    assert call_model == "mistral-small-latest"
+    assert call_model == "claude-haiku-4-5-20251001"
 
 
 def test_diagnose_custom_model(tmp_path):
-    with patch("sequana_pipetools.diagnose._call_mistral", return_value="ok") as mock:
-        diagnose(workdir=str(tmp_path), provider="mistral", model="mistral-large-latest")
+    with patch("sequana_pipetools.diagnose._call_claude", return_value="ok") as mock:
+        diagnose(workdir=str(tmp_path), provider="claude", model="claude-sonnet-4-5")
     _, call_model = mock.call_args[0]
-    assert call_model == "mistral-large-latest"
+    assert call_model == "claude-sonnet-4-5"
 
 
 class _SDKError(Exception):
@@ -222,7 +257,7 @@ def test_is_rate_limit_from_status_code():
 
 
 def test_is_rate_limit_from_message():
-    # mistralai raises a plain SDKError whose text carries the status
+    # some SDKs raise a plain SDKError whose text carries the status
     assert _is_rate_limit(Exception('API error occurred: Status 429. Body: {"message":"Rate limit exceeded"}'))
 
 
@@ -248,40 +283,40 @@ def test_call_provider_retries_then_succeeds(monkeypatch):
             raise _SDKError("API error occurred: Status 429", status_code=429)
         return "recovered"
 
-    with patch("sequana_pipetools.diagnose._call_mistral", side_effect=flaky):
-        assert _call_provider("mistral", "context", "mistral-small-latest") == "recovered"
+    with patch("sequana_pipetools.diagnose._call_claude", side_effect=flaky):
+        assert _call_provider("claude", "context", "claude-haiku-4-5-20251001") == "recovered"
     assert len(calls) == 3
 
 
 def test_call_provider_rate_limit_exhausted(monkeypatch):
     monkeypatch.setattr("sequana_pipetools.diagnose.time.sleep", lambda delay: None)
     err = _SDKError("API error occurred: Status 429", status_code=429)
-    with patch("sequana_pipetools.diagnose._call_mistral", side_effect=err):
+    with patch("sequana_pipetools.diagnose._call_claude", side_effect=err):
         with pytest.raises(DiagnoseError, match="rate-limiting"):
-            _call_provider("mistral", "context", "mistral-small-latest")
+            _call_provider("claude", "context", "claude-haiku-4-5-20251001")
 
 
 def test_call_provider_other_error_not_retried():
     err = _SDKError("Status 500", status_code=500)
-    with patch("sequana_pipetools.diagnose._call_mistral", side_effect=err) as mock:
+    with patch("sequana_pipetools.diagnose._call_claude", side_effect=err) as mock:
         with pytest.raises(DiagnoseError, match="API call failed"):
-            _call_provider("mistral", "context", "mistral-small-latest")
+            _call_provider("claude", "context", "claude-haiku-4-5-20251001")
     assert mock.call_count == 1
 
 
 def test_call_provider_missing_key_not_retried():
-    with patch("sequana_pipetools.diagnose._call_mistral", side_effect=EnvironmentError("MISTRAL_API_KEY")) as mock:
+    with patch("sequana_pipetools.diagnose._call_claude", side_effect=EnvironmentError("ANTHROPIC_API_KEY")) as mock:
         with pytest.raises(EnvironmentError):
-            _call_provider("mistral", "context", "mistral-small-latest")
+            _call_provider("claude", "context", "claude-haiku-4-5-20251001")
     assert mock.call_count == 1
 
 
 def test_diagnose_raises_diagnose_error_on_rate_limit(tmp_path, monkeypatch):
     monkeypatch.setattr("sequana_pipetools.diagnose.time.sleep", lambda delay: None)
     err = _SDKError("API error occurred: Status 429", status_code=429)
-    with patch("sequana_pipetools.diagnose._call_mistral", side_effect=err):
+    with patch("sequana_pipetools.diagnose._call_claude", side_effect=err):
         with pytest.raises(DiagnoseError):
-            diagnose(workdir=str(tmp_path), provider="mistral")
+            diagnose(workdir=str(tmp_path), provider="claude")
 
 
 def test_tips_only(tmp_path):
@@ -289,11 +324,6 @@ def test_tips_only(tmp_path):
     result = tips_only(str(tmp_path))
     assert "sh fastqc.sh" in result
     assert "sequana_pipetools --diagnose" not in result
-
-
-def test_resolve_base_url_local_default(monkeypatch):
-    monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
-    assert resolve_base_url("local") == "http://localhost:11434/v1"
 
 
 def test_resolve_base_url_openai_default(monkeypatch):
@@ -304,20 +334,18 @@ def test_resolve_base_url_openai_default(monkeypatch):
 def test_resolve_base_url_from_env(monkeypatch):
     monkeypatch.setenv("OPENAI_BASE_URL", "http://gpu-node:8000/v1")
     assert resolve_base_url("openai") == "http://gpu-node:8000/v1"
-    assert resolve_base_url("local") == "http://gpu-node:8000/v1"
+
+
+def test_resolve_base_url_ignored_for_claude_providers(monkeypatch):
+    monkeypatch.setenv("OPENAI_BASE_URL", "http://gpu-node:8000/v1")
+    for provider in ("claude", "claude-code"):
+        assert resolve_base_url(provider) is None
+        assert resolve_base_url(provider, "http://explicit/v1") is None
 
 
 def test_resolve_base_url_explicit_wins(monkeypatch):
     monkeypatch.setenv("OPENAI_BASE_URL", "http://from-env/v1")
-    assert resolve_base_url("local", "http://explicit/v1") == "http://explicit/v1"
-
-
-def test_diagnose_local_default_model(tmp_path, monkeypatch):
-    monkeypatch.delenv("OPENAI_BASE_URL", raising=False)
-    with patch("sequana_pipetools.diagnose._call_openai", return_value="ok") as mock:
-        diagnose(workdir=str(tmp_path), provider="local")
-    assert mock.call_args[0][1] == "llama3.2"
-    assert mock.call_args[1]["base_url"] == "http://localhost:11434/v1"
+    assert resolve_base_url("openai", "http://explicit/v1") == "http://explicit/v1"
 
 
 def test_call_openai_no_key_but_base_url(monkeypatch):
@@ -342,7 +370,7 @@ def test_call_provider_unreachable_server_message(monkeypatch):
     err = _SDKError("Connection error.")
     with patch("sequana_pipetools.diagnose._call_openai", side_effect=err):
         with pytest.raises(DiagnoseError, match="localhost:11434"):
-            _call_provider("local", "context", "llama3.2", base_url="http://localhost:11434/v1")
+            _call_provider("openai", "context", "gpt-4o-mini", base_url="http://localhost:11434/v1")
 
 
 @pytest.mark.parametrize(
@@ -382,10 +410,3 @@ def test_sequana_tips_lists_detected_issues_first(tmp_path):
     context = "slurmstepd: error: Detected 1 oom-kill event"
     lines = [line for line in _sequana_tips(context, tmp_path).splitlines() if line.startswith("•")]
     assert "mem_mb" in lines[0]
-
-
-def test_local_server_available_when_down():
-    from sequana_pipetools.diagnose import local_server_available
-
-    # port 1 is never a valid LLM endpoint
-    assert local_server_available("http://127.0.0.1:1/v1", timeout=0.5) is False
