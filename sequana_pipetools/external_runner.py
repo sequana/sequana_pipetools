@@ -83,15 +83,11 @@ def write_wrapper_summary(
 
     links = []
     if rulegraph_png and rulegraph_png.exists():
-        links.append(
-            f'<li><a href="{html.escape(os.path.relpath(rulegraph_png, workdir))}">Rulegraph PNG</a></li>'
-        )
+        links.append(f'<li><a href="{html.escape(os.path.relpath(rulegraph_png, workdir))}">Rulegraph PNG</a></li>')
     if snakelog.exists():
         links.append(f'<li><a href="{html.escape(os.path.relpath(snakelog, workdir))}">Snakemake log</a></li>')
     if profile_config.exists():
-        links.append(
-            f'<li><a href="{html.escape(os.path.relpath(profile_config, workdir))}">Profile config</a></li>'
-        )
+        links.append(f'<li><a href="{html.escape(os.path.relpath(profile_config, workdir))}">Profile config</a></li>')
 
     lines = [
         "<!DOCTYPE html>",

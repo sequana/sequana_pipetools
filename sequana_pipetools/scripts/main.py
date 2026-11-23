@@ -13,6 +13,7 @@
 import importlib
 import os
 import re
+import subprocess
 import sys
 
 import rich_click as click
@@ -329,8 +330,7 @@ in which case the output is called rulegraph.sequana.png unless --output is used
 @click.option(
     "--diagnose",
     is_flag=True,
-    help="Diagnose pipeline errors using an LLM (see --provider). Run from the pipeline working directory."
-    " Without an API key, use --provider local after 'ollama pull llama3.2'.",
+    help="Diagnose pipeline errors using an LLM (see --provider). Run from the pipeline working directory.",
 )
 @click.option(
     "--workdir",
@@ -341,23 +341,22 @@ in which case the output is called rulegraph.sequana.png unless --output is used
 )
 @click.option(
     "--provider",
-    default="mistral",
+    default="claude-code",
     show_default=True,
-    type=click.Choice(["mistral", "openai", "local"], case_sensitive=False),
-    help="LLM provider for --diagnose. 'mistral' has a free tier (MISTRAL_API_KEY); 'openai' requires a paid"
-    " account (OPENAI_API_KEY); 'local' queries an OpenAI-compatible server (Ollama by default) and needs no key.",
+    type=click.Choice(["claude-code", "claude", "openai"], case_sensitive=False),
+    help="LLM provider for --diagnose. 'claude-code' runs the local 'claude' CLI with your Claude Code login (no API"
+    " key); 'claude' uses the Anthropic API (ANTHROPIC_API_KEY); 'openai' requires a paid account (OPENAI_API_KEY).",
 )
 @click.option(
     "--model",
     default=None,
-    help="Model name for --diagnose. Defaults to mistral-small-latest (mistral), gpt-4o-mini (openai)"
-    " or llama3.2 (local).",
+    help="Model name for --diagnose. Defaults to the claude CLI default (claude-code), claude-haiku-4-5-20251001 (claude), gpt-4o-mini (openai).",
 )
 @click.option(
     "--base-url",
     default=None,
-    help="OpenAI-compatible endpoint for --diagnose, e.g. http://localhost:11434/v1 for Ollama or the URL of a"
-    " vLLM/llama.cpp/institutional server. Defaults to $OPENAI_BASE_URL, then to the provider default.",
+    help="OpenAI-compatible endpoint for --diagnose with the openai provider, e.g. an institutional gateway."
+    " Defaults to $OPENAI_BASE_URL.",
 )
 @click.option(
     "--wrapper",
@@ -406,15 +405,9 @@ def main(**kwargs):
         sequana_pipetools --completion multitax --force
 
     To diagnose a failed pipeline with an LLM, run this from the pipeline
-    working directory (needs MISTRAL_API_KEY or OPENAI_API_KEY):
+    working directory (needs the claude CLI, or ANTHROPIC_API_KEY / OPENAI_API_KEY):
 
         sequana_pipetools --diagnose
-
-    No API key or no internet access? Install ollama (https://ollama.com),
-    download a model once, and query it locally on your CPU:
-
-        ollama pull llama3.2
-        sequana_pipetools --diagnose --provider local
 
     """
 
@@ -486,7 +479,6 @@ def main(**kwargs):
         from sequana_pipetools.diagnose import (
             DiagnoseError,
             diagnose,
-            local_server_available,
             resolve_base_url,
             tips_only,
         )
@@ -506,12 +498,6 @@ def main(**kwargs):
             # missing package, missing key, unreachable endpoint or rate limit: the LLM
             # analysis is lost but the deterministic tips need no provider at all
             click.echo(f"[ERROR] {exc}", err=True)
-            if provider != "local" and local_server_available():
-                click.echo(
-                    "[INFO] A local LLM server is answering on http://localhost:11434/v1."
-                    " Retry with: sequana_pipetools --diagnose --provider local",
-                    err=True,
-                )
             click.echo("\nNo AI analysis available. Falling back to the offline Sequana tips.", err=True)
             _print_diagnosis(tips_only(workdir), disclaimer=False)
             sys.exit(1)

@@ -5,30 +5,31 @@ then asks an LLM to explain the errors in plain language.
 
 Supported providers
 -------------------
-mistral  (default) – free tier available, requires MISTRAL_API_KEY
-                      https://console.mistral.ai/
+claude-code  (default) – the ``claude`` CLI (Claude Code) in headless mode; uses your
+                      Claude subscription login, no API key needed.
+claude             – Anthropic API, requires ANTHROPIC_API_KEY
+                      https://console.anthropic.com/
 openai             – paid account required, requires OPENAI_API_KEY
                       https://platform.openai.com/
-local              – any OpenAI-compatible server (Ollama, vLLM, llama.cpp,
-                      LM Studio, an institutional gateway). No API key and no
-                      internet access needed when the server runs locally.
-                      Defaults to Ollama on http://localhost:11434/v1 ; use
-                      --base-url (or OPENAI_BASE_URL) for another endpoint.
+                      Use --base-url (or OPENAI_BASE_URL) for an OpenAI-compatible gateway.
 """
 
 from __future__ import annotations
 
 import os
 import re
+import shutil
+import subprocess
 import time
 from functools import partial
 from pathlib import Path
-from urllib.error import URLError
-from urllib.request import urlopen
 
 import colorlog
 
 logger = colorlog.getLogger(__name__)
+
+# Seconds before giving up on the claude CLI
+_CLI_TIMEOUT = 180
 
 # Maximum number of log lines sent to the model to stay within token limits
 _MAX_LOG_LINES = 150
@@ -50,19 +51,12 @@ def _strip_noise(text: str) -> str:
     return "\n".join(lines)
 
 
-_PROVIDERS = ("mistral", "openai", "local")
+_PROVIDERS = ("claude-code", "claude", "openai")
 _DEFAULT_MODELS = {
-    "mistral": "mistral-small-latest",
+    "claude": "claude-haiku-4-5-20251001",
+    "claude-code": "",  # empty: let the claude CLI use its own default model
     "openai": "gpt-4o-mini",
-    "local": "llama3.2",
 }
-
-# Providers reached through the OpenAI-compatible chat/completions API
-_OPENAI_COMPATIBLE = ("openai", "local")
-
-# Endpoint used by the 'local' provider when neither --base-url nor
-# OPENAI_BASE_URL is set. This is the default Ollama address.
-_DEFAULT_LOCAL_BASE_URL = "http://localhost:11434/v1"
 
 
 # ── log collection ────────────────────────────────────────────────────────────
@@ -168,70 +162,83 @@ Keep your response concise (under 300 words) and actionable.\
 # ── provider backends ─────────────────────────────────────────────────────────
 
 
-def _call_mistral(context: str, model: str) -> str:
+def _call_claude(context: str, model: str) -> str:
     try:
-        # mistralai >= 1.0 moved the client to mistralai.client in v2.x
-        try:
-            from mistralai.client import Mistral
-        except ImportError:
-            from mistralai import Mistral  # v1.x fallback
+        import anthropic
     except ImportError:
         raise ImportError(
-            "The 'mistralai' package is required for the mistral provider.\n"
-            "Install it with:  pip install sequana_pipetools[ai]  or  pip install mistralai"
+            "The 'anthropic' package is required for the claude provider.\n"
+            "Install it with:  pip install sequana_pipetools[ai-claude]  or  pip install anthropic"
         )
 
-    api_key = os.environ.get("MISTRAL_API_KEY")
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         raise EnvironmentError(
-            "MISTRAL_API_KEY environment variable is not set.\n"
-            "Get a free key at https://console.mistral.ai/ then:\n"
-            "  export MISTRAL_API_KEY=<your-key>\n"
-            "Or run a model locally instead, with no key and no internet access:\n"
-            "  ollama pull llama3.2      (see https://ollama.com)\n"
-            "  sequana_pipetools --diagnose --provider local"
+            "ANTHROPIC_API_KEY environment variable is not set.\n"
+            "Get a key at https://console.anthropic.com/ then:\n"
+            "  export ANTHROPIC_API_KEY=<your-key>\n"
+            "Or use your Claude Code login instead, no key needed:\n"
+            "  sequana_pipetools --diagnose --provider claude-code"
         )
 
-    client = Mistral(api_key=api_key)
-    response = client.chat.complete(
+    client = anthropic.Anthropic(api_key=api_key)
+    response = client.messages.create(
         model=model,
-        messages=[
-            {"role": "system", "content": _SYSTEM_PROMPT},
-            {"role": "user", "content": f"Here are the pipeline logs:\n\n{context}"},
-        ],
+        max_tokens=1024,
+        system=_SYSTEM_PROMPT,
+        messages=[{"role": "user", "content": f"Here are the pipeline logs:\n\n{context}"}],
         temperature=0.2,
     )
-    return response.choices[0].message.content
+    return "".join(block.text for block in response.content if block.type == "text")
+
+
+def _call_claude_code(context: str, model: str) -> str:
+    """Query Claude through the ``claude`` CLI (Claude Code) in non-interactive mode.
+
+    Authentication is whatever the CLI already uses (subscription login), so no
+    API key is needed. Tools are disabled: the model only reads the logs given on stdin.
+    """
+    if shutil.which("claude") is None:
+        raise EnvironmentError(
+            "The 'claude' command (Claude Code) was not found in PATH.\n"
+            "Install it from https://claude.com/claude-code and log in, or use another --provider."
+        )
+
+    cmd = ["claude", "-p", "--system-prompt", _SYSTEM_PROMPT, "--tools", ""]
+    if model:
+        cmd += ["--model", model]
+    proc = subprocess.run(
+        cmd, input=f"Here are the pipeline logs:\n\n{context}", capture_output=True, text=True, timeout=_CLI_TIMEOUT
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(f"claude exited with status {proc.returncode}: {(proc.stderr or proc.stdout).strip()}")
+    return proc.stdout.strip()
 
 
 def _call_openai(context: str, model: str, base_url: str | None = None) -> str:
     """Query an OpenAI-compatible chat/completions endpoint.
 
     *base_url* selects the server. ``None`` means the official OpenAI API and an
-    ``OPENAI_API_KEY`` is then mandatory. Any other value (Ollama, vLLM,
-    llama.cpp, an institutional gateway) usually ignores the key, so a
-    placeholder is used when the variable is not set.
+    ``OPENAI_API_KEY`` is then mandatory. Any other value (an institutional
+    gateway, vLLM, ...) may ignore the key, so a placeholder is used when the
+    variable is not set.
     """
     try:
         from openai import OpenAI
     except ImportError:
         raise ImportError(
-            "The 'openai' package is required for the openai and local providers.\n"
+            "The 'openai' package is required for the openai provider.\n"
             "Install it with:  pip install sequana_pipetools[ai-openai]  or  pip install openai"
         )
 
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         if base_url:
-            # local/self-hosted servers require no credential but the SDK asks for one
+            # self-hosted gateways may require no credential but the SDK asks for one
             api_key = "no-key-required"
         else:
             raise EnvironmentError(
-                "OPENAI_API_KEY environment variable is not set.\n"
-                "Export your key:  export OPENAI_API_KEY=sk-...\n"
-                "Or run a model locally instead, with no key and no internet access:\n"
-                "  ollama pull llama3.2      (see https://ollama.com)\n"
-                "  sequana_pipetools --diagnose --provider local"
+                "OPENAI_API_KEY environment variable is not set.\n" "Export your key:  export OPENAI_API_KEY=sk-..."
             )
 
     client = OpenAI(api_key=api_key, base_url=base_url)
@@ -298,29 +305,9 @@ def resolve_base_url(provider: str, base_url: str | None = None) -> str | None:
     """Return the endpoint to query for *provider*.
 
     Explicit *base_url* wins, then the ``OPENAI_BASE_URL`` environment variable,
-    then the provider default (Ollama for ``local``, the official API otherwise).
+    then the official API (``None``).
     """
-    base_url = base_url or os.environ.get("OPENAI_BASE_URL")
-    if not base_url and provider == "local":
-        base_url = _DEFAULT_LOCAL_BASE_URL
-    return base_url
-
-
-def local_server_available(base_url: str | None = None, timeout: float = 1.0) -> bool:
-    """Return True if an OpenAI-compatible server answers at *base_url*.
-
-    Used to tell the user that ``--provider local`` would work when the remote
-    provider failed. Defaults to the Ollama endpoint.
-    """
-    url = (base_url or _DEFAULT_LOCAL_BASE_URL).rstrip("/") + "/models"
-    try:
-        # nosec B310: user-provided base_url for local LLM server probing; endpoint
-        # is trusted by design (user explicitly specifies it via CLI/env). Exceptions
-        # are caught safely; function only checks server response, never executes it.
-        with urlopen(url, timeout=timeout) as response:
-            return response.status == 200
-    except (URLError, OSError, ValueError):
-        return False
+    return base_url or os.environ.get("OPENAI_BASE_URL")
 
 
 def _call_provider(
@@ -336,9 +323,11 @@ def _call_provider(
     as-is since retrying cannot help. Any other provider failure is wrapped into a
     :class:`DiagnoseError` carrying an actionable message.
     """
-    if provider == "mistral":
-        call = partial(_call_mistral, context, model)
-    elif provider in _OPENAI_COMPATIBLE:
+    if provider == "claude":
+        call = partial(_call_claude, context, model)
+    elif provider == "claude-code":
+        call = partial(_call_claude_code, context, model)
+    elif provider == "openai":
         call = partial(_call_openai, context, model, base_url=base_url)
     else:
         raise ValueError(f"Unknown provider: {provider}. Must be one of {_PROVIDERS}.")
@@ -356,8 +345,7 @@ def _call_provider(
                 if base_url:
                     message += (
                         f"\nEndpoint used: {base_url}\n"
-                        "Check that the server is running and serves an OpenAI-compatible API "
-                        "(for Ollama: `ollama serve` then `ollama pull " + model + "`)."
+                        "Check that the server is running and serves an OpenAI-compatible API."
                     )
                 raise DiagnoseError(message) from None
             if attempt == max_attempts:
@@ -538,10 +526,8 @@ def _sequana_tips(context: str, workdir: Path, show_diagnose_tip: bool = True) -
     # diagnose tip — suppressed when already running --diagnose
     if show_diagnose_tip:
         lines.append(
-            "• For an AI-powered diagnosis, set `export MISTRAL_API_KEY=<your-key>` and run:\n"
-            "  `sequana_pipetools --diagnose`\n"
-            "  No API key? Install ollama, then: `ollama pull llama3.2` and"
-            " `sequana_pipetools --diagnose --provider local`"
+            "• For an AI-powered diagnosis, run:\n"
+            "  `sequana_pipetools --diagnose`  (uses the `claude` CLI; see `--provider` for other options)"
         )
 
     return "\n".join(lines)
@@ -551,7 +537,7 @@ def _sequana_tips(context: str, workdir: Path, show_diagnose_tip: bool = True) -
 
 
 def diagnose(
-    workdir: str = ".", provider: str = "mistral", model: str | None = None, base_url: str | None = None
+    workdir: str = ".", provider: str = "claude-code", model: str | None = None, base_url: str | None = None
 ) -> str:
     """Collect pipeline logs and return an LLM diagnosis string.
 
@@ -560,15 +546,13 @@ def diagnose(
     workdir:
         Pipeline working directory (default: current directory).
     provider:
-        LLM provider: ``"mistral"`` (default, free tier), ``"openai"`` or
-        ``"local"`` (any OpenAI-compatible server, no API key needed).
+        LLM provider: ``"claude-code"`` (default), ``"claude"`` or ``"openai"``.
     model:
-        Model name. Defaults to ``mistral-small-latest`` for Mistral,
-        ``gpt-4o-mini`` for OpenAI and ``llama3.2`` for a local server.
+        Model name. Defaults to
+        ``claude-haiku-4-5-20251001`` for Claude, and ``gpt-4o-mini`` for OpenAI.
     base_url:
-        OpenAI-compatible endpoint to query (e.g. ``http://localhost:11434/v1``
-        for Ollama). Defaults to the ``OPENAI_BASE_URL`` environment variable,
-        then to the provider default. Ignored by the mistral provider.
+        OpenAI-compatible endpoint to query (``openai`` provider only). Defaults to the ``OPENAI_BASE_URL`` environment variable,
+        then to the provider default. Ignored by the claude providers.
 
     Returns
     -------

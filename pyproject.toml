@@ -53,9 +53,9 @@ dependencies = [
 [project.optional-dependencies]
 # Required for snakemake >= 8 cluster (SLURM) execution
 slurm = ["snakemake-executor-plugin-cluster-generic"]
-# Required for the --diagnose command (mistral = default free-tier provider)
-ai = ["mistralai>=1.0"]
+# Optional SDKs for the --diagnose command (the default claude-code provider needs only the claude CLI)
 ai-openai = ["openai>=1.0"]
+ai-claude = ["anthropic>=0.40"]
 
 [project.scripts]
 sequana_pipetools = "sequana_pipetools.scripts.main:main"

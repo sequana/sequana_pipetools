@@ -9,7 +9,7 @@
 .. image:: https://coveralls.io/repos/github/sequana/sequana_pipetools/badge.svg?branch=main
     :target: https://coveralls.io/github/sequana/sequana_pipetools?branch=main
 
-.. image:: https://readthedocs.org/projects/sequana-pipetools/badge/?version=latest
+.. image:: https://app.readthedocs.org/projects/sequana-pipetools/badge/?version=latest
     :target: https://sequana-pipetools.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
@@ -172,23 +172,13 @@ The output is called *rulegraph.sequana.png* in that case; use **-o/--output** t
 
     snakemake --rulegraph | sequana_pipetools --dot2png - -o rulegraph.png
 
-To diagnose pipeline errors using an LLM (requires a Mistral or OpenAI API key)::
+To diagnose pipeline errors using an LLM (uses the ``claude`` CLI by default; see **--provider** for the Anthropic or OpenAI APIs)::
 
     sequana_pipetools --diagnose
 
-No API key, or no internet access on the compute nodes? Use **--provider local**
-to query an OpenAI-compatible server running on your machine. With
-`Ollama <https://ollama.com>`_ installed, this is all it takes::
-
-    ollama pull llama3.2
-    sequana_pipetools --diagnose --provider local
-
-Inference then runs on the CPU: no API key, no quota, no CUDA driver, and the
-logs never leave your machine. Use **--base-url** (or the *OPENAI_BASE_URL*
-environment variable) to target another endpoint, such as a vLLM or llama.cpp
-server, a GPU node, or an institutional gateway::
-
-    sequana_pipetools --diagnose --provider local --base-url http://gpu-node:8000/v1 --model mistral:7b
+Use **--provider claude** (``ANTHROPIC_API_KEY``) or **--provider openai** (``OPENAI_API_KEY``) to
+query an API instead. With **openai**, **--base-url** (or *OPENAI_BASE_URL*) targets an
+OpenAI-compatible gateway.
 
 If the provider is unreachable or rate-limits the request, the deterministic
 Sequana tips are printed anyway, so **--diagnose** always returns something useful.
@@ -394,9 +384,9 @@ Version   Description
 1.7.0     * --diagnose no longer crashes with a traceback when the LLM
             provider fails; rate-limit errors (HTTP 429) are retried with an
             exponential backoff and the offline Sequana tips are still shown
-          * --diagnose accepts --provider local and --base-url to query any
-            OpenAI-compatible server (Ollama, vLLM, llama.cpp, institutional
-            gateway), which requires neither an API key nor internet access
+          * --diagnose accepts --provider claude-code (default, uses the claude
+            CLI, no API key), claude (Anthropic API) and openai, with --base-url
+            to query an OpenAI-compatible gateway
           * offline error catalogue extended and --diagnose falls back to
             it whenever no provider can be reached (e.g., rate limit)
           * the tips panel printed by a pipeline on failure (onerror) now scans
