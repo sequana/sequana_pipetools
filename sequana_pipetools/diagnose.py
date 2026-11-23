@@ -20,6 +20,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 import time
 from functools import partial
 from pathlib import Path
@@ -218,9 +219,19 @@ def _call_claude_code(context: str, model: str) -> str:
     if model:
         cmd += ["--model", model]
     try:
-        proc = subprocess.run(
-            cmd, input=f"Here are the pipeline logs:\n\n{context}", capture_output=True, text=True, timeout=_CLI_TIMEOUT
-        )
+        # run from an empty directory so that no project CLAUDE.md of the caller is auto-discovered and sent along
+        # (--bare would also prevent this but disables subscription login)
+        with tempfile.TemporaryDirectory(prefix="sequana_diagnose_") as isolated_cwd:
+            proc = subprocess.run(
+                cmd,
+                input=f"Here are the pipeline logs:\n\n{context}",
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=_CLI_TIMEOUT,
+                cwd=isolated_cwd,
+            )
     except subprocess.TimeoutExpired:
         # do not chain: the exception text would repeat the whole command line, system prompt included
         raise RuntimeError(f"claude did not answer within {_CLI_TIMEOUT}s (is it logged in?)") from None
